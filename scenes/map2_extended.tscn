@@ -1,0 +1,1055 @@
+[gd_scene format=3 uid="uid://60hfmpepi4x0"]
+
+[ext_resource type="PackedScene" uid="uid://cfdu1y7t7cw6a" path="res://assets/kenney/furniture/chair.glb" id="1_dac35"]
+[ext_resource type="PackedScene" uid="uid://1ppijt430ixf" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Junk_Food/Ice-Cream_Magnum_A.glb" id="1_v2yic"]
+[ext_resource type="PackedScene" uid="uid://5g4xlq3eqn34" path="res://assets/kenney/food/utensil-fork.glb" id="2_7touq"]
+[ext_resource type="PackedScene" uid="uid://clft4h6siabnp" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Junk_Food/Soda.glb" id="2_13q06"]
+[ext_resource type="PackedScene" uid="uid://dq78xj3mu0f5h" path="res://assets/kenney/furniture/table.glb" id="2_hugno"]
+[ext_resource type="PackedScene" uid="uid://b6ed5q70dth8l" path="res://assets/kenney/furniture/kitchenFridge.glb" id="3_d3lit"]
+[ext_resource type="PackedScene" uid="uid://bueve6fpye22p" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Junk_Food/Doughnut_D.glb" id="3_r0jqq"]
+[ext_resource type="PackedScene" uid="uid://bjiw44ynfykoy" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Healthy_Food/Chicken_Cooking_A.glb" id="3_tol1j"]
+[ext_resource type="PackedScene" uid="uid://dmnmhcuv5s5ku" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Healthy_Food/Lentil_Soup.glb" id="4_13q06"]
+[ext_resource type="PackedScene" uid="uid://cavlb4krpp7ek" path="res://assets/kenney/furniture/sideTableDrawers.glb" id="4_ph6bl"]
+[ext_resource type="PackedScene" uid="uid://dm4mdg4yf0g1m" path="res://assets/kenney/furniture/televisionModern.glb" id="5_b8no4"]
+[ext_resource type="PackedScene" uid="uid://l4kvwtsi5lr8" path="res://assets/kenney/furniture/rugRounded.glb" id="6_c1k2s"]
+[ext_resource type="PackedScene" uid="uid://d2uwqh0i6dt74" path="res://assets/kenney/furniture/rugRound.glb" id="7_i5ljf"]
+[ext_resource type="PackedScene" uid="uid://rolbl4ed8a8d" path="res://assets/kenney/furniture/loungeSofa.glb" id="8_d3lit"]
+[ext_resource type="PackedScene" uid="uid://bsikp6lvhthjj" path="res://assets/kenney/furniture/kitchenStove.glb" id="9_er5r7"]
+[ext_resource type="PackedScene" uid="uid://cgjibgkr2sj34" path="res://assets/kenney/furniture/kitchenCabinetDrawer.glb" id="10_7uomq"]
+[ext_resource type="PackedScene" uid="uid://drnwm7o5ncd4a" path="res://assets/kenney/furniture/kitchenCabinetCornerInner.glb" id="11_np4fc"]
+[ext_resource type="PackedScene" uid="uid://bnerusm7726ju" path="res://assets/kenney/furniture/kitchenSink.glb" id="12_7utbr"]
+[ext_resource type="PackedScene" uid="uid://do08t728ihp6e" path="res://assets/kenney/furniture/kitchenBlender.glb" id="13_w46h8"]
+[ext_resource type="PackedScene" uid="uid://cntdsmfmacml8" path="res://assets/kenney/furniture/kitchenCoffeeMachine.glb" id="14_7utbr"]
+[ext_resource type="PackedScene" uid="uid://dbioa3s65oxrb" path="res://assets/kenney/furniture/kitchenMicrowave.glb" id="16_eiwpu"]
+[ext_resource type="PackedScene" uid="uid://n7fg8k4ij8er" path="res://assets/customizgeg/faceswapinggggggggg_framed.glb" id="21_o6qsn"]
+[ext_resource type="PackedScene" uid="uid://d24cr5krfm8ln" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Healthy_Food/Bottle_Water_a.glb" id="25_r0jqq"]
+[ext_resource type="PackedScene" uid="uid://ciw5cxobvbm3w" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Healthy_Food/Salmon.glb" id="26_yydf7"]
+[ext_resource type="PackedScene" uid="uid://et7se7hknemq" path="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Gltf/Junk_Food/Pizza.glb" id="27_35e0n"]
+[ext_resource type="PackedScene" uid="uid://3711iglko6ps" path="res://assets/Gun&Knife/low_poly_knife.glb" id="30_r0jqq"]
+[ext_resource type="PackedScene" uid="uid://ccx0gq81vbyjo" path="res://assets/kenney/furniture/tableCross.glb" id="42_uycsn"]
+[ext_resource type="PackedScene" uid="uid://5pusp5rliakq" path="res://assets/kenney/furniture/bathroomCabinetDrawer.glb" id="54_7a13y"]
+[ext_resource type="Script" uid="uid://cndpbd46syf2d" path="res://scripts/rats.gd" id="55_hxs6d"]
+[ext_resource type="PackedScene" uid="uid://bu1n4384072ev" path="res://assets/quaternius/Door_1.fbx" id="59_6g4yg"]
+[ext_resource type="Script" uid="uid://bvt4kd3pefjxh" path="res://scripts/entrance_door.gd" id="60_36jk5"]
+[ext_resource type="PackedScene" uid="uid://dinh7mb6idk63" path="res://assets/kenney/furniture/bathtub.glb" id="mob_bathtub"]
+[ext_resource type="PackedScene" uid="uid://lku2n088k5yy" path="res://assets/kenney/furniture/bedDouble.glb" id="mob_bed"]
+[ext_resource type="PackedScene" uid="uid://errkropianqq" path="res://assets/kenney/furniture/bookcaseClosed.glb" id="mob_bookclosed"]
+[ext_resource type="PackedScene" uid="uid://cb2ntinbhruwi" path="res://assets/kenney/furniture/bookcaseClosedDoors.glb" id="mob_bookdoors"]
+[ext_resource type="PackedScene" uid="uid://cjlo4hn5i761g" path="res://assets/kenney/furniture/bookcaseOpen.glb" id="mob_bookopen"]
+[ext_resource type="PackedScene" uid="uid://7tketxcewema" path="res://assets/kenney/furniture/cardboardBoxClosed.glb" id="mob_boxclosed"]
+[ext_resource type="PackedScene" uid="uid://b7kcbwfcx14ex" path="res://assets/kenney/furniture/cardboardBoxOpen.glb" id="mob_boxopen"]
+[ext_resource type="PackedScene" uid="uid://cyjaqan28eur7" path="res://assets/kenney/furniture/chairDesk.glb" id="mob_chairdesk"]
+[ext_resource type="PackedScene" uid="uid://dcklq5xjbux8j" path="res://assets/kenney/furniture/coatRackStanding.glb" id="mob_coatrack"]
+[ext_resource type="PackedScene" uid="uid://cwytjgvw3rfpm" path="res://assets/kenney/furniture/desk.glb" id="mob_desk"]
+[ext_resource type="PackedScene" uid="uid://cid2e2towfwyu" path="res://assets/kenney/furniture/ceilingFan.glb" id="mob_fan"]
+[ext_resource type="PackedScene" uid="uid://crtgr4jwhp2te" path="res://assets/kenney/furniture/lampRoundTable.glb" id="mob_lamptable"]
+[ext_resource type="PackedScene" uid="uid://k2svf805nxnc" path="res://assets/kenney/furniture/laptop.glb" id="mob_laptop"]
+[ext_resource type="PackedScene" uid="uid://b5tg27ym5t7uy" path="res://assets/kenney/furniture/bathroomMirror.glb" id="mob_mirror"]
+[ext_resource type="PackedScene" uid="uid://c8q53tiqqquau" path="res://assets/kenney/furniture/cabinetBedDrawerTable.glb" id="mob_nightstand"]
+[ext_resource type="PackedScene" uid="uid://dqoiktw05pb3o" path="res://assets/kenney/furniture/pillow.glb" id="mob_pillow"]
+[ext_resource type="PackedScene" uid="uid://55ee40gcxvl8" path="res://assets/kenney/furniture/lampSquareCeiling.glb" id="mob_plafonnier"]
+[ext_resource type="PackedScene" uid="uid://bmmkl6sq3wayd" path="res://assets/kenney/furniture/pottedPlant.glb" id="mob_plant"]
+[ext_resource type="PackedScene" uid="uid://cf8m2vre7w2u5" path="res://assets/kenney/furniture/plantSmall1.glb" id="mob_plantsmall"]
+[ext_resource type="PackedScene" uid="uid://bs2h3wj8621cd" path="res://assets/kenney/furniture/radio.glb" id="mob_radio"]
+[ext_resource type="PackedScene" uid="uid://cr3s2nyclc1i1" path="res://assets/kenney/furniture/rugDoormat.glb" id="mob_rugdoormat"]
+[ext_resource type="PackedScene" uid="uid://c4tlk2d3yh7r7" path="res://assets/kenney/furniture/rugRectangle.glb" id="mob_rugrect"]
+[ext_resource type="PackedScene" uid="uid://dhiy3orxc3q6d" path="res://assets/kenney/furniture/bathroomSinkSquare.glb" id="mob_sink"]
+[ext_resource type="PackedScene" uid="uid://bphmgpq7s6dq3" path="res://assets/kenney/furniture/stoolBarSquare.glb" id="mob_stool"]
+[ext_resource type="PackedScene" uid="uid://bgqe5u6o4oqo8" path="res://assets/customizgeg/mayozedong_framed.glb" id="mob_tabmayo"]
+[ext_resource type="PackedScene" uid="uid://c4s5iraq7wora" path="res://assets/customizgeg/tableau_royesque_framed.glb" id="mob_tabroy"]
+[ext_resource type="PackedScene" uid="uid://dw8x7nbl6uiwd" path="res://assets/kenney/furniture/toilet.glb" id="mob_toilet"]
+[ext_resource type="PackedScene" uid="uid://bikcwnasvxf36" path="res://assets/kenney/furniture/trashcan.glb" id="mob_trash"]
+[ext_resource type="PackedScene" uid="uid://dfu7fy1g4fru3" path="res://assets/kenney/furniture/washerDryerStacked.glb" id="mob_washer"]
+
+[sub_resource type="StandardMaterial3D" id="mat_sol"]
+albedo_color = Color(0.4, 0.27, 0.18, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="mesh_floor"]
+size = Vector3(8.6, 0.1, 6.6)
+
+[sub_resource type="BoxShape3D" id="shape_floor"]
+size = Vector3(8.6, 0.1, 6.6)
+
+[sub_resource type="StandardMaterial3D" id="mat_plafond"]
+albedo_color = Color(0.8, 0.77, 0.72, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="mesh_ceil"]
+size = Vector3(8.6, 0.1, 6.6)
+
+[sub_resource type="BoxShape3D" id="shape_ceil"]
+size = Vector3(8.6, 0.1, 6.6)
+
+[sub_resource type="StandardMaterial3D" id="mat_mur"]
+albedo_color = Color(0.72, 0.65, 0.56, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="mesh_walln"]
+size = Vector3(8.6, 2.7, 0.15)
+
+[sub_resource type="BoxShape3D" id="shape_walln"]
+size = Vector3(8.6, 2.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_walls"]
+size = Vector3(8.6, 2.7, 0.15)
+
+[sub_resource type="BoxShape3D" id="shape_walls"]
+size = Vector3(8.6, 2.7, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="mat_mur2"]
+albedo_color = Color(0.76, 0.7, 0.62, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="mesh_walle_n"]
+size = Vector3(0.15, 2.7, 4.55)
+
+[sub_resource type="BoxShape3D" id="shape_walle_n"]
+size = Vector3(0.15, 2.7, 4.55)
+
+[sub_resource type="BoxMesh" id="mesh_walle_s"]
+size = Vector3(0.15, 2.7, 0.55)
+
+[sub_resource type="BoxShape3D" id="shape_walle_s"]
+size = Vector3(0.15, 2.7, 0.55)
+
+[sub_resource type="BoxMesh" id="mesh_walle_l"]
+size = Vector3(0.15, 0.6, 0.9)
+
+[sub_resource type="BoxShape3D" id="shape_walle_l"]
+size = Vector3(0.15, 0.6, 0.9)
+
+[sub_resource type="BoxMesh" id="mesh_wallw_t"]
+size = Vector3(0.15, 0.6, 6.6)
+
+[sub_resource type="BoxShape3D" id="shape_wallw_t"]
+size = Vector3(0.15, 0.6, 6.6)
+
+[sub_resource type="BoxMesh" id="mesh_wallw_n"]
+size = Vector3(0.15, 2.1, 2.2)
+
+[sub_resource type="BoxShape3D" id="shape_wallw_n"]
+size = Vector3(0.15, 2.1, 2.2)
+
+[sub_resource type="BoxMesh" id="mesh_wallw_s"]
+size = Vector3(0.15, 2.1, 2.2)
+
+[sub_resource type="BoxShape3D" id="shape_wallw_s"]
+size = Vector3(0.15, 2.1, 2.2)
+
+[sub_resource type="BoxMesh" id="mesh_wallw_b"]
+size = Vector3(0.15, 0.9, 1.6)
+
+[sub_resource type="BoxShape3D" id="shape_wallw_b"]
+size = Vector3(0.15, 0.9, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="mat_vitre"]
+transparency = 1
+albedo_color = Color(0.75, 0.88, 0.95, 0.18)
+roughness = 0.15
+emission_enabled = true
+emission = Color(0.1, 0.15, 0.28, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="BoxMesh" id="mesh_pane"]
+size = Vector3(0.04, 1.2, 1.58)
+
+[sub_resource type="StandardMaterial3D" id="mat_bois_fonce"]
+albedo_color = Color(0.24, 0.16, 0.11, 1)
+roughness = 0.88
+
+[sub_resource type="BoxMesh" id="mesh_plinthe_n"]
+size = Vector3(8, 0.08, 0.02)
+
+[sub_resource type="BoxMesh" id="mesh_plinthe_s"]
+size = Vector3(8, 0.08, 0.02)
+
+[sub_resource type="BoxMesh" id="mesh_plinthe_e"]
+size = Vector3(0.02, 0.08, 6)
+
+[sub_resource type="BoxMesh" id="mesh_plinthe_w"]
+size = Vector3(0.02, 0.08, 6)
+
+[sub_resource type="StandardMaterial3D" id="mat_cadre"]
+albedo_color = Color(0.85, 0.82, 0.76, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="mesh_fen_montant"]
+size = Vector3(0.06, 1.24, 0.06)
+
+[sub_resource type="BoxMesh" id="mesh_fen_traverse"]
+size = Vector3(0.06, 0.05, 1.6)
+
+[sub_resource type="BoxMesh" id="mesh_fen_appui"]
+size = Vector3(0.1, 0.04, 1.72)
+
+[sub_resource type="BoxMesh" id="mesh_porte_montant"]
+size = Vector3(0.06, 2.14, 0.1)
+
+[sub_resource type="BoxMesh" id="mesh_porte_linteau"]
+size = Vector3(0.06, 0.1, 1.02)
+
+[sub_resource type="BoxMesh" id="mesh_cadre_photo"]
+size = Vector3(0.44, 0.56, 0.03)
+
+[sub_resource type="StandardMaterial3D" id="mat_photo"]
+albedo_color = Color(0.3, 0.35, 0.42, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="mesh_photo_interieur"]
+size = Vector3(0.36, 0.48, 0.035)
+
+[sub_resource type="StandardMaterial3D" id="mat_herbe"]
+albedo_color = Color(0.33, 0.5, 0.22, 1)
+
+[sub_resource type="CylinderMesh" id="mesh_tronc"]
+top_radius = 0.08
+bottom_radius = 0.13
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="mat_feuille"]
+albedo_color = Color(0.2, 0.4, 0.16, 1)
+
+[sub_resource type="SphereMesh" id="mesh_feuille"]
+radius = 0.75
+
+[sub_resource type="StandardMaterial3D" id="mat_fleur_r"]
+albedo_color = Color(0.85, 0.15, 0.15, 1)
+roughness = 0.8
+
+[sub_resource type="SphereMesh" id="mesh_fleur"]
+radius = 0.06
+
+[sub_resource type="StandardMaterial3D" id="mat_fleur_j"]
+albedo_color = Color(0.95, 0.8, 0.15, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="mat_fleur_b"]
+albedo_color = Color(0.95, 0.95, 0.95, 1)
+roughness = 0.8
+
+[node name="Map2Extended" type="Node3D" unique_id=1239910875]
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=1252020866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor" unique_id=1844293296]
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="Collision" type="CollisionShape3D" parent="Floor" unique_id=849667723]
+shape = SubResource("shape_floor")
+
+[node name="Ice-Cream_Magnum_A2" parent="Floor" unique_id=541374580 instance=ExtResource("1_v2yic")]
+transform = Transform3D(1.2, 0, 0, 0, -5.2453668e-08, -1.2, 0, 1.2, -5.2453668e-08, -0.575636, 0.66214937, 1.5840673)
+
+[node name="Soda2" parent="Floor" unique_id=1820664967 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.63999045, 1.1090729, -2.5607963)
+
+[node name="Soda3" parent="Floor" unique_id=174332238 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34659773, 1.1056569, -2.5649278)
+
+[node name="Soda4" parent="Floor" unique_id=1301712802 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1937043, 1.5747998, -2.8114927)
+
+[node name="Soda5" parent="Floor" unique_id=935233753 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65571976, 1.1074755, -2.6854331)
+
+[node name="Soda6" parent="Floor" unique_id=1214687376 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19462942, 1.0992272, -2.6640062)
+
+[node name="Soda7" parent="Floor" unique_id=129044095 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25704595, 1.1048113, -2.1717641)
+
+[node name="Soda8" parent="Floor" unique_id=695905539 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.39442378, 1.1053312, -2.0990548)
+
+[node name="Soda9" parent="Floor" unique_id=556008975 instance=ExtResource("2_13q06")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.49978405, 1.1017449, -2.4360182)
+
+[node name="Doughnut_D2" parent="Floor" unique_id=1914134508 instance=ExtResource("3_r0jqq")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -3.3590975, 1.0978692, -2.227098)
+
+[node name="Ceiling" type="StaticBody3D" parent="." unique_id=884023542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ceiling" unique_id=2066886672]
+material_override = SubResource("mat_plafond")
+mesh = SubResource("mesh_ceil")
+
+[node name="Collision" type="CollisionShape3D" parent="Ceiling" unique_id=540402664]
+shape = SubResource("shape_ceil")
+
+[node name="WallN" type="StaticBody3D" parent="." unique_id=1648261418]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -3.075)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallN" unique_id=206036503]
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="Collision" type="CollisionShape3D" parent="WallN" unique_id=1369359602]
+shape = SubResource("shape_walln")
+
+[node name="WallS" type="StaticBody3D" parent="." unique_id=2087697929]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 3.075)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallS" unique_id=1712049728]
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walls")
+
+[node name="Collision" type="CollisionShape3D" parent="WallS" unique_id=2108660001]
+shape = SubResource("shape_walls")
+
+[node name="utensil-fork2" parent="WallS" unique_id=494984290 instance=ExtResource("2_7touq")]
+transform = Transform3D(0.59555984, 0, 0.072859436, 0, 0.59999996, 0, -0.072859436, 0, 0.59555984, 0.60198104, -0.48607624, -1.2632196)
+
+[node name="utensil-fork3" parent="WallS" unique_id=1425580104 instance=ExtResource("2_7touq")]
+transform = Transform3D(-0.59639895, 0, 0.06563732, 0, 0.59999996, 0, -0.06563732, 0, -0.59639895, -0.017215967, -0.51744306, -1.9891534)
+
+[node name="utensil-fork4" parent="WallS" unique_id=891055101 instance=ExtResource("2_7touq")]
+transform = Transform3D(0.58974916, 0, -0.11043516, 0, 0.59999996, 0, 0.11043516, 0, 0.58974916, 0.631796, -0.4940424, -2.0825818)
+
+[node name="utensil-fork5" parent="WallS" unique_id=1314096967 instance=ExtResource("2_7touq")]
+transform = Transform3D(0.53462625, 0, 0.2723504, 0, 0.59999996, 0, -0.2723504, 0, 0.53462625, 0.48361754, -0.5166694, -2.647266)
+
+[node name="Chicken_Cooking_A2" parent="WallS" unique_id=942739921 instance=ExtResource("3_tol1j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.014232069, -0.5262719, -2.1954436)
+
+[node name="Lentil_Soup2" parent="WallS" unique_id=1059852192 instance=ExtResource("4_13q06")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0.50420916, -0.5261682, -2.474763)
+
+[node name="WallE_North" type="StaticBody3D" parent="." unique_id=1700697562]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.075, 1.35, -0.725)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallE_North" unique_id=2139859594]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_walle_n")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallE_North/Mesh" unique_id=319497759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1433053, -0.0048499107, 0.0009938478)
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_walle_n")
+
+[node name="Collision" type="CollisionShape3D" parent="WallE_North" unique_id=1201499896]
+shape = SubResource("shape_walle_n")
+
+[node name="WallE_South" type="StaticBody3D" parent="." unique_id=450478125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.075, 1.35, 2.725)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallE_South" unique_id=1517560167]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_walle_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallE_South/Mesh" unique_id=650384152]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13917637, 0, 0)
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_walle_s")
+
+[node name="Collision" type="CollisionShape3D" parent="WallE_South" unique_id=1263575309]
+shape = SubResource("shape_walle_s")
+
+[node name="WallE_Lintel" type="StaticBody3D" parent="." unique_id=1084472711]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.075, 2.4, 2)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallE_Lintel" unique_id=1537602147]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_walle_l")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallE_Lintel/Mesh" unique_id=1183142600]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14210033, 0, 0)
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_walle_l")
+
+[node name="Collision" type="CollisionShape3D" parent="WallE_Lintel" unique_id=918125691]
+shape = SubResource("shape_walle_l")
+
+[node name="WallW_Top" type="StaticBody3D" parent="." unique_id=63476538]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.075, 2.4, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallW_Top" unique_id=1662235278]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_wallw_t")
+
+[node name="Collision" type="CollisionShape3D" parent="WallW_Top" unique_id=1872918296]
+shape = SubResource("shape_wallw_t")
+
+[node name="WallW_North" type="StaticBody3D" parent="." unique_id=1247962891]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.075, 1.05, -1.9)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallW_North" unique_id=616799465]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_wallw_n")
+
+[node name="Collision" type="CollisionShape3D" parent="WallW_North" unique_id=2010983471]
+shape = SubResource("shape_wallw_n")
+
+[node name="WallW_South" type="StaticBody3D" parent="." unique_id=644967014]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.075, 1.05, 1.9)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallW_South" unique_id=546859132]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_wallw_s")
+
+[node name="Collision" type="CollisionShape3D" parent="WallW_South" unique_id=1248226639]
+shape = SubResource("shape_wallw_s")
+
+[node name="WallW_Bottom" type="StaticBody3D" parent="." unique_id=389926357]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.075, 0.45, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="WallW_Bottom" unique_id=1210278405]
+material_override = SubResource("mat_mur2")
+mesh = SubResource("mesh_wallw_b")
+
+[node name="Collision" type="CollisionShape3D" parent="WallW_Bottom" unique_id=1181304309]
+shape = SubResource("shape_wallw_b")
+
+[node name="WindowPane" type="MeshInstance3D" parent="." unique_id=661761300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 0)
+material_override = SubResource("mat_vitre")
+mesh = SubResource("mesh_pane")
+
+[node name="PlintheN" type="MeshInstance3D" parent="." unique_id=1845695023]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, -2.99)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_plinthe_n")
+
+[node name="PlintheS" type="MeshInstance3D" parent="." unique_id=216640008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 2.99)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_plinthe_s")
+
+[node name="PlintheE" type="MeshInstance3D" parent="." unique_id=1944578580]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.99, 0.04, 0)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_plinthe_e")
+
+[node name="PlintheW" type="MeshInstance3D" parent="." unique_id=1226547891]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.99, 0.04, 0)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_plinthe_w")
+
+[node name="FenMontantN" type="MeshInstance3D" parent="." unique_id=528410656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.96, 1.5, -0.83)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_fen_montant")
+
+[node name="FenMontantN" type="MeshInstance3D" parent="FenMontantN" unique_id=260958462]
+transform = Transform3D(1, 0, 0, 0, -6.119594e-08, -1, 0, 1.4, -4.371139e-08, -0.050091743, 0.6468251, 0.83570546)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_fen_montant")
+
+[node name="FenMontantS" type="MeshInstance3D" parent="." unique_id=573101924]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.96, 1.5, 0.83)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_fen_montant")
+
+[node name="FenTraverse" type="MeshInstance3D" parent="." unique_id=160775607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.96, 1.5, 0)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_fen_traverse")
+
+[node name="FenAppui" type="MeshInstance3D" parent="." unique_id=1824824472]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.95, 0.92, 0)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_fen_appui")
+
+[node name="PorteMontantN" type="MeshInstance3D" parent="." unique_id=1373821324]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.96, 1.07, 1.5)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_porte_montant")
+
+[node name="PorteMontantS" type="MeshInstance3D" parent="." unique_id=767886190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.96, 1.07, 2.5)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_porte_montant")
+
+[node name="PorteLinteau" type="MeshInstance3D" parent="." unique_id=704545536]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.96, 2.16, 2)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_porte_linteau")
+
+[node name="CadrePhoto" type="MeshInstance3D" parent="." unique_id=2040929360]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.6, 2.97)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_cadre_photo")
+
+[node name="PhotoInterieur" type="MeshInstance3D" parent="." unique_id=450628694]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.6, 2.955)
+material_override = SubResource("mat_photo")
+mesh = SubResource("mesh_photo_interieur")
+
+[node name="chair2" parent="." unique_id=873817604 instance=ExtResource("1_dac35")]
+transform = Transform3D(0.17166814, 0.11313979, -2.4915316, 0, 2.4974265, 0.11340748, 2.494099, -0.0077873804, 0.17149143, 0.7935051, 0, 0.49843758)
+
+[node name="chair" parent="." unique_id=1590827648 instance=ExtResource("1_dac35")]
+transform = Transform3D(-0.20985506, 0, -2.4911766, 0, 2.5, 0, 2.4911766, 0, -0.20985506, 0.8319143, 0, 1.3056858)
+
+[node name="table" parent="." unique_id=52857046 instance=ExtResource("2_hugno")]
+transform = Transform3D(-1.0927848e-07, 0, 2.5000002, 0, 2.5000002, 0, -2.5000002, 0, -1.0927848e-07, 0.88230914, 0, 2.198686)
+
+[node name="kitchenFridge" parent="." unique_id=991216226 instance=ExtResource("3_d3lit")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 1.1384679, -4.8428774e-08, -2.2541356)
+
+[node name="sideTableDrawers" parent="." unique_id=1676333205 instance=ExtResource("4_ph6bl")]
+transform = Transform3D(-2.5000002, 0, -2.1855696e-07, 0, 2.5, 0, 2.1855696e-07, 0, -2.5000002, -2.0530791, 0.030021787, 2.321509)
+
+[node name="televisionModern" parent="." unique_id=23092938 instance=ExtResource("5_b8no4")]
+transform = Transform3D(-2.486418, 0, 0.2602405, 0, 2.5, 0, -0.2602405, 0, -2.486418, -2.727117, 1.0219246, 2.5586972)
+
+[node name="chair3" parent="." unique_id=1904473355 instance=ExtResource("1_dac35")]
+transform = Transform3D(-1.3416737, 0, 2.1094813, 0, 2.5, 0, -2.1094813, 0, -1.3416737, -0.19901013, 0, 1.7516859)
+
+[node name="chair4" parent="." unique_id=967978571 instance=ExtResource("1_dac35")]
+transform = Transform3D(0.43805915, 0, 2.4613216, 0, 2.5, 0, -2.4613216, 0, 0.43805915, 0.025251627, 0, 1.2254417)
+
+[node name="rugRounded" parent="." unique_id=1424068260 instance=ExtResource("6_c1k2s")]
+transform = Transform3D(-1.09278474e-07, 0, 2.5, 0, 2.5, 0, -2.5, 0, -1.09278474e-07, 3.5914783, -0.023298034, 2.069806)
+
+[node name="rugRound" parent="." unique_id=1684246499 instance=ExtResource("7_i5ljf")]
+transform = Transform3D(1.75, 0, 0, 0, 1.75, 0, 0, 0, 1.75, -3.8437572, -0.01, 2.9052851)
+
+[node name="loungeSofa" parent="." unique_id=218454479 instance=ExtResource("8_d3lit")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -3.8955588, 0, 1.1560448)
+
+[node name="kitchenStove" parent="." unique_id=1763722448 instance=ExtResource("9_er5r7")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -2.8559384, 0, -1.828)
+
+[node name="kitchenCabinetDrawer" parent="." unique_id=1188632430 instance=ExtResource("10_7uomq")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -0.72660315, 0, -1.8417387)
+
+[node name="kitchenCabinetCornerInner" parent="." unique_id=1561887825 instance=ExtResource("11_np4fc")]
+transform = Transform3D(-1.09278474e-07, 0, 2.5, 0, 2.5, 0, -2.5, 0, -1.09278474e-07, -2.8473911, 0, -1.7902131)
+
+[node name="kitchenSink" parent="." unique_id=1190529568 instance=ExtResource("12_7utbr")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -1.7923222, 0, -1.8336067)
+
+[node name="kitchenBlender" parent="." unique_id=2010771376 instance=ExtResource("13_w46h8")]
+transform = Transform3D(2.2631004, 0, 1.0622509, 0, 2.5, 0, -1.0622509, 0, 2.2631004, -3.6313717, 1.5178353, -2.538518)
+
+[node name="kitchenCoffeeMachine" parent="." unique_id=732076431 instance=ExtResource("14_7utbr")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -0.12134683, 1.0802686, -2.2584212)
+
+[node name="kitchenMicrowave" parent="." unique_id=629099860 instance=ExtResource("16_eiwpu")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -3.836003, 1.0574174, -2.4328709)
+
+[node name="pottedPlant" parent="." unique_id=1322605246 instance=ExtResource("mob_plant")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 3.5752506, 0, -2.5671918)
+
+[node name="trashcan" parent="." unique_id=1153051162 instance=ExtResource("mob_trash")]
+transform = Transform3D(2.25, 0, 0, 0, 2.25, 0, 0, 0, 2.25, 0.6772673, -4.8428774e-08, -2.6653214)
+
+[node name="tableau_royesque_framed" parent="." unique_id=86563085 instance=ExtResource("mob_tabroy")]
+transform = Transform3D(-7.430936e-08, 0, -1, 0, 1.7, 0, 1.7, 0, -4.371139e-08, 3.9830267, 1.4052961, -0.54714215)
+
+[node name="faceswapinggggggggg_framed" parent="." unique_id=734422864 instance=ExtResource("21_o6qsn")]
+transform = Transform3D(-2, 0, -1.509958e-07, 0, 1.75, 0, 3.019916e-07, 0, -1, 1.2400223, 1.4194748, 2.998764)
+
+[node name="mayozedong_framed" parent="." unique_id=1715955740 instance=ExtResource("mob_tabmayo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3665559, 1.9085207, -2.9808404)
+
+[node name="Bottle_Water_a2" parent="." unique_id=908639212 instance=ExtResource("25_r0jqq")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0.11772156, 0.82348514, 1.5801127)
+
+[node name="Salmon2" parent="." unique_id=1274005346 instance=ExtResource("26_yydf7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6689379, 0.82489276, 1.6142045)
+
+[node name="Pizza2" parent="." unique_id=2032875172 instance=ExtResource("27_35e0n")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -2.6862009, 0.9859295, 2.5185578)
+
+[node name="Sketchfab_Scene" parent="." unique_id=1761314107 instance=ExtResource("30_r0jqq")]
+transform = Transform3D(-0.042214237, -0.023226522, -0.08762694, 0.016439691, 0.09309779, -0.032596417, 0.08914981, -0.028165951, -0.03548214, -2.8165846, 0.8203072, 0.4535138)
+
+[node name="Sketchfab_Scene" parent="Sketchfab_Scene" unique_id=1459504896 instance=ExtResource("30_r0jqq")]
+transform = Transform3D(0.65335906, 0.7503995, 0.10010639, -0.62969816, 0.4652778, 0.62209034, 0.4202394, -0.469485, 0.77651906, -41.548817, 5.054123, -30.614487)
+
+[node name="ExtensionEst" type="Node3D" parent="." unique_id=1130852935]
+
+[node name="Couloir" type="Node3D" parent="ExtensionEst" unique_id=218517286]
+
+[node name="MurCouloirN1" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=338707893]
+transform = Transform3D(0.104651, 0, 0, 0, 1, 0, 0, 0, 1, 4.75, 1.35, 1.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurCouloirN2" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1689552200]
+transform = Transform3D(0.337209, 0, 0, 0, 1, 0, 0, 0, 1, 7.55, 1.35, 1.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurCouloirN3" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1603058750]
+transform = Transform3D(0.046512, 0, 0, 0, 1, 0, 0, 0, 1, 10.1, 1.35, 1.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="LinteauD2" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1073121937]
+transform = Transform3D(0.104651, 0, 0, 0, 0.222222, 0, 0, 0, 1, 5.65, 2.4, 1.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="LinteauD3" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=2054301130]
+transform = Transform3D(0.104651, 0, 0, 0, 0.222222, 0, 0, 0, 1, 9.45, 2.4, 1.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurCouloirS1" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=542752001]
+transform = Transform3D(0.151163, 0, 0, 0, 1, 0, 0, 0, 1, 4.95, 1.35, 2.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurCouloirS2" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=962459433]
+transform = Transform3D(0.44186, 0, 0, 0, 1, 0, 0, 0, 1, 8.4, 1.35, 2.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="LinteauD4" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=368131565]
+transform = Transform3D(0.104651, 0, 0, 0, 0.222222, 0, 0, 0, 1, 6.05, 2.4, 2.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurCouloirE1" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=797812203]
+transform = Transform3D(-7.62414e-10, 0, 1, 0, 1, 0, -0.017442, 0, -4.371139e-08, 10.3, 1.35, 1.475)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurCouloirE2" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=29905670]
+transform = Transform3D(-7.62414e-10, 0, 1, 0, 1, 0, -0.017442, 0, -4.371139e-08, 10.3, 1.35, 2.525)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="LinteauD6" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1299327981]
+transform = Transform3D(-4.5744404e-09, 0, 1, 0, 0.222222, 0, -0.104651, 0, -4.371139e-08, 10.3, 2.4, 2)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="SolCouloir" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1500581072]
+transform = Transform3D(0.697674, 0, 0, 0, 1, 0, 0, 0, 0.181818, 7.3, -0.05, 2)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="PlafondCouloir" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=178937820]
+transform = Transform3D(0.697674, 0, 0, 0, 1, 0, 0, 0, 0.181818, 7.3, 2.75, 2)
+material_override = SubResource("mat_plafond")
+mesh = SubResource("mesh_ceil")
+
+[node name="Paillasson" parent="ExtensionEst/Couloir" unique_id=74620086 instance=ExtResource("mob_rugdoormat")]
+transform = Transform3D(-0.006657823, 0, -1.4999852, 0, 1.5, 0, 1.4999852, 0, -0.006657823, 9.88686, 0.01, 1.75661)
+
+[node name="PorteManteau" parent="ExtensionEst/Couloir" unique_id=896876277 instance=ExtResource("mob_coatrack")]
+transform = Transform3D(2.3, 0, 0, 0, 2.3, 0, 0, 0, 2.3, 4.68, 0, 0.95863)
+
+[node name="PlanteCouloir" parent="ExtensionEst/Couloir" unique_id=288939372 instance=ExtResource("mob_plantsmall")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 10.04303, 0, 1.59543)
+
+[node name="SpotCouloir" type="SpotLight3D" parent="ExtensionEst/Couloir" unique_id=1815526898]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 7.3, 2.62, 2)
+light_color = Color(1, 0.85, 0.65, 1)
+light_energy = 3.0
+spot_angle = 70.0
+
+[node name="PlafonnierCouloir" parent="ExtensionEst/Couloir" unique_id=615350720 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 2.68, 2)
+
+[node name="Garage" type="Node3D" parent="ExtensionEst" unique_id=1622907729]
+
+[node name="MurGarageS" type="MeshInstance3D" parent="ExtensionEst/Garage" unique_id=336737895]
+transform = Transform3D(0.697674, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 1.35, 6.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurGarageE" type="MeshInstance3D" parent="ExtensionEst/Garage" unique_id=1660983714]
+transform = Transform3D(-2.0330866e-08, 0, 1, 0, 1, 0, -0.465116, 0, -4.371139e-08, 10.3, 1.35, 4.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurGarageO" type="MeshInstance3D" parent="ExtensionEst/Garage" unique_id=1271274252]
+transform = Transform3D(-2.0330866e-08, 0, 1, 0, 1, 0, -0.465116, 0, -4.371139e-08, 4.3, 1.35, 4.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurJonctionS" type="MeshInstance3D" parent="ExtensionEst/Garage" unique_id=1791778262]
+transform = Transform3D(-2.0331041e-09, 0, 1, 0, 1, 0, -0.046512, 0, -4.371139e-08, 4.3, 1.35, 2.8)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="SolGarage" type="MeshInstance3D" parent="ExtensionEst/Garage" unique_id=2098171157]
+transform = Transform3D(0.697674, 0, 0, 0, 1, 0, 0, 0, 0.606061, 7.3, -0.05, 4.6)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="PlafondGarage" type="MeshInstance3D" parent="ExtensionEst/Garage" unique_id=263541869]
+transform = Transform3D(0.697674, 0, 0, 0, 1, 0, 0, 0, 0.606061, 7.3, 2.75, 4.6)
+material_override = SubResource("mat_plafond")
+mesh = SubResource("mesh_ceil")
+
+[node name="LaveLinge" parent="ExtensionEst/Garage" unique_id=1657318772 instance=ExtResource("mob_washer")]
+transform = Transform3D(-7.86805e-08, 0, 1.8, 0, 1.8, 0, -1.8, 0, -7.86805e-08, 5.13597, 0, 3.7037902)
+
+[node name="Etabli" parent="ExtensionEst/Garage" unique_id=1661155701 instance=ExtResource("mob_desk")]
+transform = Transform3D(-1.9, 0, -1.6610328e-07, 0, 1.9, 0, 1.6610328e-07, 0, -1.9, 6.40665, 0, 5.79967)
+
+[node name="Tabouret" parent="ExtensionEst/Garage" unique_id=974729686 instance=ExtResource("mob_stool")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 5.44744, 0, 6.09239)
+
+[node name="EtagereGarage" parent="ExtensionEst/Garage" unique_id=1594739695 instance=ExtResource("mob_bookopen")]
+transform = Transform3D(-9.616505e-08, 0, -2.2, 0, 2.2, 0, 2.2, 0, -9.616505e-08, 9.8, 0, 4.26768)
+
+[node name="Radio" parent="ExtensionEst/Garage" unique_id=1469191872 instance=ExtResource("mob_radio")]
+transform = Transform3D(-0.98480755, 0, 0.17364946, 0, 1, 0, -0.17364946, 0, -0.98480755, 5.591471, 0.73037434, 6.128325)
+
+[node name="Carton1" parent="ExtensionEst/Garage" unique_id=1142352109 instance=ExtResource("mob_boxclosed")]
+transform = Transform3D(1.642074, 0, 0.43999207, 0, 1.7, 0, -0.43999207, 0, 1.642074, 9.422279, 0, 6.4212193)
+
+[node name="Carton2" parent="ExtensionEst/Garage" unique_id=1946914343 instance=ExtResource("mob_boxopen")]
+transform = Transform3D(1.5407228, 0, -0.71845204, 0, 1.7, 0, 0.71845204, 0, 1.5407228, 9.509963, 0, 5.487366)
+
+[node name="Carton3" parent="ExtensionEst/Garage" unique_id=1924250518 instance=ExtResource("mob_boxclosed")]
+transform = Transform3D(1.3022705, 0, 1.0927451, 0, 1.7, 0, -1.0927451, 0, 1.3022705, 8.827739, 0, 6.45447)
+
+[node name="Poubelle" parent="ExtensionEst/Garage" unique_id=905418761 instance=ExtResource("mob_trash")]
+transform = Transform3D(-1.2358104, 0, 0.40345058, 0, 1.3, 0, -0.40345058, 0, -1.2358104, 4.58117, 0, 6.2874)
+
+[node name="AmpouleGarage" type="OmniLight3D" parent="ExtensionEst/Garage" unique_id=996385442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 2.35, 4.6)
+light_color = Color(0.85, 0.9, 1, 1)
+light_energy = 2.5
+omni_range = 9.0
+
+[node name="PlafonnierGarage" parent="ExtensionEst/Garage" unique_id=1994681895 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 2.68, 4.6)
+
+[node name="TableStockage" parent="ExtensionEst/Garage" unique_id=1053664063 instance=ExtResource("42_uycsn")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 7.5, 0, 4.2)
+
+[node name="CartonStockage" parent="ExtensionEst/Garage" unique_id=1313518290 instance=ExtResource("mob_boxclosed")]
+transform = Transform3D(1.7, 0, 0, 0, 1.7, 0, 0, 0, 1.7, 8.3, 0, 4.4)
+
+[node name="Chambre" type="Node3D" parent="ExtensionEst" unique_id=1158461240]
+
+[node name="MurChambreN" type="MeshInstance3D" parent="ExtensionEst/Chambre" unique_id=1050490043]
+transform = Transform3D(0.465116, 0, 0, 0, 1, 0, 0, 0, 1, 6.3, 1.35, -3.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurChambreO" type="MeshInstance3D" parent="ExtensionEst/Chambre" unique_id=1142285053]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -0.581395, 0, -2.541358e-08, 4.3, 1.35, -1.1)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurJonctionN" type="MeshInstance3D" parent="ExtensionEst/Chambre" unique_id=1387466185]
+transform = Transform3D(-2.0331041e-09, 0, 1, 0, 1, 0, -0.046512, 0, -4.371139e-08, 4.3, 1.35, -2.8)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurChambreE" type="MeshInstance3D" parent="ExtensionEst/Chambre" unique_id=1819563242]
+transform = Transform3D(-1.0165433e-08, 0, 1, 0, 1, 0, -0.232558, 0, -4.371139e-08, 8.3, 1.35, 0.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="SolChambre" type="MeshInstance3D" parent="ExtensionEst/Chambre" unique_id=3131286]
+transform = Transform3D(0.465116, 0, 0, 0, 1, 0, 0, 0, 0.757576, 6.3, -0.05, -1.1)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="PlafondChambre" type="MeshInstance3D" parent="ExtensionEst/Chambre" unique_id=1039962113]
+transform = Transform3D(0.465116, 0, 0, 0, 1, 0, 0, 0, 0.757576, 6.3, 2.75, -1.1)
+material_override = SubResource("mat_plafond")
+mesh = SubResource("mesh_ceil")
+
+[node name="LitDouble" parent="ExtensionEst/Chambre" unique_id=362085414 instance=ExtResource("mob_bed")]
+transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 5.3352, 0, -0.7)
+
+[node name="TableNuit" parent="ExtensionEst/Chambre" unique_id=673601983 instance=ExtResource("mob_nightstand")]
+transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 4.73, 0, -2.11796)
+
+[node name="LampeNuit" parent="ExtensionEst/Chambre" unique_id=1317635487 instance=ExtResource("mob_lamptable")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 4.8305, 0.5, -2.16714)
+
+[node name="Bureau" parent="ExtensionEst/Chambre" unique_id=1076494282 instance=ExtResource("mob_desk")]
+transform = Transform3D(-1.9, 0, -1.6610328e-07, 0, 1.9, 0, 1.6610328e-07, 0, -1.9, 7.07875, 0, 0.5807)
+
+[node name="ChaiseBureau" parent="ExtensionEst/Chambre" unique_id=1502538878 instance=ExtResource("mob_chairdesk")]
+transform = Transform3D(1.4359066, 0, 0.43378818, 0, 1.5, 0, -0.43378818, 0, 1.4359066, 6.24985, 0, 0.4949)
+
+[node name="TapisChambre" parent="ExtensionEst/Chambre" unique_id=1271591647 instance=ExtResource("mob_rugrect")]
+transform = Transform3D(-1.1999865, 0, -0.005717628, 0, 1.2, 0, 0.005717628, 0, -1.1999865, 6.8, 0.01, -0.8386)
+
+[node name="PlanteChambre" parent="ExtensionEst/Chambre" unique_id=1314829972 instance=ExtResource("mob_plant")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 4.55, 0, -2.30903)
+
+[node name="Ordinateur" parent="ExtensionEst/Chambre" unique_id=1497767954 instance=ExtResource("mob_laptop")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6.86075, 0.73, 0.6532)
+
+[node name="Ventilateur" parent="ExtensionEst/Chambre" unique_id=927888937 instance=ExtResource("mob_fan")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 6.3, 2.7, -1.1)
+
+[node name="SpotChambre" type="SpotLight3D" parent="ExtensionEst/Chambre" unique_id=1614310109]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 6.3, 2.62, -1.1)
+light_color = Color(1, 0.82, 0.62, 1)
+light_energy = 3.5
+shadow_enabled = true
+spot_angle = 70.0
+
+[node name="LumiereLampeNuit" type="OmniLight3D" parent="ExtensionEst/Chambre" unique_id=1575482942]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.65, 0.8, -2.3)
+light_color = Color(1, 0.72, 0.45, 1)
+light_energy = 1.2
+omni_range = 3.5
+
+[node name="PlafonnierChambre" parent="ExtensionEst/Chambre" unique_id=1353665129 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.3, 2.68, -1.1)
+
+[node name="EtagereChambre" parent="ExtensionEst/Chambre" unique_id=776189669 instance=ExtResource("mob_bookdoors")]
+transform = Transform3D(-9.616505e-08, 0, 2.2, 0, 2.2, 0, -2.2, 0, -9.616505e-08, 4.55, 0, -0.1)
+
+[node name="SDB" type="Node3D" parent="ExtensionEst" unique_id=2062315239]
+
+[node name="MurSDBN" type="MeshInstance3D" parent="ExtensionEst/SDB" unique_id=1962506359]
+transform = Transform3D(0.4651163, 0, 0, 0, 1, 0, 0, 0, 1, 10.3, 1.35, -0.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurSDBE" type="MeshInstance3D" parent="ExtensionEst/SDB" unique_id=1382596768]
+transform = Transform3D(-1.0165433e-08, 0, 1, 0, 1, 0, -0.232558, 0, -4.371139e-08, 12.3, 1.35, 0.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="SolSDB" type="MeshInstance3D" parent="ExtensionEst/SDB" unique_id=1732505313]
+transform = Transform3D(0.4651163, 0, 0, 0, 1, 0, 0, 0, 0.30303, 10.3, -0.05, 0.4)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="PlafondSDB" type="MeshInstance3D" parent="ExtensionEst/SDB" unique_id=722534785]
+transform = Transform3D(0.4651163, 0, 0, 0, 1, 0, 0, 0, 0.30303, 10.3, 2.75, 0.4)
+material_override = SubResource("mat_plafond")
+mesh = SubResource("mesh_ceil")
+
+[node name="Baignoire" parent="ExtensionEst/SDB" unique_id=776093777 instance=ExtResource("mob_bathtub")]
+transform = Transform3D(-6.338151e-08, 0, 1.45, 0, 1.45, 0, -1.45, 0, -6.338151e-08, 12.15675, 0, 1.26275)
+
+[node name="WC" parent="ExtensionEst/SDB" unique_id=660467442 instance=ExtResource("mob_toilet")]
+transform = Transform3D(-1.7, 0, -2.5669289e-07, 0, 1.7, 0, 2.5669289e-07, 0, -1.7, 8.915668, 0, 1.3056002)
+
+[node name="Lavabo" parent="ExtensionEst/SDB" unique_id=1030075106 instance=ExtResource("mob_sink")]
+transform = Transform3D(-1.4, 0, -2.1139412e-07, 0, 1.4, 0, 2.1139412e-07, 0, -1.4, 10.851, -0.0795312, 0.68)
+
+[node name="Miroir" parent="ExtensionEst/SDB" unique_id=1730042219 instance=ExtResource("mob_mirror")]
+transform = Transform3D(-1.6, 0, -2.4159328e-07, 0, 1.6, 0, 2.4159328e-07, 0, -1.6, 10.79107, 0.862, 1.29744)
+
+[node name="TapisSDB" parent="ExtensionEst/SDB" unique_id=675742120 instance=ExtResource("mob_rugdoormat")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 9.178025, 0.01, 0.627757)
+
+[node name="SpotSDB" type="SpotLight3D" parent="ExtensionEst/SDB" unique_id=1646101972]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 10.3, 2.62, 0.4)
+light_color = Color(0.93, 0.96, 1, 1)
+light_energy = 3.0
+spot_angle = 80.0
+
+[node name="PlafonnierSDB" parent="ExtensionEst/SDB" unique_id=1241662898 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.3, 2.68, 0.4)
+
+[node name="MurSDBS" type="MeshInstance3D" parent="ExtensionEst/SDB" unique_id=950909638]
+transform = Transform3D(0.232558, 0, 0, 0, 1, 0, 0, 0, 1, 11.3, 1.35, 1.4)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MeubleSDB" parent="ExtensionEst/SDB" unique_id=517954338 instance=ExtResource("54_7a13y")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 8.6775, -0.08736, 0.185)
+
+[node name="Dressing" type="Node3D" parent="ExtensionEst" unique_id=433758910]
+
+[node name="MurDressN" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=248230955]
+transform = Transform3D(0.232558, 0, 0, 0, 1, 0, 0, 0, 1, 9.3, 1.35, -3.6)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurDressE" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=1793416305]
+transform = Transform3D(-4.371139e-08, 0, 0.348837, 0, 1, 0, -1, 0, -1.524815e-08, 10.3, 1.35, -2.1)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurDressO1" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=2105877954]
+transform = Transform3D(-4.371139e-08, 0, 0.197674, 0, 1, 0, -1, 0, -8.640606e-09, 8.3, 1.35, -2.75)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="MurDressO2" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=841984401]
+transform = Transform3D(-2.54138e-09, 0, 1, 0, 1, 0, -0.05814, 0, -4.371139e-08, 8.3, 1.35, -0.85)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="LinteauD5" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=2062357010]
+transform = Transform3D(-4.0661647e-09, 0, 1, 0, 0.222222, 0, -0.093023, 0, -4.371139e-08, 8.3, 2.4, -1.5)
+material_override = SubResource("mat_mur")
+mesh = SubResource("mesh_walln")
+
+[node name="SolDressing" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=1599671110]
+transform = Transform3D(0.232558, 0, 0, 0, 1, 0, 0, 0, 0.454545, 9.3, -0.05, -2.1)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="PlafondDressing" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=217748204]
+transform = Transform3D(0.232558, 0, 0, 0, 1, 0, 0, 0, 0.454545, 9.3, 2.75, -2.1)
+material_override = SubResource("mat_plafond")
+mesh = SubResource("mesh_ceil")
+
+[node name="Armoire1" parent="ExtensionEst/Dressing" unique_id=694603609 instance=ExtResource("mob_bookdoors")]
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 8.38, 0, -2.85)
+
+[node name="Armoire2" parent="ExtensionEst/Dressing" unique_id=1899596439 instance=ExtResource("mob_bookclosed")]
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 9.26, 0, -2.85)
+
+[node name="PorteManteauDressing" parent="ExtensionEst/Dressing" unique_id=1327854293 instance=ExtResource("mob_coatrack")]
+transform = Transform3D(-1.0053619e-07, 0, -2.3, 0, 2.3, 0, 2.3, 0, -1.0053619e-07, 9.85, 0, -1)
+
+[node name="CartonDressing" parent="ExtensionEst/Dressing" unique_id=529180675 instance=ExtResource("mob_boxopen")]
+transform = Transform3D(1.6741728, 0, 0.29520425, 0, 1.7, 0, -0.29520425, 0, 1.6741728, 8.633485, 0, -0.7507537)
+
+[node name="Coussin" parent="ExtensionEst/Dressing" unique_id=824677161 instance=ExtResource("mob_pillow")]
+transform = Transform3D(1.5407228, 0, 0.71845204, 0, 1.7, 0, -0.71845204, 0, 1.5407228, 8.634603, 0.02, -0.8392137)
+
+[node name="SpotDressing" type="SpotLight3D" parent="ExtensionEst/Dressing" unique_id=136796155]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 9.3, 2.62, -2.1)
+light_color = Color(1, 0.85, 0.65, 1)
+light_energy = 2.0
+spot_angle = 75.0
+
+[node name="PlafonnierDressing" parent="ExtensionEst/Dressing" unique_id=877196925 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.3, 2.68, -2.1)
+
+[node name="Jardin" type="Node3D" parent="." unique_id=289758290]
+
+[node name="SolHerbe" type="MeshInstance3D" parent="Jardin" unique_id=1360815716]
+transform = Transform3D(0.616279, 0, 0, 0, 1, 0, 0, 0, 1.19697, -6.8, -0.11, 0)
+material_override = SubResource("mat_herbe")
+mesh = SubResource("mesh_floor")
+
+[node name="Terrasse" type="MeshInstance3D" parent="Jardin" unique_id=1137884628]
+transform = Transform3D(0.168605, 0, 0, 0, 0.8, 0, 0, 0, 0.363636, -4.875, -0.06, 0)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_floor")
+
+[node name="ClotureO" type="MeshInstance3D" parent="Jardin" unique_id=825682553]
+transform = Transform3D(0, 0, 0.936047, 0, 0.37037, 0, -1, 0, 0, -9.375, 0.44, 0)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_walln")
+
+[node name="ClotureN" type="MeshInstance3D" parent="Jardin" unique_id=1819105273]
+transform = Transform3D(0.616279, 0, 0, 0, 0.37037, 0, 0, 0, 1, -6.8, 0.44, -3.875)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_walln")
+
+[node name="ClotureS" type="MeshInstance3D" parent="Jardin" unique_id=1873965113]
+transform = Transform3D(0.616279, 0, 0, 0, 0.37037, 0, 0, 0, 1, -6.8, 0.44, 3.875)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_walln")
+
+[node name="Arbre1Tronc" type="MeshInstance3D" parent="Jardin" unique_id=817659793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.3, 0.79, -2.6)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_tronc")
+
+[node name="Arbre1Cime" type="MeshInstance3D" parent="Jardin" unique_id=1250944794]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.3, 2.03, -2.6)
+material_override = SubResource("mat_feuille")
+mesh = SubResource("mesh_feuille")
+
+[node name="Arbre2Tronc" type="MeshInstance3D" parent="Jardin" unique_id=1136178533]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.79, 2.5)
+material_override = SubResource("mat_bois_fonce")
+mesh = SubResource("mesh_tronc")
+
+[node name="Arbre2Cime" type="MeshInstance3D" parent="Jardin" unique_id=1233167359]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.03, 2.5)
+material_override = SubResource("mat_feuille")
+mesh = SubResource("mesh_feuille")
+
+[node name="Buisson1" type="MeshInstance3D" parent="Jardin" unique_id=1501552358]
+transform = Transform3D(0.081395, 0, 0, 0, 7, 0, 0, 0, 0.106061, -9, 0.29, -1.2)
+material_override = SubResource("mat_feuille")
+mesh = SubResource("mesh_floor")
+
+[node name="Buisson2" type="MeshInstance3D" parent="Jardin" unique_id=977017650]
+transform = Transform3D(0.081395, 0, 0, 0, 7, 0, 0, 0, 0.106061, -9, 0.29, 1.5)
+material_override = SubResource("mat_feuille")
+mesh = SubResource("mesh_floor")
+
+[node name="Buisson3" type="MeshInstance3D" parent="Jardin" unique_id=1793432577]
+transform = Transform3D(0.081395, 0, 0, 0, 7, 0, 0, 0, 0.106061, -5.7, 0.29, -3.3)
+material_override = SubResource("mat_feuille")
+mesh = SubResource("mesh_floor")
+
+[node name="Buisson4" type="MeshInstance3D" parent="Jardin" unique_id=1507181116]
+transform = Transform3D(0.081395, 0, 0, 0, 7, 0, 0, 0, 0.106061, -7.2, 0.29, 3.4)
+material_override = SubResource("mat_feuille")
+mesh = SubResource("mesh_floor")
+
+[node name="PlatebandeN" type="MeshInstance3D" parent="Jardin" unique_id=586995753]
+transform = Transform3D(0.151163, 0, 0, 0, 0.6, 0, 0, 0, 0.106061, -4.9, -0.04, -1.7)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="PlatebandeS" type="MeshInstance3D" parent="Jardin" unique_id=1252422429]
+transform = Transform3D(0.151163, 0, 0, 0, 0.6, 0, 0, 0, 0.106061, -4.9, -0.04, 1.7)
+material_override = SubResource("mat_sol")
+mesh = SubResource("mesh_floor")
+
+[node name="FleurN1" type="MeshInstance3D" parent="Jardin" unique_id=2066808274]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, 0.02, -1.7)
+material_override = SubResource("mat_fleur_r")
+mesh = SubResource("mesh_fleur")
+
+[node name="FleurN2" type="MeshInstance3D" parent="Jardin" unique_id=742344823]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.9, 0.02, -1.6)
+material_override = SubResource("mat_fleur_j")
+mesh = SubResource("mesh_fleur")
+
+[node name="FleurN3" type="MeshInstance3D" parent="Jardin" unique_id=97003945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.55, 0.02, -1.75)
+material_override = SubResource("mat_fleur_b")
+mesh = SubResource("mesh_fleur")
+
+[node name="FleurS1" type="MeshInstance3D" parent="Jardin" unique_id=2098815049]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, 0.02, 1.7)
+material_override = SubResource("mat_fleur_j")
+mesh = SubResource("mesh_fleur")
+
+[node name="FleurS2" type="MeshInstance3D" parent="Jardin" unique_id=320174563]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.9, 0.02, 1.6)
+material_override = SubResource("mat_fleur_b")
+mesh = SubResource("mesh_fleur")
+
+[node name="FleurS3" type="MeshInstance3D" parent="Jardin" unique_id=1377796963]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.55, 0.02, 1.75)
+material_override = SubResource("mat_fleur_r")
+mesh = SubResource("mesh_fleur")
+
+[node name="Rats" type="Node3D" parent="Jardin" unique_id=143466382]
+script = ExtResource("55_hxs6d")
+
+[node name="SoleilJardin" type="DirectionalLight3D" parent="Jardin" unique_id=1376461480]
+transform = Transform3D(0.81915206, 0.46984634, -0.32898995, 0, 0.57357645, 0.81915206, 0.57357645, -0.6710101, 0.46984634, 0, 0, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="SpotSalon" type="SpotLight3D" parent="." unique_id=1553502582]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0.5, 2.62, 0)
+light_color = Color(1, 0.85, 0.65, 1)
+light_energy = 5.0
+shadow_enabled = true
+spot_angle = 75.0
+
+[node name="SpotCuisine" type="SpotLight3D" parent="." unique_id=943899684]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, -2.5, 2.62, -2.2)
+light_color = Color(1, 0.88, 0.7, 1)
+light_energy = 3.0
+spot_angle = 70.0
+
+[node name="PlafonnierSalon" parent="." unique_id=1325403697 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 2.68, 0)
+
+[node name="PlafonnierCuisine" parent="." unique_id=738538297 instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.68, -2.2)
+
+[node name="EntranceDoor" parent="." unique_id=1492960938 instance=ExtResource("59_6g4yg")]
+transform = Transform3D(-2.1855694e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, -2.1855694e-08, 4.075, 0, 2.5)
+script = ExtResource("60_36jk5")

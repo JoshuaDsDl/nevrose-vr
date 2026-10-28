@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cq8upcub8gq8n"
+path="res://.godot/imported/Waffle_One_Piece.obj-5a7dc8cf3c8a008f271fb6c141a4849b.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Waffle_One_Piece.obj-5a7dc8cf3c8a008f271fb6c141a4849b.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Junk_Food/Waffle_One_Piece.obj"
+dest_files=["res://.godot/imported/Waffle_One_Piece.obj-5a7dc8cf3c8a008f271fb6c141a4849b.mesh", "res://.godot/imported/Waffle_One_Piece.obj-5a7dc8cf3c8a008f271fb6c141a4849b.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

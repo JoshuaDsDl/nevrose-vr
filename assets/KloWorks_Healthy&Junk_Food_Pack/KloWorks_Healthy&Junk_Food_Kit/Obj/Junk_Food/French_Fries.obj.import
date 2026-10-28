@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cxmhvxdy2dxnw"
+path="res://.godot/imported/French_Fries.obj-4d2d04ddf4a81f2d09b9b038873ea9e5.mesh"
+
+[deps]
+
+files=["res://.godot/imported/French_Fries.obj-4d2d04ddf4a81f2d09b9b038873ea9e5.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Junk_Food/French_Fries.obj"
+dest_files=["res://.godot/imported/French_Fries.obj-4d2d04ddf4a81f2d09b9b038873ea9e5.mesh", "res://.godot/imported/French_Fries.obj-4d2d04ddf4a81f2d09b9b038873ea9e5.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

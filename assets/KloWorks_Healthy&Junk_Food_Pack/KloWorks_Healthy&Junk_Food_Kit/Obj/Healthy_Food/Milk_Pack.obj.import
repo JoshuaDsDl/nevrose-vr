@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dqtjtw0128am7"
+path="res://.godot/imported/Milk_Pack.obj-33a35bc7916da82fcfa592f01d9abaab.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Milk_Pack.obj-33a35bc7916da82fcfa592f01d9abaab.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Healthy_Food/Milk_Pack.obj"
+dest_files=["res://.godot/imported/Milk_Pack.obj-33a35bc7916da82fcfa592f01d9abaab.mesh", "res://.godot/imported/Milk_Pack.obj-33a35bc7916da82fcfa592f01d9abaab.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

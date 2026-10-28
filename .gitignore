@@ -1,0 +1,24 @@
+# Godot 4+ standard ignores
+.godot/
+/android/
+*.apk
+*.apks
+*.aab
+*.keystore
+!debug.keystore
+.builds/
+.cache/
+build/
+
+# Assets Quaternius non utilisés par le jeu (seul Door_1.fbx est chargé).
+# Conservés sur disque pour l'utilisateur mais exclus du dépôt.
+# Pour tous les réintégrer : supprimer ce bloc et `git add assets/quaternius/`.
+assets/quaternius/*.fbx
+!assets/quaternius/Door_1.fbx
+assets/quaternius/*.fbx.import
+!assets/quaternius/Door_1.fbx.import
+
+# Assets d'armes non utilisés (seul low_poly_knife.glb est dans le jeu).
+# Conservés sur disque pour l'utilisateur mais exclus du dépôt.
+assets/Gun&Knife/Guns Low Poly/
+assets/Gun&Knife/Ultimate Gun Pack by Quaternius/

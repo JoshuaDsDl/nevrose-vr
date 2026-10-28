@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://fnfnkxwc0wnc"
+path="res://.godot/imported/Fried_Chicken.obj-e50bf9077e37eb8cf8c524df5a3cb23d.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Fried_Chicken.obj-e50bf9077e37eb8cf8c524df5a3cb23d.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Junk_Food/Fried_Chicken.obj"
+dest_files=["res://.godot/imported/Fried_Chicken.obj-e50bf9077e37eb8cf8c524df5a3cb23d.mesh", "res://.godot/imported/Fried_Chicken.obj-e50bf9077e37eb8cf8c524df5a3cb23d.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

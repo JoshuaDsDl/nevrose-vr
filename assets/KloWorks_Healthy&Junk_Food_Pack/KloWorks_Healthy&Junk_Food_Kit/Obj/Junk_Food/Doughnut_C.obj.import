@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://didkibdyttwx4"
+path="res://.godot/imported/Doughnut_C.obj-f8c899d9f5a2ae40640c80e8e89472af.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Doughnut_C.obj-f8c899d9f5a2ae40640c80e8e89472af.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Junk_Food/Doughnut_C.obj"
+dest_files=["res://.godot/imported/Doughnut_C.obj-f8c899d9f5a2ae40640c80e8e89472af.mesh", "res://.godot/imported/Doughnut_C.obj-f8c899d9f5a2ae40640c80e8e89472af.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dbv010dg11qn8"
+path="res://.godot/imported/Soup_Vegetable.obj-357b1c3124c90a2961d699c6ea1c5ebc.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Soup_Vegetable.obj-357b1c3124c90a2961d699c6ea1c5ebc.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Healthy_Food/Soup_Vegetable.obj"
+dest_files=["res://.godot/imported/Soup_Vegetable.obj-357b1c3124c90a2961d699c6ea1c5ebc.mesh", "res://.godot/imported/Soup_Vegetable.obj-357b1c3124c90a2961d699c6ea1c5ebc.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

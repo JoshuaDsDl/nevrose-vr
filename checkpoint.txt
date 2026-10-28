@@ -1,0 +1,335 @@
+# CHECKPOINT — NÉVROSE le jeu VR (fragment 1 jouable)
+# Écrit le 07/10/2026 — État : APK v3 (fix écran noir + fix déplacement VR + logs) construite, signée, validée.
+# Projet : D:\DEV\OTHERS\GODOT\serious-game-vr-ci3\NEVROSE-le-jeu-vr
+# Repo GitHub : Noahcnci/serious-game-vr-ci3 (2 sous-dossiers : NEVROSE-le-jeu-vr + serious-game-vr-ci-3)
+
+================================================================================
+1. LE PROJET — C'EST QUOI
+================================================================================
+
+Serious game VR pour Meta Quest 2, Godot 4.7.2. Tu es schizophrène, tu as
+oublié ta dose : fouille ton studio pour retrouver la pilule avant que la
+jauge de folie n'atteigne 100 %. Le GDD verrouillé est dans ASSIMILE_GDD.md
+(à la racine du dossier parent). Fragment 1 = le studio entier, jouable.
+
+Design technique (imposé) :
+- Renderer Compatibility (OpenGL / gl_compatibility) — LE renderer mobile
+  officiellement recommandé pour Quest 2 dans Godot 4. Déjà réglé dans
+  project.godot (desktop ET mobile).
+- Graphismes "sympas mais pas gourmands" : primitives (box/sphere/cylinder),
+  matériaux couleur unie, ZÉRO texture, baked-like via Environment (ambient +
+  fog + glow + ACES), OmniLights sans ombres.
+- Zéro physique coûteuse : pas de RigidBody, murs gérés par clamp de position.
+- Commentaires et messages de code en français.
+
+================================================================================
+2. ENVIRONNEMENT INSTALLÉ SUR LE PC (tout est en place, vérifié)
+================================================================================
+
+- Godot 4.7.2 console : D:\DEV\OTHERS\GODOT\Godot_v4.7.2-stable_win64_console.exe
+- JDK 21 (Temurin) : C:\Users\noah0\jdk-21  (javac 21.0.12.1 OK)
+- Android SDK : C:\Users\noah0\AppData\Local\Android\Sdk
+    cmdline-tools\latest + platform-tools + platforms;android-34 + build-tools;34.0.0
+- Templates d'export 4.7.2.stable :
+    C:\Users\noah0\AppData\Roaming\Godot\export_templates\4.7.2.stable\ (aplatis)
+- Keystore debug : C:\Users\noah0\.android\debug.keystore
+    alias androiddebugkey / mdp keystore : android / mdp clé : android
+- Paramètres éditeur patchés : C:\Users\noah0\AppData\Roaming\Godot\editor_settings-4.7.tres
+    export/android/java_sdk_path, debug_keystore, alias, passes
+- Gradle 8.11.1 : provisionné automatiquement dans android/build/.gradle (JDK 21)
+
+PIÈGES WINDOWS / GIT-BASH (appris à la dure) :
+- curl en arrière-plan via le runner = échec exit 23. TOUJOURS télécharger en
+  avant-plan avec `curl -C -` (reprise).
+- keytool / sdkmanager / apksigner / python natif REFUSENT les chemins MSYS
+  (/c/...) : utiliser les chemins natifs C:/... et D:/...
+- sdkmanager exige : --sdk_root="C:/Users/noah0/AppData/Local/Android/Sdk"
+
+================================================================================
+3. STRUCTURE DU PROJET
+================================================================================
+
+project.godot           config : nom, main scene, autoload GameLog, file_logging,
+                        renderer gl_compatibility + ETC2/ASTC, OpenXR activé
+scenes/main.tscn        scène principale Node3D + XROrigin3D/XRCamera3D/2 manettes
+scripts/main.gd         cœur du jeu (~470 l.) : OpenXR, déplacement, snap 45°,
+                        rayon d'interaction, sanity, chat compte à rebours, HUD
+scripts/map_base.gd      classe de base des maps (conteneurs, dose, clés,
+                         mimics, helper placement GLB)
+scripts/map2_extended.gd générateur de la map 2 : coquille salon/cuisine
+                         (map2_extended.tscn) + extension Est + jardin procéduraux
+scripts/container.gd    tiroirs + placard (InteractiveContainer, ouverture animée)
+scripts/pill.gd         la Dose (pilule cyan, Area3D cliquable)
+scripts/mimic.gd        la fausse tasse qui tremble (Mimic)
+scripts/vignette.gdshader  vignette de folie plein écran (uniform intensity)
+scripts/game_logger.gd  JOURNAL .txt (GameLogger, autoload "GameLog")
+tests/smoke_test.gd     24 assertions headless (structure + boucle de jeu)
+export_presets.cfg      preset "Meta Quest 2" (73 l., clés alignées sur le plugin)
+android/.build_version  contient exactement : 4.7.2.stable  (SANS .official)
+android/build/          template Gradle complet (gradle, build.gradle, src, libs…)
+tools/codemap_gd.py     pont graphify : indexe les .gd dans le graphe
+docs/CODEMAP.md         carte des scripts générée (commitée)
+build/nevrose_quest2.apk  L'APK (81,7 Mo)
+README.md               doc du fragment
+
+================================================================================
+4. GAMEPLAY IMPLÉMENTÉ (GDD §4/§5)
+================================================================================
+
+- Stick gauche : déplacement constant 1,8 m/s, clampé aux murs (5,4 x 4 m).
+- Stick droit : snap turn 45° (confort), anti-rebond 0,25 s.
+- Gâchette index droite : rayon 3 m depuis la main → ouvrir tiroir/placard ou
+  prendre la pilule. Le point central devient cyan quand quelque chose est
+  visé. Haptique 0,25 s à chaque interaction.
+- Folie : +1,4 pts/s tant que pas de dose. Vignette qui se referme, murs qui
+  respirent (échelle), chat qui déraille ("IL EST DANS LA PIÈCE AVEC TOI"),
+  puis game over "L'APPART T'A ASSIMILÉ" (gâchette/clic = recommencer).
+- Dose : spawn aléatoire dans 1 des 4 conteneurs ou à plat sur un meuble,
+  glow pulsant. Prendre une dose : sanity -55, montée ralentie à 0,7/s, nouvelle
+  dose 2 s plus tard.
+- Mimic : une tasse tremble (spawn aléatoire) ; si tu l'interagis, purge
+  immédiate +6 folie. "Le faux est celui qui tremble."
+- Fallback bureau (sans casque) : WASD + Q/E + F + clic souris, caméra à 1,7 m.
+  Sert aux tests headless.
+
+================================================================================
+5. BUGS RENCONTRÉS → SOLUTIONS (ne pas les redécouvrir)
+================================================================================
+
+EXPORT / BUILD :
+1. "Gradle build template not installed" → le preset doit pointer le template :
+   gradle_build_directory="res://android"  (Godot AJOUTE lui-même /build ;
+   si tu mets res://android/build il cherche android/build/build).
+2. "Gradle build template version mismatch" → créer android/.build_version
+   contenant EXACTEMENT "4.7.2.stable" (la vérification compare au version
+   string officiel, sans suffixe).
+3. "ETC2/ASTC required" → textures/vram_compression/import_etc2_astc=true
+   dans project.godot.
+4. Export sans VR → les clés du preset doivent être celles du plugin :
+   xr_features/xr_mode=1 (OpenXR), screen/immersive_mode=true, etc. Un preset
+   avec de mauvaises clés fait échouer l'export silencieusement.
+5. Le build Gradle complet dépasse 570 s → timeout du terminal. L'APK est
+   quand même écrit avant la fin ; vérifier avec ls, puis tuer le Godot restant.
+
+CODE GODOT :
+6. Vector3.BACKWARD n'existe PAS → Vector3.BACK (+Z, vers le joueur face à -Z).
+7. Après ajout d'un class_name : relancer `Godot --headless --editor --quit`
+   pour régénérer le cache des classes globales, sinon "Could not find type".
+8. `log()` est déjà la fonction math globale (logarithme) → nommer ses
+   méthodes autrement (log_line) ; et typer les vars qui les reçoivent.
+9. *** ÉCRAN NOIR SUR QUEST 2 *** : OpenXR initialisé mais
+   `get_viewport().use_xr = true` JAMAIS appelé → rien n'est soumis au
+   runtime XR → écran noir total. Corrigé dans _init_openxr().
+
+QUEST 2 / ADB :
+10. "Ce casque/" de l'explorateur de fichiers = /sdcard/ (nom historique,
+    pas de vraie SD). Download = /sdcard/Download/.
+11. Autorisation USB révoquée si la popup n'est pas cochée "Toujours autoriser".
+    État unauthorized → kill-server puis rebrancher avec le casque allumé.
+12. adb shell am start / monkey = LANCER le jeu : NE PAS le faire, l'utilisateur
+    lance lui-même depuis le menu du casque.
+
+================================================================================
+6. SYSTÈME DE LOGS .txt (nouveau, pour diagnostiquer l'écran noir)
+================================================================================
+
+Trois niveaux, tous récupérables par adb pull :
+a) JEU : GameLogger (autoload GameLog) → une ligne horodatée par événement
+   (BOOT/MAIN/XR/WORLD/HUD/GAME/HB) dans nevrose.log.
+   Sur Quest : /sdcard/Android/data/com.noirlab.nevrose/files/logs/nevrose.log
+   Sur PC :     user://logs/nevrose.log (C:\Users\noah0\AppData\Roaming\Godot\
+               app_userdata\NÉVROSE\logs\)
+   HB = heartbeat : position caméra/origine/santé chaque seconde pendant 20 s.
+b) MOTEUR : file_logging/enable_file_logging=true → godot.log (toutes les
+   erreurs Godot) dans le user://logs interne du casque (récup via run-as).
+c) logcat : adb logcat en direct pendant que le jeu tourne.
+
+RÉCUPÉRER LES LOGS DU CASQUE (après un lancement) :
+  adb pull /sdcard/Android/data/com.noirlab.nevrose/files/logs/nevrose.log
+  adb shell run-as com.noirlab.nevrose ls files/logs/    (godot.log interne)
+
+================================================================================
+7. CHAÎNE D'EXPORT APK (reproduire à l'identique)
+================================================================================
+
+Commande (depuis la racine du projet) :
+  export JAVA_HOME="C:/Users/noah0/jdk-21"
+  Godot_v4.7.2-stable_win64_console.exe --headless --path . \
+      --export-debug "Meta Quest 2" build/nevrose_quest2.apk
+
+Durée : ~9-10 min le 1er build (Gradle télécharge), ~8 min ensuite. Le
+timeout du terminal (600 s max) coupe Godot en fin de build MAIS l'APK est
+déjà écrit : vérifier `ls -la build/`, valider, tuer le Godot restant
+(`ps aux | grep Godot` puis kill <pid>).
+
+Validation systématique de l'APK :
+  python -c "import zipfile; z=zipfile.ZipFile('build/nevrose_quest2.apk'); \
+print('OK' if z.testzip() is None else 'CORROMPU')"
+  apksigner.bat verify --print-certs build/nevrose_quest2.apk
+    (build-tools 34.0.0, chemin APK en D:/ natif)
+  aapt.exe dump badging build/nevrose_quest2.apk | findstr /c:"application-label"
+
+================================================================================
+8. DÉPLOIEMENT SUR LE QUEST 2 (mémo)
+================================================================================
+
+- Mode développeur : app Meta Horizon → appareil → Mode développeur = ON.
+- Câble USB-C, casque allumé, popup "Autoriser le débogage USB" → OK +
+  "Toujours autoriser".
+- adb install -r build/nevrose_quest2.apk          (installe)
+- adb push build/nevrose_quest2.apk /sdcard/Download/   (dépose le fichier)
+- Lancement : BIBLIOTHÈQUE → Sources inconnues → NÉVROSE (jamais via adb).
+- apk identique déjà posé à : /sdcard/nevrose_quest2.apk (racine "Ce casque").
+
+================================================================================
+9. TESTS HEADLESS (avant chaque export)
+================================================================================
+
+  Godot_v4.7.2-stable_win64_console.exe --headless --path . \
+      --script res://tests/smoke_test.gd
+Résultat attendu : "=== RESULTAT: PASS (0 échec(s)) ===" (24 assertions :
+structure du studio, spawn dose, ouverture de conteneur dans le bon sens,
+prise de dose, purge du mimic, game over, restart).
+Note : le logger écrit aussi dans le .log du PC pendant les tests — vérifier
+le heartbeat y confirme le câblage.
+
+================================================================================
+10. GRAPHIFY (graphe de connaissances du projet)
+================================================================================
+
+- Hook git installé (post-commit/post-checkout relancent le graphe).
+- graphify n'indexe PAS les .gd (extracteur AST sans GDScript) → pont ajouté :
+  tools/codemap_gd.py génère docs/CODEMAP.md (classes/signaux/fonctions des
+  6 scripts), branché dans le hook post-commit, commité dans le repo.
+- Graphe : graphify-out/graph.json (47 nœuds, 45 arêtes, 6 communautés).
+- Usage : graphify query "..." | graphify path A B | graphify explain "..."
+
+================================================================================
+11. ÉTAT ACTUEL ET PROCHAINES ÉTAPES
+================================================================================
+
+FAIT :
+- Fragment 1 complet + tests 24/24 PASS.
+- APK v3 construite (07/10 13:38) : build/nevrose_quest2.apk — zip OK, signée
+  debug (SHA-1 d32d10187e50bf222bd1556aa58e4be07b804e4b).
+- Fix écran noir inclus : viewport.use_xr=true.
+- Fix déplacement VR : axe Y du stick gauche inversé à la source (Quest renvoie
+  +Y quand on pousse en avant, contrairement à Godot).
+- Système de logs .txt inclus.
+- Repo rebranché sur la racine (2 sous-dossiers), push GitHub OK.
+- PAS ENCORE déployée sur le casque (v1 installée = l'ancienne, écran noir).
+
+À FAIRE (dans l'ordre) :
+1. Pousser l'APK v3 sur le casque : adb push build/nevrose_quest2.apk
+   /sdcard/Download/  (puis l'utilisateur l'installe/lance depuis le casque,
+   ou adb install -r).
+2. L'utilisateur lance depuis le menu, laisse tourner ~20 s.
+3. Récupérer nevrose.log (§6) → vérifier "[XR] OpenXR initialisé —
+   viewport.use_xr=true" → l'écran noir devrait être résolu.
+4. Si encore noir : lire les lignes BOOT/XR/HB du log pour le diagnostique.
+5. Commit git de cette passe (fix + logger + checkpoint) : le hook graphify
+   tournera tout seul.
+6. Suite du jeu : Fragments 2-4 du GDD (appartement complet, voisin,
+   mécanique de doute renforcée).
+
+================================================================================
+12. RÉCAP DES CHEMINS CLÉS
+================================================================================
+
+PC :
+  Projet   D:\DEV\OTHERS\GODOT\serious-game-vr-ci3\NEVROSE-le-jeu-vr
+  APK      D:\DEV\OTHERS\GODOT\serious-game-vr-ci3\NEVROSE-le-jeu-vr\build\
+  Godot    D:\DEV\OTHERS\GODOT\Godot_v4.7.2-stable_win64_console.exe
+  JDK      C:\Users\noah0\jdk-21
+  SDK      C:\Users\noah0\AppData\Local\Android\Sdk
+  adb      C:\Users\noah0\AppData\Local\Android\Sdk\platform-tools\adb.exe
+  Keystore C:\Users\noah0\.android\debug.keystore (android/android)
+
+QUEST 2 :
+  APK copiée       /sdcard/Download/nevrose_quest2.apk (et /sdcard/)
+  Logs du jeu      /sdcard/Android/data/com.noirlab.nevrose/files/logs/
+  Jeu installé     Bibliothèque → Sources inconnues → NÉVROSE
+  Package          com.noirlab.nevrose
+
+================================================================================
+13. PLAN DE TEST PROTO — 6 JOURS NON STOP
+================================================================================
+
+Règle d'or : l'utilisateur lance le jeu lui-même depuis le casque.
+Déroulé : il teste → il rapporte (même en vrac) → je fixe/rebuild (~8 min)
+→ on repasse le palier. Détail complet : TEST_PROTO_6J.md (même contenu,
+avec cases à cocher). Fichier de référence cochable = TEST_PROTO_6J.md.
+
+--- PALIER 0 — MISE EN PLACE (avant le jour 1, ~30 min) ---
+[ ] Casque en mode développeur, adb devices = "device"
+[ ] APK v2 (fix écran noir + logs) poussée dans /sdcard/Download/
+[ ] apk v2 installée
+[ ] 1 session de lancement → nevrose.log relu
+[ ] Le log contient "[XR] OpenXR initialisé — viewport.use_xr=true"
+    → Sinon : logcat, fix, rebuild, retour au début du palier.
+
+--- PALIER 1 — LANCEMENT & AFFICHAGE (jour 1 matin) ---
+[ ] Pas d'écran noir — l'appart visible en entier
+[ ] Couleurs lisibles (rien d'écrasé, pas de blanc saturé)
+[ ] HUD complet : point central + chat + vignette de folie
+[ ] Lumière correcte (pas de zone illisible)
+[ ] 30 s sans crash ni gel
+[ ] Caméra à hauteur humaine (≈1,6-1,7 m)
+
+--- PALIER 2 — CONTRÔLES VR (jour 1 après-midi) ---
+[ ] Stick gauche : déplacement fluide, constant, 4 directions
+[ ] Les murs bloquent (pas de traverse)
+[ ] Stick droit : snap 45° net, pas de double rotation
+[ ] Point central devient CYAN sur cible interactible
+[ ] Gâchette : ouvre un tiroir (animé vers soi)
+[ ] Gâchette : ouvre le placard
+[ ] Haptique ressentie à chaque ouverture
+[ ] Tracking des deux manettes correct
+[ ] 10 min de jeu sans mal des transports
+
+--- PALIER 3 — BOUCLE DE JEU COMPLÈTE (jour 2 → jour 3) ---
+[ ] Pilule cyan spawn (tiroir/placard/plan de travail/sol)
+[ ] Chat = compte à rebours avant la folie totale
+[ ] Prise de pilule → sanity redescend nettement
+[ ] Vignette se referme quand la folie monte
+[ ] Murs qui respirent à folie élevée
+[ ] Messages de plus en plus inquiétants
+[ ] Nouvelle pilule ~2 s après la prise
+[ ] Folie à 100 → GAME OVER (écran + message)
+[ ] Restart depuis le game over propre
+[ ] 3 runs complets SANS crash
+[ ] Noter à chaud : temps 1ʳᵉ pilule, nb d'ouvertures, pression /5
+
+--- PALIER 4 — MIMIC & VARIABILITÉ (jour 3 → jour 4) ---
+[ ] 6 runs : mimic parfois présent, parfois absent (0-1/run)
+[ ] La tasse qui tremble se détecte
+[ ] Purge + pénalité folie ressenties
+[ ] Aucun faux positif sur objets normaux
+[ ] Position de la pilule varie entre runs (4 spots distincts min)
+
+--- PALIER 5 — ROBUSTESSE & ENDURANCE (jour 4 → jour 5) ---
+[ ] Session continue de 20+ min sans crash
+[ ] 5 lancements d'affilée stables
+[ ] Désinstaller + réinstaller propre
+[ ] Respect du périmètre Guardian
+[ ] Pas de surchauffe anormale
+[ ] nevrose.log présent et exploitable après chaque session
+
+--- PALIER 6 — VERDICT DU PROTO (jour 5 → jour 6) ---
+[ ] Notes /5 : immersion, pression, lisibilité, confort
+[ ] Bugs triés : BLOQUANT / MAJEUR / MINEUR
+[ ] Points forts validés (à garder)
+[ ] La boucle pilule/folie est-elle FUN ?
+[ ] GO pour le fragment 2 ?
+[ ] checkpoint.txt mis à jour avec les apprentissages
+
+RYTHME DE JOURNÉE SUGGÉRÉ :
+1. Session de test 15-20 min (notes à chaud)
+2. Rapport, même en vrac
+3. Fix + rebuild APK (~8 min)
+4. Repasser le palier en échec, avancer
+5. Chaque soir : mise à jour des [x]
+
+À NOTER EN PERMANENCE : heure/durée des sessions ; bug = quoi+où+p palier ;
+toute sensation de malaise VR (crucial pour un serious game) ; envies
+émergentes ("j'aurais aimé pouvoir…") → nourrissent le fragment 2.

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cqqqstxb8s64x"
+path="res://.godot/imported/Ketchup_sauce.obj-66bd1a5cc3e37cfb0abba978f07b9c1e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Ketchup_sauce.obj-66bd1a5cc3e37cfb0abba978f07b9c1e.mesh"]
+
+source_file="res://assets/KloWorks_Healthy&Junk_Food_Pack/KloWorks_Healthy&Junk_Food_Kit/Obj/Junk_Food/Ketchup_sauce.obj"
+dest_files=["res://.godot/imported/Ketchup_sauce.obj-66bd1a5cc3e37cfb0abba978f07b9c1e.mesh", "res://.godot/imported/Ketchup_sauce.obj-66bd1a5cc3e37cfb0abba978f07b9c1e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

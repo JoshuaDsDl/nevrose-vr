@@ -1,0 +1,322 @@
+[gd_scene format=3 uid="uid://cjxk1e7wjhfrh"]
+
+[ext_resource type="Script" uid="uid://bdfdt31s58qwg" path="res://scripts/lobby_world.gd" id="1_q6qq2"]
+[ext_resource type="PackedScene" uid="uid://c4tlk2d3yh7r7" path="res://assets/kenney/furniture/rugRectangle.glb" id="2_rgcd7"]
+[ext_resource type="PackedScene" uid="uid://rolbl4ed8a8d" path="res://assets/kenney/furniture/loungeSofa.glb" id="3_lqo1b"]
+[ext_resource type="PackedScene" uid="uid://cwytjgvw3rfpm" path="res://assets/kenney/furniture/desk.glb" id="4_0gjkf"]
+[ext_resource type="PackedScene" uid="uid://cyjaqan28eur7" path="res://assets/kenney/furniture/chairDesk.glb" id="5_o2i1r"]
+[ext_resource type="PackedScene" uid="uid://bes0omf6yaj2p" path="res://assets/kenney/furniture/sideTable.glb" id="6_iulku"]
+[ext_resource type="PackedScene" uid="uid://crtgr4jwhp2te" path="res://assets/kenney/furniture/lampRoundTable.glb" id="7_dfnwm"]
+[ext_resource type="PackedScene" uid="uid://cpn3uanleb6pq" path="res://assets/kenney/furniture/lampRoundFloor.glb" id="8_0jb4q"]
+[ext_resource type="PackedScene" uid="uid://bmmkl6sq3wayd" path="res://assets/kenney/furniture/pottedPlant.glb" id="9_vwf6o"]
+[ext_resource type="PackedScene" uid="uid://cjlo4hn5i761g" path="res://assets/kenney/furniture/bookcaseOpen.glb" id="10_iwi7x"]
+[ext_resource type="Script" uid="uid://d1q48srtrgp6e" path="res://scripts/lobby_computer.gd" id="11_wjff0"]
+[ext_resource type="PackedScene" uid="uid://clxujngn03y7c" path="res://assets/kenney/furniture/computerScreen.glb" id="12_h1rib"]
+[ext_resource type="PackedScene" uid="uid://buorwatby3fjc" path="res://assets/kenney/furniture/computerKeyboard.glb" id="13_kn4i6"]
+[ext_resource type="PackedScene" uid="uid://h8200i0hfjrg" path="res://assets/kenney/furniture/computerMouse.glb" id="14_3jc85"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_jhtcy"]
+sky_top_color = Color(0.38, 0.45, 0.55, 1)
+sky_horizon_color = Color(0.65, 0.67, 0.7, 1)
+ground_bottom_color = Color(0.2, 0.17, 0.13, 1)
+ground_horizon_color = Color(0.65, 0.67, 0.7, 1)
+
+[sub_resource type="Sky" id="Sky_f2bte"]
+sky_material = SubResource("ProceduralSkyMaterial_jhtcy")
+
+[sub_resource type="Environment" id="Environment_iwv4c"]
+background_mode = 2
+background_color = Color(0.09019608, 0.07450981, 0.09803922, 1)
+sky = SubResource("Sky_f2bte")
+ambient_light_source = 3
+ambient_light_color = Color(0.7254902, 0.6313726, 0.5529412, 1)
+ambient_light_energy = 0.65
+tonemap_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wpcbs"]
+albedo_color = Color(0.3764706, 0.25882354, 0.19215687, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="BoxMesh_ierb3"]
+size = Vector3(5.4, 0.1, 5.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_78rk6"]
+albedo_color = Color(0.72156864, 0.6666667, 0.59607846, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="BoxMesh_417c5"]
+size = Vector3(5.4, 0.1, 5.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_50md7"]
+albedo_color = Color(0.45882353, 0.39215687, 0.34509805, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="BoxMesh_6mek4"]
+size = Vector3(5.4, 2.7, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8ht5e"]
+albedo_color = Color(0.54509807, 0.4745098, 0.4117647, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="BoxMesh_tuh25"]
+size = Vector3(5.4, 2.7, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8tmsf"]
+albedo_color = Color(0.54509807, 0.4745098, 0.4117647, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="BoxMesh_gxh4y"]
+size = Vector3(0.12, 2.7, 5.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_30fw8"]
+albedo_color = Color(0.54509807, 0.4745098, 0.4117647, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="BoxMesh_7rn74"]
+size = Vector3(0.12, 2.7, 5.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_q6qq2"]
+size = Vector3(1.45, 1.15, 0.75)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s3vw1"]
+shading_mode = 0
+albedo_color = Color(0.0627451, 0.15686275, 0.19607843, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_iwv5h"]
+size = Vector2(0.72, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gufxi"]
+shading_mode = 0
+albedo_color = Color(0.09019608, 0.35686275, 0.3764706, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_arjad"]
+size = Vector2(0.72, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_busoe"]
+shading_mode = 0
+albedo_color = Color(0.09411765, 0.14901961, 0.1764706, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_rgcd7"]
+size = Vector2(3.25, 0.85)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gd4oi"]
+shading_mode = 0
+albedo_color = Color(0.09411765, 0.14901961, 0.1764706, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_u7tfn"]
+size = Vector2(1.8, 1.55)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2630d"]
+shading_mode = 0
+albedo_color = Color(0.09411765, 0.14901961, 0.1764706, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_835bk"]
+size = Vector2(1.8, 1.65)
+
+[node name="Lobby" type="Node3D" unique_id=1071086553]
+script = ExtResource("1_q6qq2")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=273804174]
+environment = SubResource("Environment_iwv4c")
+
+[node name="Shell" type="Node3D" parent="." unique_id=1943855625]
+
+[node name="Floor" type="MeshInstance3D" parent="Shell" unique_id=223350361]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+material_override = SubResource("StandardMaterial3D_wpcbs")
+mesh = SubResource("BoxMesh_ierb3")
+
+[node name="Ceiling" type="MeshInstance3D" parent="Shell" unique_id=1442742601]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0)
+material_override = SubResource("StandardMaterial3D_78rk6")
+mesh = SubResource("BoxMesh_417c5")
+
+[node name="WallN" type="MeshInstance3D" parent="Shell" unique_id=168171025]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -2.6)
+material_override = SubResource("StandardMaterial3D_50md7")
+mesh = SubResource("BoxMesh_6mek4")
+
+[node name="WallS" type="MeshInstance3D" parent="Shell" unique_id=1839734114]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 2.6)
+material_override = SubResource("StandardMaterial3D_8ht5e")
+mesh = SubResource("BoxMesh_tuh25")
+
+[node name="WallE" type="MeshInstance3D" parent="Shell" unique_id=623288043]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7, 1.35, 0)
+material_override = SubResource("StandardMaterial3D_8tmsf")
+mesh = SubResource("BoxMesh_gxh4y")
+
+[node name="WallW" type="MeshInstance3D" parent="Shell" unique_id=559713108]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7, 1.35, 0)
+material_override = SubResource("StandardMaterial3D_30fw8")
+mesh = SubResource("BoxMesh_7rn74")
+
+[node name="Furniture" type="Node3D" parent="." unique_id=830573696]
+
+[node name="Rug" parent="Furniture" unique_id=2118747760 instance=ExtResource("2_rgcd7")]
+transform = Transform3D(2.3, 0, 0, 0, 2.3, 0, 0, 0, 2.3, -1.4055, 0.012, 1.358)
+
+[node name="Sofa" parent="Furniture" unique_id=1164949627 instance=ExtResource("3_lqo1b")]
+transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, -1.75, 0, 1.3111012)
+
+[node name="Desk" parent="Furniture" unique_id=1669877643 instance=ExtResource("4_0gjkf")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.0850029, 0, -1.58)
+
+[node name="DeskChair" parent="Furniture" unique_id=1281666533 instance=ExtResource("5_o2i1r")]
+transform = Transform3D(-2.4999263, 0, 0.019176792, 0, 2.5, 0, -0.019176792, 0, -2.4999263, 1.5975703, 0, -1.5014963)
+
+[node name="SideTable" parent="Furniture" unique_id=1348996232 instance=ExtResource("6_iulku")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -2.093, 0, -1.55)
+
+[node name="TableLamp" parent="Furniture" unique_id=340066358 instance=ExtResource("7_dfnwm")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -1.6, 0.965, -1.65)
+
+[node name="FloorLamp" parent="Furniture" unique_id=1305596811 instance=ExtResource("8_0jb4q")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -2.5133986, 0, 2.410011)
+
+[node name="Plant" parent="Furniture" unique_id=306796162 instance=ExtResource("9_vwf6o")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.66241133, 0, 2.146269)
+
+[node name="Bookcase" parent="Furniture" unique_id=1001164260 instance=ExtResource("10_iwi7x")]
+transform = Transform3D(-2.4998972, 0, -0.022670314, 0, 2.5, 0, 0.022670314, 0, -2.4998972, 2.2079875, 0, 1.84443)
+
+[node name="Computer" type="Area3D" parent="." unique_id=397462066]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.65, 0.965, -1.52)
+script = ExtResource("11_wjff0")
+
+[node name="ScreenModel" parent="Computer" unique_id=253883242 instance=ExtResource("12_h1rib")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -0.14096427, 0, -0.69111204)
+
+[node name="Keyboard" parent="Computer" unique_id=103989601 instance=ExtResource("13_kn4i6")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -0.17933941, 0.00999999, -0.10602093)
+
+[node name="Mouse" parent="Computer" unique_id=1765713868 instance=ExtResource("14_3jc85")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.8206606, 0.00999999, -0.11602092)
+
+[node name="Collision" type="CollisionShape3D" parent="Computer" unique_id=1919826674]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.38, 0.12)
+shape = SubResource("BoxShape3D_q6qq2")
+
+[node name="ScreenPanel" type="MeshInstance3D" parent="Computer" unique_id=1563935073]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34903574, 0.40000004, -0.7802794)
+material_override = SubResource("StandardMaterial3D_s3vw1")
+mesh = SubResource("QuadMesh_iwv5h")
+
+[node name="ScreenHighlight" type="MeshInstance3D" parent="Computer" unique_id=1012150464]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.49, 0.4, 0.03)
+visible = false
+material_override = SubResource("StandardMaterial3D_gufxi")
+mesh = SubResource("QuadMesh_arjad")
+
+[node name="ScreenText" type="Label3D" parent="Computer" unique_id=882824148]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34903574, 0.40000004, -0.7682793)
+pixel_size = 0.002
+modulate = Color(0.9098039, 1, 0.9764706, 1)
+outline_modulate = Color(0.02745098, 0.07450981, 0.09019608, 1)
+text = "NÉVROSE
+
+JOUER"
+font_size = 48
+outline_size = 4
+
+[node name="PlayPrompt" type="Label3D" parent="Computer" unique_id=2069225718]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.49, 0.72, 0.04)
+visible = false
+pixel_size = 0.0022
+modulate = Color(0.7490196, 1, 0.9490196, 1)
+outline_modulate = Color(0.02745098, 0.07450981, 0.09019608, 1)
+text = "CLIQUE POUR JOUER
+Gâchette / clic"
+font_size = 40
+outline_size = 6
+
+[node name="Tutorial" type="Node3D" parent="." unique_id=1096067808]
+
+[node name="MissionPanel" type="Node3D" parent="Tutorial" unique_id=534426441]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 2.25, -2.53)
+
+[node name="Backdrop" type="MeshInstance3D" parent="Tutorial/MissionPanel" unique_id=857058564]
+material_override = SubResource("StandardMaterial3D_busoe")
+mesh = SubResource("QuadMesh_rgcd7")
+
+[node name="Text" type="Label3D" parent="Tutorial/MissionPanel" unique_id=267972552]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.006)
+pixel_size = 0.0023
+modulate = Color(0.9529412, 0.9137255, 0.8235294, 1)
+text = "NÉVROSE
+Ta dose est cachée dans l'appartement.
+Fouille avant que la folie ne prenne le contrôle."
+font_size = 52
+outline_size = 4
+
+[node name="MovementPanel" type="Node3D" parent="Tutorial" unique_id=2100455399]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.53, 1.75, -0.45)
+
+[node name="Backdrop" type="MeshInstance3D" parent="Tutorial/MovementPanel" unique_id=1114340618]
+material_override = SubResource("StandardMaterial3D_gd4oi")
+mesh = SubResource("QuadMesh_u7tfn")
+
+[node name="Text" type="Label3D" parent="Tutorial/MovementPanel" unique_id=1327993846]
+transform = Transform3D(2.0042853, 0, 0, 0, 1.4790559, 0, 0, 0, 3.1338282, 0, 0, 0.006000042)
+pixel_size = 0.0018
+modulate = Color(0.9529412, 0.9137255, 0.8235294, 1)
+text = "1  SE DÉPLACER
+
+STICK GAUCHE
+Avancer / reculer
+pas latéraux
+
+STICK DROIT
+Tourner par crans de 45°
+
+Ici, prends ton temps :
+la folie est en pause."
+font_size = 30
+outline_size = 4
+
+[node name="InteractionPanel" type="Node3D" parent="Tutorial" unique_id=2002680081]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.53, 1.5, -0.35)
+
+[node name="Backdrop" type="MeshInstance3D" parent="Tutorial/InteractionPanel" unique_id=550769116]
+material_override = SubResource("StandardMaterial3D_2630d")
+mesh = SubResource("QuadMesh_835bk")
+
+[node name="Text" type="Label3D" parent="Tutorial/InteractionPanel" unique_id=1846012525]
+transform = Transform3D(1.9134743, 0, 0, 0, 1.824548, 0, 0, 0, 0.99999994, 0, 0, 0.006000042)
+pixel_size = 0.0018
+modulate = Color(0.9529412, 0.9137255, 0.8235294, 1)
+text = "2  INTERAGIR
+
+Vise avec ta main droite
+GÂCHETTE = ouvrir / prendre
+
+Pilule en main :
+porte-la à ta bouche
+puis appuie sur la gâchette
+
+BOUTON X / Y = téléphone
+
+Méfie-toi des objets
+qui tremblent..."
+font_size = 28
+outline_size = 4
+
+[node name="Lighting" type="Node3D" parent="." unique_id=954219179]
+
+[node name="CeilingLight" type="OmniLight3D" parent="Lighting" unique_id=1678540715]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, 0.25)
+light_color = Color(1, 0.84705883, 0.65882355, 1)
+light_energy = 0.85
+omni_range = 6.0
+
+[node name="DeskLight" type="OmniLight3D" parent="Lighting" unique_id=104642959]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 1.25, -1.05)
+light_color = Color(1, 0.7411765, 0.47843137, 1)
+light_energy = 0.45
+omni_range = 2.6
+
+[node name="SofaLight" type="OmniLight3D" parent="Lighting" unique_id=312759313]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.95, 1.55, 1.95)
+light_color = Color(1, 0.8156863, 0.6039216, 1)
+light_energy = 0.5
+omni_range = 3.0
