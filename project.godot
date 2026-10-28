@@ -20,6 +20,7 @@ config/features=PackedStringArray("4.7")
 GameLog="*res://scripts/game_logger.gd"
 XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd"
 XRToolsRumbleManager="*res://addons/godot-xr-tools/rumble/rumble_manager.gd"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [debug]
 
