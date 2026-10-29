@@ -344,18 +344,10 @@ func _initialize() -> void:
 	for i in 10:
 		await physics_frame
 	_assert(main.game_over, "GO: 100% de schizo déclenche l'assimilation")
-	# En fallback bureau, seul le game over dédié reste visible.
-	_assert(main.gameover_label.visible, "GO: game over bureau visible en fallback desktop")
-	_assert(not main.vr_gameover_label.visible, "GO: game over VR masqué en fallback desktop")
-	_assert(not main.chat_label.visible, "GO: chat masqué pendant le game over")
-	_assert(not main.center_dot.visible, "GO: point central masqué pendant le game over")
+	# Le game over passe par le téléphone, sorti de la poche (diégétique).
+	_assert(main.phone.is_in_hand, "GO: le téléphone est sorti pour le game over")
 	main._restart()
 	_assert(not main.game_over and main.sanity == 0.0, "GO: le restart réinitialise la run")
-	# Le restart restaure le HUD et masque les deux écrans de game over.
-	_assert(main.chat_label.visible, "GO: chat réaffiché après le restart")
-	_assert(main.center_dot.visible, "GO: point central réaffiché après le restart")
-	_assert(not main.gameover_label.visible, "GO: game over bureau masqué après le restart")
-	_assert(not main.vr_gameover_label.visible, "GO: game over VR masqué après le restart")
 
 	_finish()
 
