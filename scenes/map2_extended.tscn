@@ -616,8 +616,8 @@ transform = Transform3D(-7.62414e-10, 0, 1, 0, 1, 0, -0.017442, 0, -4.371139e-08
 material_override = SubResource("mat_mur")
 mesh = SubResource("mesh_walln")
 
-[node name="LinteauD6" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1299327981]
-transform = Transform3D(-4.5744404e-09, 0, 1, 0, 0.222222, 0, -0.104651, 0, -4.371139e-08, 10.3, 2.4, 2)
+[node name="MurCouloirE3" type="MeshInstance3D" parent="ExtensionEst/Couloir" unique_id=1299327981]
+transform = Transform3D(-4.5744404e-09, 0, 1, 0, 1, 0, -0.104651, 0, -4.371139e-08, 10.3, 1.35, 2)
 material_override = SubResource("mat_mur")
 mesh = SubResource("mesh_walln")
 
@@ -635,7 +635,7 @@ mesh = SubResource("mesh_ceil")
 transform = Transform3D(-0.006657823, 0, -1.4999852, 0, 1.5, 0, 1.4999852, 0, -0.006657823, 9.88686, 0.01, 1.75661)
 
 [node name="PorteManteau" parent="ExtensionEst/Couloir" unique_id=896876277 instance=ExtResource("mob_coatrack")]
-transform = Transform3D(2.3, 0, 0, 0, 2.3, 0, 0, 0, 2.3, 4.68, 0, 0.95863)
+transform = Transform3D(2.3, 0, 0, 0, 2.3, 0, 0, 0, 2.3, 7, 0, 1.73)
 
 [node name="PlanteCouloir" parent="ExtensionEst/Couloir" unique_id=288939372 instance=ExtResource("mob_plantsmall")]
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 10.04303, 0, 1.59543)
@@ -799,7 +799,7 @@ omni_range = 3.5
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.3, 2.68, -1.1)
 
 [node name="EtagereChambre" parent="ExtensionEst/Chambre" unique_id=776189669 instance=ExtResource("mob_bookdoors")]
-transform = Transform3D(-9.616505e-08, 0, 2.2, 0, 2.2, 0, -2.2, 0, -9.616505e-08, 4.55, 0, -0.1)
+transform = Transform3D(-9.616505e-08, 0, 2.2, 0, 2.2, 0, -2.2, 0, -9.616505e-08, 4.925, 0, -0.1)
 
 [node name="SDB" type="Node3D" parent="ExtensionEst" unique_id=2062315239]
 
@@ -863,12 +863,12 @@ material_override = SubResource("mat_mur")
 mesh = SubResource("mesh_walln")
 
 [node name="MurDressE" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=1793416305]
-transform = Transform3D(-4.371139e-08, 0, 0.348837, 0, 1, 0, -1, 0, -1.524815e-08, 10.3, 1.35, -2.1)
+transform = Transform3D(0, 0, 1, 0, 1, 0, 0.348837, 0, 0, 10.3, 1.35, -2.1)
 material_override = SubResource("mat_mur")
 mesh = SubResource("mesh_walln")
 
 [node name="MurDressO1" type="MeshInstance3D" parent="ExtensionEst/Dressing" unique_id=2105877954]
-transform = Transform3D(-4.371139e-08, 0, 0.197674, 0, 1, 0, -1, 0, -8.640606e-09, 8.3, 1.35, -2.75)
+transform = Transform3D(0, 0, 1, 0, 1, 0, 0.197674, 0, 0, 8.3, 1.35, -2.75)
 material_override = SubResource("mat_mur")
 mesh = SubResource("mesh_walln")
 
