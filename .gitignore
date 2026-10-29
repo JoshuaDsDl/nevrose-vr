@@ -22,3 +22,6 @@ assets/quaternius/*.fbx.import
 # Conservés sur disque pour l'utilisateur mais exclus du dépôt.
 assets/Gun&Knife/Guns Low Poly/
 assets/Gun&Knife/Ultimate Gun Pack by Quaternius/
+
+# Clé API du LLM (jamais commitée)
+llm.local.cfg

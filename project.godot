@@ -39,6 +39,10 @@ enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
 
 3d/default_gravity=9.81
 
+[audio]
+
+driver/enable_input=true
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

@@ -21,7 +21,7 @@ const PROXIMITY_RADIUS := 0.45 # interaction au contact sans viser
 const TRIGGER_PRESS := 0.75 # gâchette analogique : seuil d'appui…
 const TRIGGER_RELEASE := 0.35 # …et seuil de relâchement (hystérésis)
 
-enum Mode { NONE, RESIST, HUNT }
+enum Mode { NONE, RESIST, HUNT, REEL }
 
 const START_SANITY := 12.0 # on est déjà fou en arrivant : les voix commencent tout de suite
 const TOKENS_PER_SECOND := 0.12 # mode Résistance : plus on tient, plus on gagne
@@ -87,6 +87,7 @@ var run_time := 0.0 ## secondes survécues dans le mode Résistance
 var last_tokens := 0 ## tokens gagnés à la fin de la dernière partie
 var profile: PlayerProfile = null
 var hunt: HuntMode = null
+var reel: ReelMode = null
 
 var apartment: MapBase = null
 var lobby: LobbyWorld = null
@@ -201,12 +202,15 @@ func start_game(p_mode: int = Mode.RESIST) -> void:
 	if mode == Mode.HUNT:
 		creepy_voices.enabled = false
 		_start_hunt()
+	elif mode == Mode.REEL:
+		creepy_voices.enabled = false
+		_start_reel()
 	else:
 		_spawn_dose()
 		_say("Les voix reviennent. Trouve la lumière cyan : c'est ta pilule.")
 		creepy_voices.play_intro_whisper()
 	_pulse_haptics()
-	_log("GAME", "début de partie (mode %s)" % ("chasse" if mode == Mode.HUNT else "résistance"))
+	_log("GAME", "début de partie (mode %s)" % ["résistance", "chasse", "réels"][clampi(int(mode) - 1, 0, 2)])
 
 
 # ---------------------------------------------------------------------------
@@ -384,8 +388,8 @@ func _physics_process(delta: float) -> void:
 		return
 	_tick_movement(delta)
 	_tick_interaction_ray()
-	if mode == Mode.HUNT:
-		return # pas de folie ni de voix : seulement les coups dans les murs
+	if mode == Mode.HUNT or mode == Mode.REEL:
+		return # ni folie ni voix : les coups dans les murs, ou le studio de réels
 	run_time += delta
 	_tick_sanity(delta)
 	_tick_pill_feedback()
@@ -591,6 +595,14 @@ func _nearest_interactable() -> Node:
 		for hand in [right_hand, left_hand]:
 			for item in lobby.interactables:
 				if is_instance_valid(item) and hand.global_transform.origin.distance_to(item.global_transform.origin) < PROXIMITY_RADIUS:
+					return item
+		return null
+	if mode == Mode.REEL:
+		if reel == null:
+			return null
+		for hand in [right_hand, left_hand]:
+			for item in reel.interactables:
+				if is_instance_valid(item) and item.visible and hand.global_transform.origin.distance_to(item.global_transform.origin) < PROXIMITY_RADIUS:
 					return item
 		return null
 	if mode == Mode.HUNT:
@@ -961,6 +973,40 @@ func _start_hunt() -> void:
 	hunt.start()
 
 
+func _start_reel() -> void:
+	reel = ReelMode.new()
+	reel.name = "Reel"
+	add_child(reel)
+	var hands: Array[Node3D] = [left_hand, right_hand]
+	reel.setup(apartment, xr_camera, hands, profile, _world_env.environment if _world_env != null else null)
+	reel.message.connect(_on_hunt_message)
+	reel.session_finished.connect(_on_reel_finished)
+	reel.start()
+	var spawn := reel.player_start()
+	xr_origin.position = Vector3(spawn.x, xr_origin.position.y, spawn.z)
+	xr_origin.rotation = Vector3(0.0, ReelMode.PLAYER_YAW, 0.0) # face au trépied
+	_desktop_yaw = ReelMode.PLAYER_YAW
+	xr_camera.rotation = Vector3.ZERO
+
+
+func _on_reel_finished(reels: int, tokens: int, best_views: int) -> void:
+	game_over = true
+	last_tokens = tokens
+	_log("GAME", "séance de réels terminée : %d réels, meilleur score %d vues, +%d tokens" % [reels, best_views, tokens])
+	var text := "Séance terminée.
+%d réel(s), meilleur : %s vues.
++%d tokens. Tu as maintenant %s abonnés.
+Gâchette : retour au lobby." % [
+		reels, ReelData.format_count(best_views), tokens, ReelData.format_count(profile.followers)]
+	if reels == 0:
+		text = "Aucun réel posté : 0 token. L'Algorithme t'a oublié.
+Gâchette : retour au lobby."
+	_say(text, true, true)
+	if phone and not phone.is_in_hand:
+		phone.toggle_pocket()
+	_set_laser_target(false)
+
+
 func _on_hunt_message(text: String, is_alert: bool) -> void:
 	_say(text, is_alert)
 
@@ -988,10 +1034,13 @@ func return_to_lobby() -> void:
 	for mimic in _all_mimics():
 		if is_instance_valid(mimic) and mimic.is_mobile:
 			mimic.queue_free()
-	for node in [hunt, apartment, creepy_voices, phone, _world_env]:
+	if is_instance_valid(reel):
+		reel.shutdown()
+	for node in [hunt, reel, apartment, creepy_voices, phone, _world_env]:
 		if is_instance_valid(node):
 			node.queue_free()
 	hunt = null
+	reel = null
 	apartment = null
 	creepy_voices = null
 	phone = null

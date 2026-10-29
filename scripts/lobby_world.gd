@@ -1,6 +1,6 @@
 class_name LobbyWorld
 extends Node3D
-## Salon d'accueil : aucune mécanique de folie. Deux grandes cartes face au joueur
+## Salon d'accueil : aucune mécanique de folie. Trois grandes cartes face au joueur
 ## pour choisir le mode (viser + gâchette lance la partie), une boutique de
 ## décorations derrière lui, et l'ordinateur qui affiche les tokens.
 
@@ -8,12 +8,14 @@ signal play_requested(mode: int)
 
 const MODE_RESIST := 1 # = Main.Mode.RESIST
 const MODE_HUNT := 2 # = Main.Mode.HUNT
+const MODE_REEL := 3 # = Main.Mode.REEL
 
 @onready var computer: LobbyComputer = $Computer
 
 var profile: PlayerProfile = null
 var card_resist: LobbyButton
 var card_hunt: LobbyButton
+var card_reel: LobbyButton
 var shop_cards: Dictionary = {} # id -> LobbyButton
 var interactables: Array[Node3D] = []
 var tokens_label: Label3D
@@ -50,8 +52,8 @@ func _build_mode_cards() -> void:
 	card_resist.setup(Vector2(0.8, 1.0), "RÉSISTER",
 		"Tu es déjà fou. Les voix montent.\nTrouve les pilules cyan avant d'être assimilé.\nPlus tu tiens, plus tu gagnes de tokens.",
 		Color(0.3, 0.95, 0.85), 0.0027, 0.0015)
-	card_resist.position = Vector3(-0.45, 1.45, -0.2)
-	card_resist.rotation.y = deg_to_rad(14.0)
+	card_resist.position = Vector3(-0.6, 1.45, -0.2)
+	card_resist.rotation.y = deg_to_rad(16.0)
 	card_resist.set_state("◆ MODE RÉSISTANCE", Color(0.3, 0.95, 0.85), true)
 	card_resist.pressed.connect(func() -> void: _choose(MODE_RESIST))
 
@@ -61,13 +63,26 @@ func _build_mode_cards() -> void:
 	card_hunt.setup(Vector2(0.8, 1.0), "CHASSER",
 		"Ça cogne dans les murs et le plafond.\nDéfonce où ça cogne pour trouver le monstre.\nTu gagnes des tokens… et un appart en ruines.",
 		Color(1.0, 0.3, 0.25), 0.0027, 0.0015)
-	card_hunt.position = Vector3(1.65, 1.45, -0.2)
-	card_hunt.rotation.y = deg_to_rad(-14.0)
+	card_hunt.position = Vector3(0.55, 1.45, -0.2)
+	card_hunt.rotation.y = deg_to_rad(3.0)
 	card_hunt.set_state("◆ MODE CHASSE", Color(1.0, 0.3, 0.25), true)
 	card_hunt.pressed.connect(func() -> void: _choose(MODE_HUNT))
 
+	card_reel = LobbyButton.new()
+	card_reel.name = "CarteReels"
+	holder.add_child(card_reel)
+	card_reel.setup(Vector2(0.8, 1.0), "FILMER",
+		"Tourne des réels complotistes (crypto, lézards, pigeons…).
+L'Algorithme juge tes vues et tes likes.
+Plus tu buzzes, plus tu gagnes de tokens.",
+		Color(1.0, 0.4, 0.75), 0.0027, 0.0015)
+	card_reel.position = Vector3(1.7, 1.45, -0.2)
+	card_reel.rotation.y = deg_to_rad(-14.0)
+	card_reel.set_state("◆ MODE RÉELS", Color(1.0, 0.4, 0.75), true)
+	card_reel.pressed.connect(func() -> void: _choose(MODE_REEL))
+
 	# Petits pieds lumineux au sol pour ancrer les cartes.
-	for card in [card_resist, card_hunt]:
+	for card in [card_resist, card_hunt, card_reel]:
 		interactables.append(card)
 		var post := MeshInstance3D.new()
 		var pm := CylinderMesh.new()
@@ -97,6 +112,7 @@ func _choose(p_mode: int) -> void:
 	_starting = true
 	card_resist.set_state("CHARGEMENT…", card_resist.accent, false)
 	card_hunt.set_state("CHARGEMENT…", card_hunt.accent, false)
+	card_reel.set_state("CHARGEMENT…", card_reel.accent, false)
 	play_requested.emit(p_mode)
 
 
@@ -145,7 +161,7 @@ func _on_shop_pressed(id: String) -> void:
 func _refresh_tokens() -> void:
 	if profile == null:
 		return
-	var txt := "◆ %d tokens" % profile.tokens
+	var txt := "◆ %d tokens  ·  %s abonnés" % [profile.tokens, ReelData.format_count(profile.followers)]
 	if tokens_label != null:
 		tokens_label.text = txt
 	computer.play_prompt.text = "Ton solde de tokens"

@@ -46,6 +46,59 @@ static func sting() -> AudioStreamWAV:
 	return _cache["sting"]
 
 
+## Bip de compte à rebours ; `go` = bip final, plus aigu et plus long.
+static func beep(go: bool = false) -> AudioStreamWAV:
+	var key := "beep_go" if go else "beep"
+	if not _cache.has(key):
+		var f := 1318.5 if go else 880.0
+		_cache[key] = _synth(0.4 if go else 0.16, func(t: float, _n: float) -> float:
+			var env := minf(t / 0.005, 1.0) * exp(-t * (7.0 if go else 18.0))
+			return sin(TAU * f * t) * env * 0.7)
+	return _cache[key]
+
+
+## Notification de téléphone : deux notes montantes.
+static func ding() -> AudioStreamWAV:
+	if not _cache.has("ding"):
+		_cache["ding"] = _synth(0.55, func(t: float, _n: float) -> float:
+			var a := sin(TAU * 988.0 * t) * exp(-t * 9.0)
+			var tb := maxf(t - 0.11, 0.0)
+			var b := sin(TAU * 1480.0 * tb) * exp(-tb * 8.0) * (1.0 if t >= 0.11 else 0.0)
+			return (a * 0.5 + b * 0.6) * 0.8)
+	return _cache["ding"]
+
+
+## Petite bulle qui éclate : un commentaire qui arrive.
+static func pop() -> AudioStreamWAV:
+	if not _cache.has("pop"):
+		_cache["pop"] = _synth(0.12, func(t: float, _n: float) -> float:
+			var f := 520.0 + 900.0 * minf(t / 0.05, 1.0)
+			return sin(TAU * f * t) * exp(-t * 40.0) * 0.8)
+	return _cache["pop"]
+
+
+## Pièces : les tokens tombent.
+static func coins() -> AudioStreamWAV:
+	if not _cache.has("coins"):
+		_cache["coins"] = _synth(0.9, func(t: float, n: float) -> float:
+			var s := 0.0
+			for k in 4:
+				var tk := t - 0.09 * k
+				if tk > 0.0:
+					s += (sin(TAU * 2093.0 * tk) + 0.5 * sin(TAU * 3136.0 * tk)) * exp(-tk * 11.0)
+			return s * 0.22 + n * exp(-t * 60.0) * 0.1)
+	return _cache["coins"]
+
+
+## Montée de tension pendant l'analyse du réel.
+static func whoosh() -> AudioStreamWAV:
+	if not _cache.has("whoosh"):
+		_cache["whoosh"] = _synth(0.9, func(t: float, n: float) -> float:
+			var env := sin(PI * clampf(t / 0.9, 0.0, 1.0))
+			return n * env * 0.5 + sin(TAU * (180.0 + 500.0 * t) * t) * env * 0.12)
+	return _cache["whoosh"]
+
+
 ## Génère un flux : `shape.call(t, bruit)` renvoie l'échantillon (-1..1).
 static func _synth(duration: float, shape: Callable) -> AudioStreamWAV:
 	var frames := int(RATE * duration)

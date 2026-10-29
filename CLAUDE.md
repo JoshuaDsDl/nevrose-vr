@@ -79,3 +79,18 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
 - Repo : `Noahcnci/serious-game-vr-ci3` (2 sous-dossiers : `NEVROSE-le-jeu-vr/` + `serious-game-vr-ci-3/`)
 - Toujours commit + push après modification
 - Ne pas committer `build/`, `android/build/`, `.hermes/`
+
+### Mode Réels (3e mode)
+
+Studio de tournage côté est du salon (`scripts/reel_mode.gd`) : tableau des tendances
+(idées + ton), trépied/REC, écran de retour avec avatar, fiche façon Instagram. Le micro
+mesure COMMENT on parle (`voice_meter.gd`, pas de reconnaissance vocale) ; le jury (LLM) reçoit
+l'idée, le ton, ces mesures et une image de la prise, et répond en flux (`llm_client.gd`).
+Sans réseau : juge local (`ReelData.heuristic`). Tokens selon vues/likes (`ReelData.compute_tokens`).
+
+- LLM : OpenRouter si une clé est présente (`OPENROUTER_API_KEY`, ou `key=` dans
+  `llm.local.cfg` à la racine, **ignoré par git**, inclus dans l'APK par `include_filter`),
+  modèle `google/gemini-2.5-flash-lite`. Sinon serveur llama.cpp (`user://llm.cfg` ou
+  `NEVROSE_LLM_URL`, défaut Tailscale `http://100.113.199.15:8081`).
+- Android : permissions `internet` et `record_audio` dans `export_presets.cfg`.
+- Tests : `tests/test_reels.gd` (hors ligne) ; `tests/live_llm.gd` essai manuel réseau.
