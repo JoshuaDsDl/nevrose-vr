@@ -6,6 +6,20 @@ Jeu VR Godot 4.7.2 où tu es schizophrène et tu as oublié ta dose. Tu fouilles
 studio pour retrouver la pilule avant que la jauge de folie n'atteigne 100 %.
 Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
 
+## Modes de jeu
+
+- **Résistance** : on démarre déjà fou (12 %), les voix (les 15 `assets/voices/v*.wav`,
+  sac mélangé, de plus en plus nombreuses) montent avec la folie. Pilules visibles
+  avec un faisceau cyan + vibration + indice sur le téléphone, toujours à ≥ 5 m du joueur.
+  Plus de clés ni de verrous. Tokens à l'assimilation : 0,12/s tenue + 5/pilule.
+- **Chasse** (`hunt_mode.gd`, `knock_patch.gd`, `monster.gd`) : « toc toc toc » dans
+  les murs/plafond, on casse la plaque (gâchette ou coup de poing, 4 coups) ; au
+  dernier mur le monstre (`assets/monster/entity.glb`, mannequin Xbot de three.js,
+  animé) apparaît puis se dissout. Tokens : 8 + 5 par mur.
+- **Lobby** : deux cartes géantes (viser + gâchette) pour choisir le mode ; boutique
+  de décorations au mur sud (`decor_catalog.gd`), profil sauvegardé (`player_profile.gd`).
+- Tests : `tests/smoke_test.gd` et `tests/test_modes.gd`.
+
 ## Commandes clés
 
 | Action | Commande |

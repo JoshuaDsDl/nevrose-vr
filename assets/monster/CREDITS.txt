@@ -1,0 +1,1 @@
+Xbot.glb (three.js examples, mannequin Mixamo) — utilise comme base du monstre, repeint par monster.gd.

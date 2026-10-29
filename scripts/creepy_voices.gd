@@ -55,7 +55,15 @@ func configure_room(w: float, d: float, h: float) -> void:
 		Vector3(0.0, 1.2, -d / 2 + 0.35),
 	]
 
+const PLAYER_COUNT := 8 ## lecteurs HRTF réutilisés (voix simultanées max)
+
+## Nœud autour duquel les voix apparaissent (la tête du joueur). Sans lui,
+## repli sur les PLACEMENTS fixes de la pièce.
+var listener: Node3D = null
+
 var _players: Array[AudioStreamPlayer3D] = []
+var _bag: Array[int] = [] ## sac mélangé : TOUTES les voix passent avant qu'une se répète
+var voices_heard := {} ## index de voix -> nombre de lectures (diagnostic / tests)
 var _streams: Array[AudioStream] = []
 var _notif_player: AudioStreamPlayer = null
 var _notif_stream: AudioStream = null
@@ -64,12 +72,12 @@ var _voice_idx := 0
 var enabled := true
 
 ## Fréquence de base (s) entre deux voix — réduite quand la schizo monte.
-const BASE_COOLDOWN := 12.0 ## ~12 s à sanity=0
-const MIN_COOLDOWN := 3.0   ## ~3 s à sanity=100
+const BASE_COOLDOWN := 9.0  ## ~9 s quand la folie vient de commencer
+const MIN_COOLDOWN := 1.1   ## ~1 s à sanity=100 : le chuchotement permanent
 
 ## Volume max (dB) — ajusté pour petits haut-parleurs Quest 2 (-10.0 à -2.0 dB)
 const MAX_VOLUME_DB := -2.0
-const MIN_VOLUME_DB := -10.0
+const MIN_VOLUME_DB := -14.0
 
 
 func _ready() -> void:
@@ -92,11 +100,12 @@ func _load_voices() -> void:
 
 
 func _create_players() -> void:
-	for i in 6: ## 6 lecteurs HRTF réutilisés, jamais simultanés
+	for i in PLAYER_COUNT:
 		var p := AudioStreamPlayer3D.new()
 		p.name = "WallVoice_%d" % i
 		p.bus = "Master"
-		p.max_distance = 8.0
+		p.max_distance = 14.0
+		p.unit_size = 3.0
 		p.position = PLACEMENTS[i % PLACEMENTS.size()]
 		add_child(p)
 		_players.append(p)
@@ -139,73 +148,84 @@ func _synthesize_notification_sound() -> AudioStreamWAV:
 	return wav
 
 
-## Appelé par main.gd à chaque frame (ou tick).
-## `t` = sanity / 100.0 (0.0 à 1.0)
+## Nombre de voix qui peuvent se chevaucher : une seule au début, six en pleine crise.
+func max_simultaneous(t: float) -> int:
+	return clampi(1 + int(t * 5.0), 1, PLAYER_COUNT)
+
+
+func _playing_count() -> int:
+	var n := 0
+	for p in _players:
+		if is_instance_valid(p) and p.playing:
+			n += 1
+	return n
+
+
+## Appelé par main.gd à chaque frame. `t` = sanity / 100 (0..1).
+## Plus on est fou : plus de voix, plus souvent, plus fort, plus près.
 func tick(t: float, delta: float) -> void:
 	if not enabled or _streams.is_empty():
 		return
-	# Pendant un clip, ignorer les déclenchements et geler le cooldown.
-	# Le délai minimal ne commence donc qu'après la fin réelle de la voix.
-	if _is_voice_playing():
-		_cooldown = maxf(_cooldown, MIN_COOLDOWN)
-		return
-	# Le cooldown diminue quand la schizo monte
 	_cooldown -= delta
 	if _cooldown > 0.0:
 		return
-	# Seuil : murmure possible dès 5% de schizo (au lieu de 20%)
 	if t < 0.05:
-		_cooldown = BASE_COOLDOWN * (1.0 - t)
+		_cooldown = BASE_COOLDOWN
 		return
-	# Jouer une voix
-	_play_random_voice(t)
-	# Nouveau cooldown (plus court = plus fou)
-	var cooldown_range := lerpf(BASE_COOLDOWN, MIN_COOLDOWN, t)
-	_cooldown = cooldown_range * randf_range(0.7, 1.3)
+	if _playing_count() < max_simultaneous(t):
+		_play_random_voice(t)
+	var range_s := lerpf(BASE_COOLDOWN, MIN_COOLDOWN, pow(t, 0.8))
+	_cooldown = range_s * randf_range(0.7, 1.3)
 
 
 func _is_voice_playing() -> bool:
-	for p in _players:
-		if is_instance_valid(p) and p.playing:
-			return true
-	return false
+	return _playing_count() > 0
+
+
+## Sac mélangé : chaque voix du dossier est jouée une fois avant la suivante.
+func _next_voice_index() -> int:
+	if _bag.is_empty():
+		for i in _streams.size():
+			_bag.append(i)
+		_bag.shuffle()
+		if _bag.size() > 1 and _bag[_bag.size() - 1] == _voice_idx:
+			_bag.reverse()
+	var idx: int = _bag.pop_back()
+	_voice_idx = idx
+	return idx
+
+
+## Position d'une voix : autour de la tête (murs, sol, plafond), de plus en plus près.
+func _voice_position(t: float) -> Vector3:
+	if listener == null or not is_instance_valid(listener) or not listener.is_inside_tree():
+		return PLACEMENTS[randi_range(0, PLACEMENTS.size() - 1)]
+	var origin: Vector3 = listener.global_position
+	var angle := randf() * TAU
+	var dist := lerpf(4.5, 1.2, t) * randf_range(0.8, 1.25)
+	var heights := [-1.3, -0.4, 0.0, 0.5, 1.0] ## sol, genoux, tête, plafond
+	var h: float = heights[randi_range(0, heights.size() - 1)]
+	return origin + Vector3(cos(angle) * dist, h, sin(angle) * dist)
 
 
 func _play_random_voice(t: float) -> void:
-	# L'intro et les voix aléatoires partagent le même verrou, sans file d'attente.
-	if _is_voice_playing():
-		return
-	# Trouver un player libre
 	var free_player: AudioStreamPlayer3D = null
 	for p in _players:
 		if not p.playing:
 			free_player = p
 			break
-	if free_player == null:
+	if free_player == null or _streams.is_empty():
 		return
-
-	# Choisir une voix aléatoire (pas la même deux fois de suite)
-	var idx := randi_range(0, _streams.size() - 1)
-	while idx == _voice_idx and _streams.size() > 1:
-		idx = randi_range(0, _streams.size() - 1)
-	_voice_idx = idx
+	var idx := _next_voice_index()
 	var stream: AudioStream = _streams[idx]
 	if stream == null:
 		return
-
-	# Position spatiale aléatoire (varie pour la surprise)
-	var pos_idx := randi_range(0, PLACEMENTS.size() - 1)
-	free_player.position = PLACEMENTS[pos_idx]
-
-	# Volume : plus la schizo monte, plus c'est fort (-10.0 à -2.0 dB)
-	free_player.volume_db = lerpf(MIN_VOLUME_DB, MAX_VOLUME_DB, t)
-
-	# Pitch : légèrement aléatoire (varie entre lectures)
-	free_player.pitch_scale = randf_range(0.85, 1.15)
-
+	free_player.global_position = _voice_position(t)
+	free_player.volume_db = lerpf(MIN_VOLUME_DB, MAX_VOLUME_DB, t) + randf_range(-2.0, 1.0)
+	free_player.pitch_scale = randf_range(0.8, 1.2)
 	free_player.stream = stream
 	free_player.play()
-	_log("VOIX", "voix #%d jouée à %s (sanity=%.0f)" % [idx + 1, str(PLACEMENTS[pos_idx]), t * 100.0])
+	voices_heard[idx] = int(voices_heard.get(idx, 0)) + 1
+	_log("VOIX", "voix #%d (folie=%.0f, %d simultanées)" % [idx + 1, t * 100.0, _playing_count()])
 
 
 ## Joue un premier murmure discret dès le démarrage pour confirmer l'audio
@@ -213,10 +233,12 @@ func play_intro_whisper() -> void:
 	if not enabled or _streams.is_empty() or _players.is_empty() or _is_voice_playing():
 		return
 	var p: AudioStreamPlayer3D = _players[0]
-	p.stream = _streams[0]
+	var idx := _next_voice_index()
+	p.stream = _streams[idx]
 	p.volume_db = MIN_VOLUME_DB
-	p.position = PLACEMENTS[0]
+	p.position = _voice_position(0.1)
 	p.play()
+	voices_heard[idx] = int(voices_heard.get(idx, 0)) + 1
 	_log("AUDIO", "Murmure d'introduction joué")
 
 

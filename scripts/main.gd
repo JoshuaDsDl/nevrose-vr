@@ -21,6 +21,11 @@ const PROXIMITY_RADIUS := 0.45 # interaction au contact sans viser
 const TRIGGER_PRESS := 0.75 # gâchette analogique : seuil d'appui…
 const TRIGGER_RELEASE := 0.35 # …et seuil de relâchement (hystérésis)
 
+enum Mode { NONE, RESIST, HUNT }
+
+const START_SANITY := 12.0 # on est déjà fou en arrivant : les voix commencent tout de suite
+const TOKENS_PER_SECOND := 0.12 # mode Résistance : plus on tient, plus on gagne
+const TOKENS_PER_DOSE := 5
 const SANITY_RATE := 1.4 # points/seconde sans dose (GDD §5.2)
 const SANITY_DOSE_RELIEF := 55.0
 const SANITY_RATE_AFTER_DOSE := 0.7
@@ -45,11 +50,11 @@ const HAND_SCENE_L := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/
 
 const CHAT_CALME := [
 	"T'as pris ta dose ce matin ou tu déconnes ?",
-	"Le tiroir de la cuisine. Regarde bien.",
+	"Cherche la lumière cyan : c'est ta pilule.",
 ]
 const CHAT_INQUIET := [
 	"Fréro. Les murs bougent. C'est pas normal.",
-	"Il te reste peu de temps. CHERCHE.",
+	"Il te reste peu de temps. CHERCHE LA LUMIÈRE.",
 	"Le faux est celui qui tremble. Souviens-toi.",
 ]
 const CHAT_CRITIQUE := [
@@ -57,7 +62,7 @@ const CHAT_CRITIQUE := [
 	"ne regarde pas derrière. CHERCHE LES PILULES.",
 	"t u   v a s   d e v e n i r   l e   m u r",
 ]
-const GAME_OVER_TEXT := "L'appart t'a assimilé. Tu es le mur, maintenant.\nTu n'auras jamais réussi à sortir.\nGâchette : recommencer."
+const GAME_OVER_TEXT := "L'appart t'a assimilé. Tu es le mur, maintenant.\nTu n'auras jamais réussi à sortir.\nGâchette : retour au lobby."
 
 # ---------------------------------------------------------------------------
 # Nœuds XR (résolus dans main.tscn)
@@ -74,9 +79,14 @@ var xr_interface: XRInterface
 var xr_active := false
 var game_started := false
 var game_over := false
-var sanity := 0.0
+var sanity := START_SANITY
 var sanity_rate := SANITY_RATE
 var dose_count := 0
+var mode: Mode = Mode.NONE
+var run_time := 0.0 ## secondes survécues dans le mode Résistance
+var last_tokens := 0 ## tokens gagnés à la fin de la dernière partie
+var profile: PlayerProfile = null
+var hunt: HuntMode = null
 
 var apartment: MapBase = null
 var lobby: LobbyWorld = null
@@ -98,12 +108,18 @@ var _desktop_pitch := 0.0
 var _message_timer := 0.0
 var _message_count := 0
 var _clock_accum := 0.0
+var _hint_timer := 0.0
+var _prox_timer := 0.0
+var _world_env: WorldEnvironment = null
 var _logger: GameLogger = null
 
 
 func _ready() -> void:
 	add_to_group("main")
 	_log("MAIN", "lancement")
+	profile = PlayerProfile.new()
+	profile.name = "Profile"
+	add_child(profile)
 	_init_openxr()
 	_build_player()
 	_build_lobby()
@@ -150,6 +166,7 @@ func _build_lobby() -> void:
 	lobby = LOBBY_SCENE.instantiate() as LobbyWorld
 	lobby.name = "Lobby"
 	add_child(lobby)
+	lobby.setup(profile)
 	lobby.play_requested.connect(start_game)
 	xr_origin.position = Vector3(1.0, 1.7 if not xr_active else 0.0, 1.35)
 	xr_origin.rotation = Vector3.ZERO
@@ -159,10 +176,14 @@ func _build_lobby() -> void:
 
 
 ## Point de départ unique de la partie, appelé par l'ordinateur du lobby.
-func start_game() -> void:
+func start_game(p_mode: int = Mode.RESIST) -> void:
 	if game_started:
 		return
 	game_started = true
+	mode = p_mode as Mode
+	sanity = START_SANITY
+	run_time = 0.0
+	_hint_timer = 0.0
 	if is_instance_valid(_pointed) and _pointed.has_method(&"on_unpointed"):
 		_pointed.on_unpointed()
 	_pointed = null
@@ -177,12 +198,15 @@ func start_game() -> void:
 	xr_camera.rotation = Vector3.ZERO
 	_build_world()
 	_build_phone()
-	_spawn_dose()
-	_say("Tu as oublié ta dose. Elle est dans la pièce. Trouve-la.")
-	if creepy_voices:
+	if mode == Mode.HUNT:
+		creepy_voices.enabled = false
+		_start_hunt()
+	else:
+		_spawn_dose()
+		_say("Les voix reviennent. Trouve la lumière cyan : c'est ta pilule.")
 		creepy_voices.play_intro_whisper()
 	_pulse_haptics()
-	_log("GAME", "début de partie")
+	_log("GAME", "début de partie (mode %s)" % ("chasse" if mode == Mode.HUNT else "résistance"))
 
 
 # ---------------------------------------------------------------------------
@@ -206,11 +230,13 @@ func _build_world() -> void:
 	env.glow_bloom = 0.08
 	world_env.environment = env
 	add_child(world_env)
+	_world_env = world_env
 
 	apartment = preload("res://scripts/map2_extended.gd").new()
 	apartment.name = "Map2Extended"
 	add_child(apartment)
 	apartment.build()
+	apartment.apply_decorations(profile.owned)
 
 	for c in apartment.containers:
 		if c.lock_type != InteractiveContainer.LockType.NONE:
@@ -223,6 +249,7 @@ func _build_world() -> void:
 	creepy_voices.name = "CreepyVoices"
 	add_child(creepy_voices)
 	creepy_voices.configure_room(apartment.room_w, apartment.room_d, apartment.room_h)
+	creepy_voices.listener = xr_camera
 
 
 func _build_phone() -> void:
@@ -355,10 +382,14 @@ func _physics_process(delta: float) -> void:
 		_tick_movement(delta)
 		_tick_interaction_ray()
 		return
-	_tick_sanity(delta)
 	_tick_movement(delta)
 	_tick_interaction_ray()
+	if mode == Mode.HUNT:
+		return # pas de folie ni de voix : seulement les coups dans les murs
+	run_time += delta
+	_tick_sanity(delta)
 	_tick_pill_feedback()
+	_tick_pill_proximity(delta)
 	_tick_phone(delta)
 	apartment.set_insanity(sanity / 100.0)
 	if creepy_voices and creepy_voices.has_method(&"tick"):
@@ -523,7 +554,7 @@ func interact(source_hand: XRController3D = null) -> void:
 	if not is_instance_valid(_pointed):
 		_pointed = null
 	if game_over:
-		_restart()
+		return_to_lobby()
 		return
 	# Pilule tenue : gâchette = avaler si elle est dans la bouche.
 	if _held_pill and is_instance_valid(_held_pill):
@@ -558,8 +589,15 @@ func _nearest_interactable() -> Node:
 		if lobby == null:
 			return null
 		for hand in [right_hand, left_hand]:
-			if hand.global_transform.origin.distance_to(lobby.computer.global_transform.origin) < PROXIMITY_RADIUS:
-				return lobby.computer
+			for item in lobby.interactables:
+				if is_instance_valid(item) and hand.global_transform.origin.distance_to(item.global_transform.origin) < PROXIMITY_RADIUS:
+					return item
+		return null
+	if mode == Mode.HUNT:
+		if hunt != null and is_instance_valid(hunt.current) and hunt.current.active:
+			for hand in [right_hand, left_hand]:
+				if hand.global_transform.origin.distance_to(hunt.current.global_transform.origin) < 0.6:
+					return hunt.current
 		return null
 	var best: Node = null
 	var best_d := PROXIMITY_RADIUS
@@ -682,6 +720,37 @@ func _tick_pill_feedback() -> void:
 	_pill_ready = ready
 
 
+## Vibration qui s'accélère quand on approche de la pilule (aide sans texte).
+func _tick_pill_proximity(delta: float) -> void:
+	var dose: Node3D = apartment.get_dose() if apartment else null
+	if dose == null or not is_instance_valid(dose) or (dose is Dose and (dose as Dose).is_held):
+		return
+	var d := xr_camera.global_position.distance_to(dose.global_position)
+	if d > 4.0:
+		return
+	_prox_timer -= delta
+	if _prox_timer <= 0.0:
+		_prox_timer = remap(clampf(d, 0.5, 4.0), 0.5, 4.0, 0.25, 1.3)
+		_pulse_haptics(remap(clampf(d, 0.5, 4.0), 0.5, 4.0, 0.45, 0.12), 0.06)
+
+
+## « Ta pilule brille à gauche, pas loin » : relatif au regard.
+func _pill_hint() -> String:
+	var dose: Node3D = apartment.get_dose() if apartment else null
+	if dose == null or not is_instance_valid(dose):
+		return ""
+	var to := dose.global_position - xr_camera.global_position
+	var local := xr_camera.global_transform.basis.inverse() * to
+	var dist := Vector2(to.x, to.z).length()
+	var side := ""
+	if absf(local.x) > absf(local.z):
+		side = "à ta droite" if local.x > 0.0 else "à ta gauche"
+	else:
+		side = "devant toi" if local.z < 0.0 else "derrière toi"
+	var far := "tout près" if dist < 2.5 else ("très loin" if dist > 8.0 else "pas loin")
+	return "Ta pilule brille %s, %s." % [side, far]
+
+
 func _consume_key() -> void:
 	if _held_key and is_instance_valid(_held_key):
 		_held_key.queue_free()
@@ -759,7 +828,7 @@ func on_dose_taken() -> void:
 	_pulse_haptics()
 	_say("Dose absorbée. Ça va mieux… pour l'instant. Cherche la suivante. Il n'y a PAS de sortie.")
 	await get_tree().create_timer(2.0).timeout
-	if game_started and not game_over:
+	if game_started and not game_over and apartment != null:
 		_spawn_dose()
 
 
@@ -771,7 +840,7 @@ func on_mimic_purged() -> void:
 
 
 func _spawn_dose() -> void:
-	apartment.spawn_dose()
+	apartment.spawn_dose(xr_camera.global_position)
 	_log("GAME", "dose spawnée")
 
 
@@ -799,6 +868,12 @@ func _tick_phone(delta: float) -> void:
 	var time_str := "%02d:%02d" % [int(remaining) / 60, int(remaining) % 60]
 	if phone:
 		phone.update_timer(time_str, sanity)
+	_hint_timer += 1.0
+	if _hint_timer >= 15.0 and not (_held_pill and is_instance_valid(_held_pill)):
+		_hint_timer = 0.0
+		var hint := _pill_hint()
+		if hint != "":
+			_say(hint)
 	_message_timer += 1.0
 	if _message_timer < MESSAGE_INTERVAL:
 		return
@@ -819,8 +894,11 @@ func _tick_phone(delta: float) -> void:
 # ---------------------------------------------------------------------------
 func _trigger_game_over() -> void:
 	game_over = true
-	_log("GAME", "game over : assimilation")
-	_say(GAME_OVER_TEXT, true, true)
+	last_tokens = compute_resist_tokens(run_time, dose_count)
+	profile.add_tokens(last_tokens)
+	_log("GAME", "game over : assimilation (%.0f s, %d doses, +%d tokens)" % [run_time, dose_count, last_tokens])
+	_say(GAME_OVER_TEXT + "
+Tu as tenu %d s : +%d tokens." % [int(run_time), last_tokens], true, true)
 	if phone and not phone.is_in_hand:
 		phone.toggle_pocket()
 	_set_laser_target(false)
@@ -841,9 +919,15 @@ func _all_mimics() -> Array:
 	return all
 
 
+## Tokens du mode Résistance : le temps tenu compte le plus, chaque pilule avalée aussi.
+static func compute_resist_tokens(seconds: float, doses: int) -> int:
+	return int(seconds * TOKENS_PER_SECOND) + doses * TOKENS_PER_DOSE
+
+
 func _restart() -> void:
 	game_over = false
-	sanity = 0.0
+	sanity = START_SANITY
+	run_time = 0.0
 	sanity_rate = SANITY_RATE
 	dose_count = 0
 	_message_timer = 0.0
@@ -861,6 +945,72 @@ func _restart() -> void:
 		creepy_voices.enabled = true
 	_log("GAME", "recommencer")
 	_say("Encore une chance. Trouve la pilule. Il n'y a pas de sortie.")
+
+
+# ---------------------------------------------------------------------------
+# Mode Chasse et retour au lobby
+# ---------------------------------------------------------------------------
+func _start_hunt() -> void:
+	hunt = HuntMode.new()
+	hunt.name = "Hunt"
+	add_child(hunt)
+	var hands: Array[Node3D] = [left_hand, right_hand]
+	hunt.setup(apartment, xr_camera, hands)
+	hunt.message.connect(_on_hunt_message)
+	hunt.hunt_finished.connect(_on_hunt_finished)
+	hunt.start()
+
+
+func _on_hunt_message(text: String, is_alert: bool) -> void:
+	_say(text, is_alert)
+
+
+func _on_hunt_finished(walls: int, tokens: int) -> void:
+	game_over = true
+	last_tokens = tokens
+	profile.add_tokens(tokens)
+	_log("GAME", "chasse terminée : %d murs cassés, +%d tokens" % [walls, tokens])
+	_say("%d murs défoncés pour rien : +%d tokens.
+Gâchette : retour au lobby." % [walls, tokens], true, true)
+	if phone and not phone.is_in_hand:
+		phone.toggle_pocket()
+	_set_laser_target(false)
+
+
+## Démonte la partie et revient au lobby (les tokens sont déjà crédités).
+func return_to_lobby() -> void:
+	_log("GAME", "retour au lobby")
+	if is_instance_valid(_pointed) and _pointed.has_method(&"on_unpointed"):
+		_pointed.on_unpointed()
+	_pointed = null
+	_consume_pill()
+	_consume_key()
+	for mimic in _all_mimics():
+		if is_instance_valid(mimic) and mimic.is_mobile:
+			mimic.queue_free()
+	for node in [hunt, apartment, creepy_voices, phone, _world_env]:
+		if is_instance_valid(node):
+			node.queue_free()
+	hunt = null
+	apartment = null
+	creepy_voices = null
+	phone = null
+	_world_env = null
+	game_over = false
+	game_started = false
+	mode = Mode.NONE
+	sanity = START_SANITY
+	sanity_rate = SANITY_RATE
+	dose_count = 0
+	run_time = 0.0
+	_message_timer = 0.0
+	_message_count = 0
+	_set_laser_target(false)
+	_build_lobby()
+
+
+func pulse_haptics(amplitude := 0.45, duration := 0.12, hand: XRController3D = null) -> void:
+	_pulse_haptics(amplitude, duration, hand)
 
 
 ## Vibration Quest 2 : amplitude 0..1, durée en secondes. Sans manette active : rien.

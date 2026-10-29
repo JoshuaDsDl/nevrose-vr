@@ -57,11 +57,12 @@ func _initialize() -> void:
 	_assert(lobby.computer.play_prompt.visible, "A: prompt visible au survol de l'ordinateur")
 
 	# Le vrai dispatch passe par l'objet pointé puis par interact().
-	main._pointed = main.lobby.computer
+	main._pointed = main.lobby.card_resist
 	main.interact()
 	await process_frame
 	await process_frame
-	_assert(main.game_started, "A: l'ordinateur lance la partie")
+	_assert(main.game_started, "A: la carte Résistance lance la partie")
+	_assert(main.mode == Main.Mode.RESIST, "A: mode Résistance actif")
 	_assert(main.lobby == null, "A: référence du lobby effacée après le départ")
 	_assert(not is_instance_valid(lobby), "A: lobby libéré après le départ")
 
@@ -132,22 +133,20 @@ func _initialize() -> void:
 	main._desktop_yaw = 0.0
 	main._desktop_pitch = 0.0
 
-	# --- B : une seule voix à la fois, intro comprise ---
+	# --- B : voix : les 15 fichiers servent, le chevauchement croît avec la folie ---
 	_assert(main.creepy_voices._is_voice_playing(), "B: le murmure d'introduction est actif")
-	main.creepy_voices._play_random_voice(0.5)
-	var voices_playing := 0
-	for player in main.creepy_voices._players:
-		if player.playing:
-			voices_playing += 1
-	_assert(voices_playing == 1, "B: aucune voix ne se superpose à l'intro")
+	_assert(main.creepy_voices._streams.size() == 15, "B: les 15 voix sont chargées")
+	_assert(main.creepy_voices.max_simultaneous(0.1) == 1, "B: une seule voix à la fois au début")
+	_assert(main.creepy_voices.max_simultaneous(1.0) >= 5, "B: plusieurs voix en pleine crise")
 	for player in main.creepy_voices._players:
 		player.stop()
-	main.creepy_voices._play_random_voice(0.5)
-	voices_playing = 0
-	for player in main.creepy_voices._players:
-		if player.playing:
-			voices_playing += 1
-	_assert(voices_playing == 1, "B: une voix aléatoire démarre après l'arrêt des players")
+	main.creepy_voices.voices_heard.clear()
+	main.creepy_voices._bag.clear()
+	for i in 15:
+		main.creepy_voices._play_random_voice(0.5)
+		for player in main.creepy_voices._players:
+			player.stop()
+	_assert(main.creepy_voices.voices_heard.size() == 15, "B: 15 tirages = les 15 voix différentes (%d)" % main.creepy_voices.voices_heard.size())
 	for player in main.creepy_voices._players:
 		player.stop()
 
@@ -218,18 +217,18 @@ func _initialize() -> void:
 	_assert(garage_drawer.position.is_equal_approx(garage_drawer._closed_pos), "E+: close_now restaure la position fermée")
 	_assert(is_equal_approx(garage_drawer.rotation.y, garage_drawer._closed_rot_y), "E+: close_now restaure la rotation fermée")
 
-	# Le placard à forcer doit s'ouvrir après trois interactions, le tiroir
-	# de cuisine doit reconnaître sa propre clé.
-	for i in 3:
-		closet_door.interact()
+	# Plus de verrous ni de clés : tout s'ouvre d'un seul geste.
+	closet_door.interact()
 	await create_timer(0.45).timeout
-	_assert(closet_door.is_open and not closet_door.is_locked, "E+: le placard de cuisine s'ouvre après trois forcings")
+	_assert(closet_door.is_open and not closet_door.is_locked, "E+: le meuble de salon s'ouvre directement")
 	closet_door.close_now()
 	var kitchen_drawer := apt.get_node("KitchenDrawerKey") as InteractiveContainer
-	kitchen_drawer.interact(kitchen_drawer.required_key)
+	kitchen_drawer.interact()
 	await create_timer(0.45).timeout
-	_assert(kitchen_drawer.is_open and not kitchen_drawer.is_locked, "E+: le tiroir de cuisine s'ouvre avec sa clé")
+	_assert(kitchen_drawer.is_open and not kitchen_drawer.is_locked, "E+: le tiroir de cuisine s'ouvre sans clé")
 	kitchen_drawer.close_now()
+	for c in apt.containers:
+		_assert(not c.is_locked, "E+: %s n'est pas verrouillé" % c.name)
 
 	# --- E+ : pilule révélée dans GarageDrawer, prioritaire sur sa façade ---
 	# La dose de la section D réapparaît après 2 s. On attend sa fin avant de
@@ -347,7 +346,16 @@ func _initialize() -> void:
 	# Le game over passe par le téléphone, sorti de la poche (diégétique).
 	_assert(main.phone.is_in_hand, "GO: le téléphone est sorti pour le game over")
 	main._restart()
-	_assert(not main.game_over and main.sanity == 0.0, "GO: le restart réinitialise la run")
+	_assert(not main.game_over and main.sanity == Main.START_SANITY, "GO: le restart réinitialise la run")
+	_assert(main.last_tokens >= 0 and main.profile.tokens == main.last_tokens, "GO: les tokens de la run sont crédités")
+
+	# --- Retour au lobby ---
+	main.sanity = 99.9
+	for i in 10:
+		await physics_frame
+	main.interact()
+	await process_frame
+	_assert(main.lobby != null and not main.game_started and main.apartment == null, "GO: la gâchette ramène au lobby")
 
 	_finish()
 

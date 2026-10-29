@@ -13,9 +13,12 @@ const AURA_LOOP_SECONDS := 12.0
 const AURA_MIX_RATE := 22050
 const AURA_VOLUME_DB := -18.0
 const AURA_MAX_DISTANCE_M := 5.0
+const BEAM_HEIGHT := 2.6 ## faisceau de repérage : la pilule se voit de loin
 const AURA_UNIT_SIZE_M := 1.5
 
 var _spin := true
+var _beam: MeshInstance3D = null
+var _glow: OmniLight3D = null
 var _aura_audio: AudioStreamPlayer3D = null
 var _aura_consumed := false
 var is_held := false
@@ -58,12 +61,43 @@ func _ready() -> void:
 
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
-	sphere.radius = 0.09
+	sphere.radius = 0.16
 	shape.shape = sphere
 	add_child(shape)
 
 	body_offset_y = 0.05
+	_create_beam()
 	_create_aura()
+
+
+## Colonne de lumière cyan et petite lueur : repère visuel intuitif en VR.
+func _create_beam() -> void:
+	_beam = MeshInstance3D.new()
+	_beam.name = "Faisceau"
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.03
+	cyl.bottom_radius = 0.06
+	cyl.height = BEAM_HEIGHT
+	cyl.radial_segments = 8
+	cyl.rings = 1
+	_beam.mesh = cyl
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.albedo_color = Color(0.25, 0.9, 0.8, 0.35)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_beam.material_override = mat
+	_beam.position.y = BEAM_HEIGHT * 0.5
+	add_child(_beam)
+	var glow := OmniLight3D.new()
+	glow.name = "Lueur"
+	glow.light_color = PILL_COLOR
+	glow.light_energy = 0.9
+	glow.omni_range = 2.2
+	glow.position.y = 0.15
+	add_child(glow)
+	_glow = glow
 
 
 ## Reprend après un reparentage (notamment vers la main), une fois les enfants
@@ -161,19 +195,23 @@ var body_offset_y := 0.0:
 	set(v):
 		body_offset_y = v
 		for c in get_children():
-			if c is MeshInstance3D:
+			if c is MeshInstance3D and c != _beam:
 				c.position.y = v
 
 
 func _process(delta: float) -> void:
 	if is_held:
+		if _beam != null and _beam.visible:
+			_beam.visible = false
+			if _glow != null:
+				_glow.visible = false
 		# Suivre la main — position offset fix par main.gd
 		return
 	if not _spin or not visible:
 		return
 	rotate_y(delta * 1.6)
 	for c in get_children():
-		if c is MeshInstance3D:
+		if c is MeshInstance3D and c != _beam:
 			c.position.y = body_offset_y + sin(Time.get_ticks_msec() / 1000.0 * 2.4) * 0.012
 
 

@@ -1,8 +1,8 @@
 class_name LobbyComputer
 extends Area3D
-## Ordinateur du lobby : survol au rayon VR, puis gâchette pour lancer le jeu.
+## Ordinateur du lobby : affiche les tokens du joueur (survol au rayon VR).
 
-signal start_requested
+signal start_requested ## réémis à chaque interaction : le lobby rafraîchit l'affichage
 
 @onready var play_prompt: Label3D = $PlayPrompt
 @onready var screen_highlight: MeshInstance3D = $ScreenHighlight
@@ -69,12 +69,6 @@ func on_unpointed() -> void:
 	screen_highlight.visible = false
 
 
-## Main transmet toujours la clé tenue (nulle ici) aux objets interactifs.
+## L'ordinateur n'affiche plus que les tokens ; le choix du mode se fait sur les cartes.
 func interact(_holding_key: Node3D = null) -> void:
-	if _activated:
-		return
-	_activated = true
-	play_prompt.text = "CHARGEMENT..."
-	play_prompt.visible = true
-	screen_highlight.visible = true
 	start_requested.emit()

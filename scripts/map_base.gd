@@ -216,12 +216,19 @@ func _register_spawn_spots() -> void:
 	pass
 
 
-func spawn_dose() -> void:
+## `avoid` : position du joueur ; la pilule apparaît à au moins `min_dist` m de lui
+## pour l'obliger à explorer (ignoré si aucun spot assez loin).
+func spawn_dose(avoid := Vector3(1e9, 0.0, 1e9), min_dist := 5.0) -> void:
 	clear_dose()
 	if _spawn_spots.is_empty():
 		push_warning("MapBase: aucun spot de dose enregistré")
 		return
-	var spot: Dictionary = _spawn_spots.pick_random()
+	var far: Array[Dictionary] = []
+	for sp in _spawn_spots:
+		var q: Vector3 = sp["pos"]
+		if Vector2(q.x - avoid.x, q.z - avoid.z).length() >= min_dist:
+			far.append(sp)
+	var spot: Dictionary = far.pick_random() if not far.is_empty() else _spawn_spots.pick_random()
 	_dose = Dose.new()
 	_dose.name = "Dose"
 	if spot.get("floor", false):

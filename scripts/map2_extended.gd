@@ -38,15 +38,16 @@ const FURNITURE_COLLISIONS := [
 
 # Surfaces où la dose peut apparaître, et où une clé peut se trouver
 const SURFACES := [
-	"Shell/kitchenCabinetDrawer", "Shell/table", "Shell/loungeSofa",
+	"Shell/kitchenCabinetDrawer", "Shell/table",
 	"Shell/sideTableDrawers", "Shell/ExtensionEst/Garage/Etabli",
 	"Shell/ExtensionEst/Chambre/LitDouble", "Shell/ExtensionEst/Chambre/Bureau",
-	"Shell/ExtensionEst/SDB/Lavabo", "Shell/ExtensionEst/Dressing/Armoire2",
+	"Shell/ExtensionEst/SDB/Lavabo",
 ]
 
 # Points au sol libres (hors meubles)
 const FLOOR_SPOTS := [
-	Vector3.ZERO, Vector3(8.0, 0.0, 2.2), Vector3(7.7, 0.0, 6.2), Vector3(6.3, 0.0, -0.6),
+	Vector3.ZERO, Vector3(-2.2, 0.0, -0.8), Vector3(2.4, 0.0, 0.4),
+	Vector3(8.0, 0.0, 2.2), Vector3(7.7, 0.0, 6.2), Vector3(6.3, 0.0, -0.6),
 ]
 
 
@@ -70,9 +71,9 @@ func build() -> void:
 	_paint_car()
 	_build_existing_gameplay()
 	_register_spawn_spots()
-	_build_keys(_key_spots())
 	_place_mimics()
 	_register_ambience()
+	_hide_decorations()
 
 
 ## Les murs respirent et les lumières grésillent avec la folie (GDD §5.2).
@@ -260,13 +261,13 @@ func _build_extension() -> void:
 	_container_part("Shell/ExtensionEst/Garage/Etabli", "drawer", "GarageDrawer",
 		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.NONE, 0.42)
 	_container_part("Shell/ExtensionEst/Chambre/TableNuit", "drawer", "NightstandDrawer",
-		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.KEY, 0.35)
+		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.NONE, 0.35)
 	_container_part("Shell/ExtensionEst/Chambre/EtagereChambre", "doorLeft", "BookcaseDoor",
 		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.NONE, 0.0, -105.0)
 	_container_part("Shell/ExtensionEst/SDB/MeubleSDB", "drawerTop", "SDBCabinet",
-		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.KEY, 0.30)
+		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.NONE, 0.30)
 	_container_part("Shell/ExtensionEst/Dressing/Armoire1", "doorLeft", "DresserDrawer",
-		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.FORCEABLE, 0.0, -105.0)
+		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.NONE, 0.0, -105.0)
 
 
 ## Couleurs de la voiture du garage : carrosserie rouge, pneus noirs.
@@ -293,11 +294,11 @@ func _solid_material(color: Color) -> StandardMaterial3D:
 ## Conteneurs du salon et de la cuisine.
 func _build_existing_gameplay() -> void:
 	_container_part("Shell/kitchenCabinetDrawer", "drawer", "KitchenDrawerKey",
-		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.KEY, 0.42)
+		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.NONE, 0.42)
 	_container_part("Shell/kitchenFridge", "doorFridge", "FridgeDoor",
-		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.KEY, 0.0, -105.0)
+		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.NONE, 0.0, -105.0)
 	_container_part("Shell/sideTableDrawers", "drawerLeft", "ClosetDoor",
-		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.FORCEABLE, 0.35)
+		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.NONE, 0.35)
 
 
 # ---------------------------------------------------------------------------
@@ -327,9 +328,8 @@ func _add_mimic(mimic_name: String, pos: Vector3, rot_y: float) -> void:
 # Apparition de la dose et des clés
 # ---------------------------------------------------------------------------
 func _register_spawn_spots() -> void:
-	# Chaque conteneur reste un point possible ; les tiroirs utilisent leur repère local.
-	for c in containers:
-		_spawn_spots.append({"pos": c.to_global(c.content_offset), "container": c})
+	# Pilules toujours à vue (surface ou sol) : un faisceau lumineux les signale.
+	# Plus de tiroirs verrouillés ni de clés cachées.
 	for path in SURFACES:
 		_spawn_spots.append({"pos": _surface_point(path, 0.09), "container": null})
 	for pos in FLOOR_SPOTS:
@@ -342,3 +342,15 @@ func _key_spots() -> Array[Vector3]:
 		spots.append(_surface_point(path))
 	spots.append(Vector3(8.0, 0.0, 2.2)) # sol du couloir, libre
 	return spots
+
+
+# ---------------------------------------------------------------------------
+# Décorations de la boutique : masquées tant qu'elles ne sont pas achetées
+# ---------------------------------------------------------------------------
+func _hide_decorations() -> void:
+	DecorCatalog.apply(self, [])
+
+
+## Montre les décorations possédées (appelé par main.gd avec le profil).
+func apply_decorations(owned: Array) -> void:
+	DecorCatalog.apply(self, owned)
