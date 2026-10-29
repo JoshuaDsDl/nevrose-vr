@@ -15,7 +15,7 @@ var _rec_label: Label
 var _live_label: Label
 var _countdown: Label
 var _cue_box: PanelContainer
-var _cue_label: Label
+var _cue_label: RichTextLabel
 var _status: Label
 var _meter: Array[ColorRect] = []
 var _meter_box: Control
@@ -71,19 +71,24 @@ func _build() -> void:
 	_top.add_child(_live_label)
 
 	_cue_box = PanelContainer.new()
-	_cue_box.position = Vector2(14, 80)
-	_cue_box.size = Vector2(W - 28, 70)
+	_cue_box.position = Vector2(12, 66)
+	_cue_box.size = Vector2(W - 24, 300)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.0, 0.0, 0.0, 0.62)
+	sb.bg_color = Color(0.0, 0.0, 0.0, 0.55)
 	sb.set_corner_radius_all(12)
 	sb.content_margin_left = 14
 	sb.content_margin_right = 14
 	sb.content_margin_top = 8
 	sb.content_margin_bottom = 8
 	_cue_box.add_theme_stylebox_override("panel", sb)
-	_cue_label = _label("", 19, Color(1.0, 0.95, 0.7))
-	_cue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_cue_label.custom_minimum_size = Vector2(W - 60, 0)
+	_cue_label = RichTextLabel.new()
+	_cue_label.bbcode_enabled = true
+	_cue_label.scroll_active = false
+	_cue_label.fit_content = true
+	_cue_label.add_theme_font_size_override("normal_font_size", 26)
+	_cue_label.add_theme_font_size_override("bold_font_size", 26)
+	_cue_label.add_theme_color_override("default_color", Color(1, 1, 1))
+	_cue_label.custom_minimum_size = Vector2(W - 52, 0)
 	_cue_box.add_child(_cue_label)
 	add_child(_cue_box)
 
@@ -155,9 +160,9 @@ func show_recording(elapsed: float, limit: float, level: float, viewers: int, cu
 		_view = View.RECORDING
 		_top.visible = true
 		_countdown.text = ""
-		_cue_box.visible = true
+		_cue_box.visible = false # le texte est lu sur le prompteur au-dessus de l'objectif
 		_meter_box.visible = true
-	_rec_label.text = "REC %02d:%02d / %02d" % [int(elapsed) / 60, int(elapsed) % 60, int(limit)]
+	_rec_label.text = "REC %02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
 	_live_label.text = "● LIVE  %s" % ReelData.format_count(viewers)
 	if _cue_label.text != cue:
 		_cue_label.text = cue

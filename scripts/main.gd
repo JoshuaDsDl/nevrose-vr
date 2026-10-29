@@ -236,8 +236,12 @@ func _build_world() -> void:
 	add_child(world_env)
 	_world_env = world_env
 
-	apartment = preload("res://scripts/map2_extended.gd").new()
-	apartment.name = "Map2Extended"
+	if mode == Mode.REEL:
+		apartment = StudioMap.new()
+		apartment.name = "Studio"
+	else:
+		apartment = preload("res://scripts/map2_extended.gd").new()
+		apartment.name = "Map2Extended"
 	add_child(apartment)
 	apartment.build()
 	apartment.apply_decorations(profile.owned)

@@ -27,7 +27,7 @@ func _initialize() -> void:
 				jpeg = img.save_jpg_to_buffer(0.82)
 				print("image jointe : %d octets" % jpeg.size())
 	var ctx := {
-		"premise": ReelData.PREMISES[0], "tone": ReelData.TONES[1],
+		"premise": ReelData.local_premise(0), "tone": ReelData.TONES[1],
 		"voice": {"mic": true, "duration": 22.0, "speak_ratio": 0.78, "avg_db": -22.0, "peak_db": -11.0, "variation": 6.5, "longest_pause": 1.6, "bursts": 9},
 		"followers": 37, "previous": [], "decor": ["Mayo Zedong", "Lampadaire"],
 	}

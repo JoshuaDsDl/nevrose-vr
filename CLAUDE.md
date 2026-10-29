@@ -82,12 +82,19 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
 
 ### Mode Réels (3e mode)
 
-Studio de tournage côté est du salon (`scripts/reel_mode.gd`) : tableau des tendances
-(idées + ton), trépied/REC, écran de retour avec avatar, fiche façon Instagram. Le micro
-mesure COMMENT on parle (`voice_meter.gd`, pas de reconnaissance vocale) ; le jury (LLM) reçoit
-l'idée, le ton, ces mesures et une image de la prise, et répond en flux (`llm_client.gd`).
-Sans réseau : juge local (`ReelData.heuristic`). Tokens selon vues/likes (`ReelData.compute_tokens`).
+Pièce dédiée `scripts/studio_map.gd` (`StudioMap`, autre map que l'appartement : fond violet,
+néon, console, canapé ; les décorations achetées s'accrochent au mur du fond filmé).
+`scripts/reel_mode.gd` : tableau des tendances (3 idées bizarres tirées au hasard + 4 tons),
+trépied/REC, écran de retour avec avatar, fiche façon Instagram. Chaque idée est un **court
+texte à lire à voix haute** (écrit par le LLM, sinon réserve locale `ReelData.SCRIPTS`) ; le
+prompteur au-dessus de l'objectif le fait défiler pendant la prise. Le micro (`voice_meter.gd`,
+pas de reconnaissance vocale) mesure le temps de parole, le volume et l'intonation ; le jury
+(LLM) compare le temps parlé au temps de lecture normal du texte, et reçoit aussi une image de
+la prise. Réponse en flux (`llm_client.gd`). Sans réseau : juge local (`ReelData.heuristic`).
+Tokens selon vues/likes (`ReelData.compute_tokens`).
 
+- Les GLB Kenney ont leur pivot dans un coin : dans le studio, toujours les poser avec
+  `StudioMap._place_centered` (emprise centrée), jamais avec `position` brute.
 - LLM : OpenRouter si une clé est présente (`OPENROUTER_API_KEY`, ou `key=` dans
   `llm.local.cfg` à la racine, **ignoré par git**, inclus dans l'APK par `include_filter`),
   modèle `google/gemini-2.5-flash-lite`. Sinon serveur llama.cpp (`user://llm.cfg` ou

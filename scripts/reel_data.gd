@@ -8,24 +8,35 @@ extends RefCounted
 
 const MAX_VIEWS := 3000000
 
-const PREMISES: Array[Dictionary] = [
-	{"title": "Bitcoin = lézards", "hook": "Satoshi Nakamoto n'existe pas : c'est un lézard géant qui mine depuis ma cave."},
-	{"title": "Le halving est truqué", "hook": "Le halving ne divise rien du tout. Ils divisent ta vie, pas les récompenses."},
-	{"title": "Ma voisine mine du BTC", "hook": "Ma voisine du dessus mine du bitcoin avec son micro-ondes. J'ai des preuves sonores."},
-	{"title": "Le Wi-Fi est un token", "hook": "Chaque fois que ton Wi-Fi coupe, quelqu'un te vole un demi-ethereum. Réfléchis."},
-	{"title": "Les NFT sont des fantômes", "hook": "Les singes des NFT ne sont pas des dessins. Ce sont des âmes en attente de rachat."},
-	{"title": "La Lune est un wallet", "hook": "Pourquoi on n'y retourne jamais ? Parce que la Lune est un cold wallet géant."},
-	{"title": "Le frigo me surveille", "hook": "Mon frigo a levé des fonds. Il a un livre blanc. Je l'ai lu : c'est pire que je pensais."},
-	{"title": "Dogecoin dirige tout", "hook": "Le chien du mème dirige la Banque centrale. Regarde ses yeux sur chaque billet."},
-	{"title": "Les pigeons minent", "hook": "Les pigeons n'existent pas, ils minent. Chaque roucoulement, c'est un hash."},
-	{"title": "Je suis le stablecoin", "hook": "Je suis le seul stablecoin de cet appartement et personne ne veut me racheter."},
-	{"title": "Le café est indexé", "hook": "Le prix du café suit exactement la courbe de l'Ethereum. Ouvre les yeux. Bois du café."},
-	{"title": "L'IA a des actions", "hook": "Mon aspirateur robot a acheté la dip hier soir. Il a du flair, lui."},
-	{"title": "La blockchain est un mur", "hook": "Les murs de cet appartement sont une blockchain. Chaque fissure est un bloc validé."},
-	{"title": "Les ATM parlent", "hook": "Les distributeurs te chuchotent le cours du jour. Colle ton oreille. Écoute."},
-	{"title": "Lundi est une arnaque", "hook": "Le lundi est un rug pull orchestré par le dimanche soir. J'ai les captures d'écran."},
-	{"title": "Ma plante est une whale", "hook": "Ma plante verte détient 4 % de tout le Solana. Elle ne bouge pas : c'est la stratégie."},
+## Chaque idée : un titre et un court texte à LIRE À VOIX HAUTE devant la caméra.
+const SCRIPTS: Array[Dictionary] = [
+	{"title": "Bitcoin = lézards", "script": "Écoutez-moi bien. Satoshi Nakamoto n'existe pas. C'est un lézard géant qui mine du bitcoin dans ma cave depuis deux mille neuf. J'ai trouvé une écaille sur ma carte graphique. Abonnez-vous avant qu'il efface cette vidéo avec sa queue."},
+	{"title": "Le halving est truqué", "script": "Le halving, ils disent que ça divise les récompenses. Faux. Ça divise votre temps de sommeil. Chaque nuit, un bloc est validé pendant que vous dormez, et le vôtre est toujours le dernier. Réveillez-vous. Abonnez-vous."},
+	{"title": "Ma voisine mine du BTC", "script": "Ma voisine du dessus mine du bitcoin avec son micro-ondes. Chaque fois qu'il fait bip, un jeton disparaît de mon compte. J'ai enregistré le bruit. Il fait exactement trois bips, comme un hash. Réfléchissez."},
+	{"title": "Le Wi-Fi est un token", "script": "Quand votre Wi-Fi coupe, quelqu'un vous vole un demi-ethereum. Ce n'est pas la box. C'est un pigeon posé sur l'antenne relais. Il a un petit portefeuille autour du cou. Regardez par la fenêtre. Maintenant."},
+	{"title": "Les NFT sont des fantômes", "script": "Les singes des NFT ne sont pas des dessins. Ce sont des âmes en attente de rachat. Chaque clic droit, enregistrer sous, c'est un exorcisme raté. Vous avez déjà téléchargé un singe. Il vous regarde. Là."},
+	{"title": "La Lune est un wallet", "script": "Pourquoi on ne retourne jamais sur la Lune ? Parce que c'est un cold wallet géant. Chaque cratère est une clé privée. Les astronautes n'ont pas marché dessus, ils ont signé une transaction. Et c'était la mauvaise."},
+	{"title": "Le frigo me surveille", "script": "Mon frigo a levé des fonds. Il a un livre blanc, je l'ai lu. Page douze, il prévoit de ne jamais refroidir mon yaourt, uniquement mon portefeuille. La lumière qui s'éteint quand je ferme la porte ? Une preuve."},
+	{"title": "Dogecoin dirige tout", "script": "Le chien du mème dirige la Banque centrale. Regardez ses yeux sur chaque billet de vingt euros. Ils vous suivent. Ils savent. Wow. Très complot. Tellement caché. Abonnez-vous ou il aboiera sur votre épargne."},
+	{"title": "Les pigeons minent", "script": "Les pigeons n'existent pas, ils minent. Chaque roucoulement est un hash validé. Si vous en voyez un immobile, il est en train de miner votre quartier. Ne le dérangez pas. Jetez-lui juste du pain, en bitcoin."},
+	{"title": "Je suis le stablecoin", "script": "Je suis le seul stablecoin de cet appartement. Je ne bouge pas, je ne bois pas, je ne dors plus. Mon cours est de un euro, moins le loyer. Personne ne veut me racheter. Soutenez-moi. Un like égale un euro."},
+	{"title": "Le café est indexé", "script": "Le prix du café suit exactement la courbe de l'Ethereum. Ouvrez les yeux. Buvez du café. Ouvrez les yeux plus fort. Le café n'est pas une boisson, c'est un oracle. Remuez la cuillère dans le sens du bull run."},
+	{"title": "L'IA a des actions", "script": "Mon aspirateur robot a acheté la baisse hier soir. Il a du flair, lui. Pendant que je dormais, il a tourné trois fois autour de la table basse : c'est un signal haussier. Je lui dois un loyer."},
+	{"title": "La blockchain est un mur", "script": "Les murs de cet appartement sont une blockchain. Chaque fissure est un bloc validé. Hier, la fissure du salon a gagné une branche. C'est une fourche. Prévenez la propriétaire, ou prenez le contrôle de la fissure."},
+	{"title": "Les ATM parlent", "script": "Les distributeurs de billets vous chuchotent le cours du jour. Collez l'oreille contre la fente. Écoutez. Ce n'est pas le bruit des billets, c'est une voix qui dit : achète. Elle dit toujours achète. Même à découvert."},
+	{"title": "Lundi est une arnaque", "script": "Le lundi est une arnaque orchestrée par le dimanche soir. Tout le monde a investi son week-end, et chaque lundi, la liquidité disparaît. J'ai des captures d'écran de mon réveil. Regardez-le pleurer."},
+	{"title": "Ma plante est une whale", "script": "Ma plante verte détient quatre pour cent de tout le Solana. Elle ne bouge pas, c'est la stratégie : garder. Elle fait de la photosynthèse avec vos frais de transaction. Ne l'arrosez pas, elle est déjà riche."},
 ]
+
+## Thèmes bizarres tirés au hasard pour les idées écrites par le LLM.
+const WEIRD_THEMES := [
+	"les pigeons", "le micro-ondes", "les chaussettes orphelines", "la Lune", "les ascenseurs",
+	"les pâtes trop cuites", "le lundi", "les trottinettes", "les moustaches", "les aspirateurs",
+	"le fromage", "les nuages", "les escaliers", "les cactus", "les GPS", "les ombres",
+	"les canards en plastique", "le Wi-Fi", "les réveils", "les grille-pain",
+]
+
+const READ_WORDS_PER_SEC := 2.5 ## rythme de lecture à voix haute, ~150 mots/minute
 
 const TONES: Array[Dictionary] = [
 	{"id": "alarmiste", "label": "ALARMISTE", "desc": "Fort, rapide, haletant.", "prompt": "alarmiste : fort, rapide, haletant"},
@@ -62,10 +73,50 @@ const _NUMBER_KEYS := {
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
+## Mots d'un texte à lire.
+static func words(script: String) -> PackedStringArray:
+	return script.strip_edges().split(" ", false)
+
+
+## Durée normale de lecture à voix haute.
+static func expected_duration(script: String) -> float:
+	return maxf(words(script).size() / READ_WORDS_PER_SEC, 4.0)
+
+
+## Première phrase, pour la carte du tableau.
+static func teaser(script: String) -> String:
+	var end := -1
+	for mark in [". ", "? ", "! "]:
+		var i := script.find(mark)
+		if i >= 0 and (end < 0 or i < end):
+			end = i
+	var first := script.substr(0, end + 1) if end >= 0 else script
+	# Une première phrase très courte ne dit rien : on ajoute la suivante.
+	if first.length() < 45 and end >= 0:
+		var rest := script.substr(end + 2)
+		var next_end := -1
+		for mark in [". ", "? ", "! "]:
+			var j := rest.find(mark)
+			if j >= 0 and (next_end < 0 or j < next_end):
+				next_end = j
+		first += " " + (rest.substr(0, next_end + 1) if next_end >= 0 else rest)
+	if first.length() > 100:
+		first = first.left(97).rstrip(" ,;:.") + "…"
+	return first
+
+
+## Une idée locale complète (titre, texte à lire, accroche de carte).
+static func local_premise(index: int) -> Dictionary:
+	var p: Dictionary = SCRIPTS[index % SCRIPTS.size()]
+	return {"title": p["title"], "script": p["script"], "hook": teaser(p["script"])}
+
+
 static func ideas_messages() -> Array:
+	var themes := WEIRD_THEMES.duplicate()
+	themes.shuffle()
 	return [
-		{"role": "system", "content": "Tu écris des idées de réels Instagram comiques : théories du complot ABSURDES sur la crypto-monnaie et le quotidien (satire évidente, jamais de vraie désinformation, ni haine, ni vraie politique ou santé). Réponds uniquement par 3 lignes, au format exact :\nIDEE: <titre de 4 mots max> | <phrase d'accroche à dire face caméra, 12 mots max>"},
-		{"role": "user", "content": "Donne 3 idées nouvelles et très différentes. Inspire-toi du thème du moment : %s." % ["les lézards", "les pigeons", "l'électroménager", "la Lune", "les voisins", "le Wi-Fi", "le café"].pick_random()},
+		{"role": "system", "content": "Tu écris des réels Instagram comiques : des théories du complot ABSURDES et très bizarres qui mélangent la crypto-monnaie et un thème farfelu imposé (satire évidente, jamais de vraie désinformation, ni haine, ni vraie politique ou santé). Chaque idée est un court texte que le créateur lira À VOIX HAUTE face caméra : phrases courtes, rythme oral, chute drôle. Réponds uniquement par 3 lignes, au format exact :\nIDEE: <titre de 3 mots max> | <texte à lire, 35 à 45 mots>"},
+		{"role": "user", "content": "Écris 3 idées complètement différentes. Thème de l'idée 1 : %s. Thème de l'idée 2 : %s. Thème de l'idée 3 : %s." % [themes[0], themes[1], themes[2]]},
 	]
 
 
@@ -75,7 +126,7 @@ static func judge_messages(ctx: Dictionary, jpeg: PackedByteArray) -> Array:
 	var voice: Dictionary = ctx["voice"]
 	var tone: Dictionary = ctx["tone"]
 	var lines: Array[String] = []
-	lines.append("Idée du réel : « %s » — accroche : « %s »" % [ctx["premise"]["title"], ctx["premise"]["hook"]])
+	lines.append("Idée du réel : « %s ». Texte que le créateur devait lire à voix haute : « %s »" % [ctx["premise"]["title"], ctx["premise"]["script"]])
 	lines.append("Ton annoncé par le créateur : %s." % tone["prompt"])
 	lines.append("Compte : %d abonnés." % int(ctx["followers"]))
 	if not (ctx["previous"] as Array).is_empty():
@@ -85,6 +136,9 @@ static func judge_messages(ctx: Dictionary, jpeg: PackedByteArray) -> Array:
 	else:
 		lines.append("Décor visible derrière lui : %s." % ", ".join(ctx["decor"]))
 	if voice.get("mic", false):
+		var expected := expected_duration(String(ctx["premise"]["script"]))
+		var spoken := float(voice["duration"]) * float(voice["speak_ratio"])
+		lines.append("Lecture : le texte se lit normalement en %.0f s ; il a parlé %.0f s sur %.0f s de prise (%s)." % [expected, spoken, voice["duration"], _pace_label(spoken, expected)])
 		lines.append("Mesures de la voix (tu n'entends pas les paroles) : %.0f s de prise, il parle %.0f %% du temps, volume moyen %.0f dB (crête %.0f dB), variation d'intonation %.1f dB (monotone < 3, expressif > 6), plus long silence %.1f s, %d phrases." % [
 			voice["duration"], voice["speak_ratio"] * 100.0, voice["avg_db"], voice["peak_db"],
 			voice["variation"], voice["longest_pause"], voice["bursts"]])
@@ -96,6 +150,18 @@ static func judge_messages(ctx: Dictionary, jpeg: PackedByteArray) -> Array:
 	if not jpeg.is_empty():
 		user_content = LlmClient.image_content(text, jpeg)
 	return [{"role": "system", "content": system}, {"role": "user", "content": user_content}]
+
+
+## Lecture trop courte, juste ou traînante, d'après le temps de parole.
+static func _pace_label(spoken: float, expected: float) -> String:
+	var ratio := spoken / maxf(expected, 1.0)
+	if ratio < 0.45:
+		return "il n'a lu presque rien"
+	if ratio < 0.8:
+		return "lecture incomplète ou très hachée"
+	if ratio < 1.35:
+		return "rythme de lecture normal"
+	return "lecture très lente, avec beaucoup de blancs"
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +229,17 @@ static func parse_number(text: String) -> float:
 	return float(digits) * mult
 
 
-## Une ligne IDEE: titre | accroche.
+## Titre court pour la carte : coupé à la fin d'un mot, jamais au milieu.
+static func _short_title(raw: String) -> String:
+	var t := raw.trim_prefix("«").trim_suffix("»").strip_edges()
+	if t.length() <= 26:
+		return t
+	var cut := t.left(26)
+	var space := cut.rfind(" ")
+	return (cut.left(space) if space > 8 else cut).rstrip(" ,;:-")
+
+
+## Une ligne IDEE: titre | texte à lire.
 static func parse_idea(raw: String) -> Dictionary:
 	var line := raw.strip_edges().replace("**", "").lstrip("-•* ").strip_edges()
 	if not line.to_upper().begins_with("IDEE") and not line.to_upper().begins_with("IDÉE"):
@@ -175,13 +251,11 @@ static func parse_idea(raw: String) -> Dictionary:
 	var bar := body.find("|")
 	if bar <= 0:
 		return {}
-	var title := body.substr(0, bar).strip_edges().left(24)
-	var hook := body.substr(bar + 1).strip_edges()
-	if hook.length() > 100:
-		hook = hook.left(97).get_slice(" ", 0) if false else hook.left(97).rstrip(" ,;:.") + "…"
-	if title == "" or hook == "":
+	var title := _short_title(body.substr(0, bar).strip_edges())
+	var script := body.substr(bar + 1).strip_edges().trim_prefix("«").trim_suffix("»").strip_edges()
+	if title == "" or words(script).size() < 12:
 		return {}
-	return {"title": title, "hook": hook, "live": true}
+	return {"title": title, "script": script.left(420), "hook": teaser(script), "live": true}
 
 
 # ---------------------------------------------------------------------------
@@ -220,9 +294,11 @@ static func heuristic(ctx: Dictionary, rng: RandomNumberGenerator) -> Dictionary
 	var score := 4.0
 	if voice.get("mic", false):
 		var duration: float = voice["duration"]
+		var expected := expected_duration(String(ctx["premise"]["script"]))
+		var spoken := duration * float(voice["speak_ratio"])
 		score = 2.0
-		score += clampf(duration / 14.0, 0.0, 1.0) * 2.0
-		score += clampf((float(voice["speak_ratio"]) - 0.25) / 0.5, 0.0, 1.0) * 2.0
+		score += clampf(spoken / (expected * 0.85), 0.0, 1.0) * 3.0 # a-t-il vraiment lu le texte ?
+		score += clampf((float(voice["speak_ratio"]) - 0.25) / 0.5, 0.0, 1.0) * 1.0
 		score += clampf(float(voice["variation"]) / 7.0, 0.0, 1.0) * 1.5
 		var tone_id: String = ctx["tone"]["id"]
 		var avg: float = voice["avg_db"]

@@ -21,27 +21,21 @@ signal reel_judged(index: int)
 enum State { CHOOSING, COUNTDOWN, RECORDING, FINISHING }
 
 const MAX_REELS := 6
-const MIN_TAKE := 6.0
-const MAX_TAKE := 30.0
-const CAPTURE_AT := 9.0 ## seconde de la prise où l'on photographie le cadre
+const MIN_TAKE := 5.0
+const MAX_TAKE := 50.0
+const END_PAD := 2.5 ## secondes après la fin du texte avant l'arrêt automatique
+const CAPTURE_AT := 6.0 ## seconde de la prise où l'on photographie le cadre
 const AVATAR_LAYER := 1 << 19 ## visible seulement de la caméra du trépied
 
-# Plan du studio (coordonnées monde) : le décor est le mur est du salon (le tableau
-# royal s'y accroche une fois acheté), la caméra filme vers l'est.
-const MARK := Vector3(2.7, 0.0, -0.75)
-const TRIPOD := Vector3(0.95, 0.0, -0.5)
+# Plan du studio (StudioMap) : le décor est le mur du fond au nord, la caméra le filme
+# depuis le sud. Le joueur se tient sur la croix et regarde vers le sud, vers le trépied.
+const MARK := Vector3(0.0, 0.0, -1.5)
+const TRIPOD := Vector3(0.0, 0.0, 1.2)
 const CAM_HEIGHT := 1.45
-const SCREEN_POS := Vector3(2.65, 1.42, -2.1)
-const BOARD_POS := Vector3(2.65, 0.0, 1.6)
-const REC_POS := Vector3(0.95, 1.1, 0.1)
-const PLAYER_YAW := PI / 2.0 # face à l'ouest, vers le trépied
-
-const CUES := [
-	{"until": 6.0, "text": "Accroche : « %s »"},
-	{"until": 16.0, "text": "Montre ta PREUVE : pointe un truc de l'appart du doigt !"},
-	{"until": 24.0, "text": "Tout s'explique… révèle le complot, sans trembler."},
-	{"until": 999.0, "text": "La chute ! Dis-leur de s'abonner (et de vendre leurs meubles)."},
-]
+const SCREEN_POS := Vector3(-2.5, 1.42, -0.7)
+const BOARD_POS := Vector3(2.55, 0.0, -0.1)
+const REC_POS := Vector3(0.6, 1.1, 1.0)
+const PLAYER_YAW := PI # face au sud, vers le trépied
 
 var apartment: MapBase = null
 var camera: Node3D = null
@@ -66,6 +60,10 @@ var post: ReelPostView = null
 var rec_button: LobbyButton = null
 
 var _cam: Camera3D = null
+var _prompter_vp: SubViewport = null
+var _prompter_title: Label = null
+var _prompter_label: RichTextLabel = null
+var _prompter_quad: MeshInstance3D = null
 var _monitor_quad: MeshInstance3D = null
 var _post_quad: MeshInstance3D = null
 var _tabs: Node3D = null
@@ -83,6 +81,11 @@ var _avatar_hands: Array[MeshInstance3D] = []
 var _heart_texture: Texture2D = null
 var _selected := -1 ## index du réel affiché à l'écran (-1 = caméra)
 var _take_time := 0.0
+var _script_words: PackedStringArray = PackedStringArray()
+var _script_duration := 10.0
+var _take_limit := MAX_TAKE
+var _prompter_index := -1
+var _prompter_text_cache := ""
 var _captured: Image = null
 var _viewers := 0.0
 var _feed_clock := 0.0
@@ -161,8 +164,9 @@ func player_start() -> Vector3:
 func _brighten_scene() -> void:
 	if environment == null:
 		return
-	environment.ambient_light_energy = 1.15
-	environment.fog_density = 0.01
+	environment.ambient_light_color = Color(0.85, 0.82, 0.92)
+	environment.ambient_light_energy = 1.0
+	environment.fog_density = 0.004
 
 
 func _build_set() -> void:
@@ -302,6 +306,7 @@ func _build_camera_and_screens() -> void:
 	post.name = "Post"
 	add_child(post)
 
+	_build_prompter()
 	_monitor_quad = _make_screen("EcranCamera", Vector2(0.76, 1.35), monitor)
 	_post_quad = _make_screen("EcranReel", Vector2(1.0, 1.61), post)
 	_tabs = Node3D.new()
@@ -309,6 +314,85 @@ func _build_camera_and_screens() -> void:
 	_tabs.position = SCREEN_POS + Vector3(0, -0.99, 0)
 	add_child(_tabs)
 	_tabs.rotation.y = _screen_yaw()
+
+
+## Prompteur : grand panneau au-dessus de l'objectif. Il montre le texte choisi avant la
+## prise, puis le fait défiler (mots lus en gris, mots à dire en jaune) pendant la prise.
+func _build_prompter() -> void:
+	_prompter_vp = SubViewport.new()
+	_prompter_vp.name = "PrompteurVP"
+	_prompter_vp.size = Vector2i(800, 420)
+	_prompter_vp.disable_3d = true
+	_prompter_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(_prompter_vp)
+	var bg := ColorRect.new()
+	bg.color = Color(0.04, 0.04, 0.07)
+	bg.size = Vector2(800, 420)
+	_prompter_vp.add_child(bg)
+	var edge := ColorRect.new()
+	edge.color = Color(0.95, 0.3, 0.62)
+	edge.size = Vector2(800, 8)
+	_prompter_vp.add_child(edge)
+	_prompter_title = Label.new()
+	_prompter_title.position = Vector2(28, 18)
+	_prompter_title.size = Vector2(744, 40)
+	_prompter_title.add_theme_font_size_override("font_size", 28)
+	_prompter_title.add_theme_color_override("font_color", Color(0.95, 0.3, 0.62))
+	_prompter_vp.add_child(_prompter_title)
+	_prompter_label = RichTextLabel.new()
+	_prompter_label.bbcode_enabled = true
+	_prompter_label.scroll_active = false
+	_prompter_label.position = Vector2(28, 64)
+	_prompter_label.size = Vector2(744, 340)
+	_prompter_label.add_theme_font_size_override("normal_font_size", 34)
+	_prompter_label.add_theme_font_size_override("bold_font_size", 34)
+	_prompter_label.add_theme_color_override("default_color", Color(0.95, 0.95, 0.97))
+	_prompter_vp.add_child(_prompter_label)
+
+	_prompter_quad = MeshInstance3D.new()
+	_prompter_quad.name = "Prompteur"
+	var frame := BoxMesh.new()
+	frame.size = Vector3(1.58, 0.86, 0.04)
+	_prompter_quad.mesh = frame
+	var fm := StandardMaterial3D.new()
+	fm.albedo_color = Color(0.03, 0.03, 0.04)
+	_prompter_quad.material_override = fm
+	var pos := Vector3(TRIPOD.x, 2.2, TRIPOD.z + 0.2)
+	_prompter_quad.position = pos
+	_prompter_quad.rotation.y = atan2(MARK.x - pos.x, MARK.z - pos.z)
+	add_child(_prompter_quad)
+	var face := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1.52, 0.8)
+	face.mesh = qm
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_texture = _prompter_vp.get_texture()
+	face.material_override = mat
+	face.position.z = 0.022
+	_prompter_quad.add_child(face)
+	var pole := MeshInstance3D.new()
+	var pc := CylinderMesh.new()
+	pc.top_radius = 0.02
+	pc.bottom_radius = 0.02
+	pc.height = pos.y - 0.43
+	pole.mesh = pc
+	pole.material_override = fm
+	pole.position = Vector3(pos.x, pc.height * 0.5, pos.z + 0.08)
+	add_child(pole)
+
+
+## Avant la prise : le texte choisi est affiché en entier, pour le relire.
+func _update_prompter_idle() -> void:
+	if _prompter_label == null:
+		return
+	if premise_index < 0:
+		_prompter_title.text = "PROMPTEUR"
+		_prompter_label.text = "[color=#9a9aa6]Choisis une idée sur le tableau :\nle texte à lire à voix haute apparaîtra ici.[/color]"
+		return
+	var p := premises[premise_index]
+	_prompter_title.text = "« %s »  ·  à lire à voix haute" % String(p["title"])
+	_prompter_label.text = _escape(String(p["script"]))
 
 
 func _screen_yaw() -> float:
@@ -526,15 +610,17 @@ func _board_label(text: String, font_size: int, color: Color, pos: Vector3) -> L
 func _pick_local_premises() -> void:
 	premises.clear()
 	var pool: Array[Dictionary] = []
-	for p in ReelData.PREMISES:
+	for i in ReelData.SCRIPTS.size():
+		var p := ReelData.local_premise(i)
 		if not (p["title"] in _seen_premises):
 			pool.append(p)
 	if pool.size() < 3:
 		_seen_premises.clear()
-		pool = ReelData.PREMISES.duplicate()
+		for i in ReelData.SCRIPTS.size():
+			pool.append(ReelData.local_premise(i))
 	pool.shuffle()
 	for i in 3:
-		premises.append(pool[i].duplicate())
+		premises.append(pool[i])
 		_seen_premises.append(pool[i]["title"])
 	premise_index = -1
 
@@ -555,6 +641,8 @@ func _refresh_board() -> void:
 	_reroll_button.set_state("", Color(0.6, 0.85, 1.0), state == State.CHOOSING)
 	_end_button.set_state("", Color(1.0, 0.45, 0.35), state == State.CHOOSING)
 	_refresh_rec_button()
+	if state == State.CHOOSING:
+		_update_prompter_idle()
 	var pending := _pending_count()
 	if state == State.FINISHING:
 		_hint_label.text = "L'Algorithme termine d'évaluer %d réel(s)…" % pending
@@ -565,7 +653,7 @@ func _refresh_board() -> void:
 	elif tone_index < 0:
 		_hint_label.text = "Maintenant, choisis le ton de ta voix."
 	else:
-		_hint_label.text = "Va sur la croix rose et appuie sur REC au trépied."
+		_hint_label.text = "Va sur la croix rose, appuie sur REC au trépied et lis le texte à voix haute."
 
 
 func _on_premise_pressed(i: int) -> void:
@@ -720,6 +808,12 @@ func _begin_countdown() -> void:
 
 func _start_take() -> void:
 	state = State.RECORDING
+	var script := String(premises[premise_index]["script"])
+	_script_words = ReelData.words(script)
+	_script_duration = ReelData.expected_duration(script)
+	_take_limit = minf(_script_duration + END_PAD, MAX_TAKE)
+	_prompter_index = -1
+	_prompter_text_cache = ""
 	_take_time = 0.0
 	_viewers = 3.0
 	_captured = null
@@ -814,21 +908,38 @@ func _process(delta: float) -> void:
 	_feed_clock += delta
 	if _feed_clock >= 0.1:
 		_feed_clock = 0.0
-		var cue := _cue_for(_take_time)
-		monitor.show_recording(_take_time, MAX_TAKE, level, int(_viewers), cue, voice.available)
+		monitor.show_recording(_take_time, _take_limit, level, int(_viewers), "", voice.available)
+		_prompter_label.text = _prompter_text(_take_time)
 		rec_button.set_state("%d s" % int(_take_time), Color(1.0, 0.25, 0.25), _take_time >= MIN_TAKE)
-	if _take_time >= MAX_TAKE:
+	if _take_time >= _take_limit:
 		_end_take()
 
 
-func _cue_for(t: float) -> String:
-	for cue in CUES:
-		if t < float(cue["until"]):
-			var text: String = cue["text"]
-			if text.contains("%s"):
-				text = text % String(premises[premise_index]["hook"]) if premise_index >= 0 else text
-			return text
-	return ""
+## Prompteur : les mots déjà passés se grisent, le bloc à lire maintenant est en jaune.
+func _prompter_text(t: float) -> String:
+	var n := _script_words.size()
+	var progress := clampf(t / _script_duration, 0.0, 1.0)
+	var idx := mini(int(progress * n), n)
+	if idx == _prompter_index and _prompter_text_cache != "":
+		return _prompter_text_cache
+	_prompter_index = idx
+	var done := " ".join(_script_words.slice(0, idx))
+	var now := " ".join(_script_words.slice(idx, mini(idx + 5, n)))
+	var rest := " ".join(_script_words.slice(mini(idx + 5, n), n))
+	var bb := ""
+	if done != "":
+		bb += "[color=#7d7d86]" + _escape(done) + "[/color] "
+	if now != "":
+		bb += "[color=#ffe27a][b]" + _escape(now) + "[/b][/color] "
+	bb += _escape(rest)
+	if idx >= n:
+		bb = "[center][color=#8dff9d][b]Bravo ! Dernier souffle…[/b][/color][/center]"
+	_prompter_text_cache = bb
+	return bb
+
+
+func _escape(text: String) -> String:
+	return text.replace("[", "(")
 
 
 # ---------------------------------------------------------------------------

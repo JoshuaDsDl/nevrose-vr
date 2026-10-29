@@ -33,8 +33,10 @@ func _initialize() -> void:
 	_assert(ReelData.parse_line(r, "VUES: beaucoup") == "", "jury : nombre absent ignoré")
 	_assert(ReelData.parse_number("1.2M") == 1200000.0, "nombre : 1.2M")
 	_assert(ReelData.format_count(12400) == "12,4 k" and ReelData.format_count(1250000) == "1,25 M" and ReelData.format_count(87) == "87", "affichage des compteurs")
-	var idea := ReelData.parse_idea("IDEE: Pigeons miners | Chaque roucoulement est un hash validé.")
+	var idea := ReelData.parse_idea("IDEE: Pigeons miners | Les pigeons n'existent pas, ils minent. Chaque roucoulement est un hash validé. Si vous en voyez un immobile, il mine votre quartier en secret. Abonnez-vous.")
 	_assert(idea.get("title", "") == "Pigeons miners" and idea.get("live", false), "idée en direct lue")
+	_assert(String(idea.get("script", "")).contains("hash validé") and String(idea["hook"]).begins_with("Les pigeons n'existent pas, ils minent.") and String(idea["hook"]).length() <= 100, "idée : texte à lire et accroche de carte")
+	_assert(ReelData.parse_idea("IDEE: Court | Trop court.").is_empty(), "idée : texte trop court refusé")
 	_assert(ReelData.parse_idea("Voici mes idées :").is_empty(), "idée : préambule ignoré")
 
 	# --- Garde-fous et tokens ---
@@ -52,7 +54,21 @@ func _initialize() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var tone: Dictionary = ReelData.TONES[0]
-	var premise: Dictionary = ReelData.PREMISES[0]
+	var premise: Dictionary = ReelData.local_premise(0)
+	_assert(ReelData.SCRIPTS.size() >= 12, "idées locales : réserve de textes à lire (%d)" % ReelData.SCRIPTS.size())
+	for i in ReelData.SCRIPTS.size():
+		var n := ReelData.words(ReelData.SCRIPTS[i]["script"]).size()
+		if n < 30 or n > 55:
+			_assert(false, "idées locales : « %s » fait %d mots (30 à 55 attendus)" % [ReelData.SCRIPTS[i]["title"], n])
+	_assert(ReelData.expected_duration(premise["script"]) > 8.0 and ReelData.expected_duration(premise["script"]) < 25.0, "texte : durée de lecture réaliste")
+	var lazy := {"mic": true, "duration": 20.0, "speak_ratio": 0.08, "avg_db": -30.0, "peak_db": -20.0, "variation": 2.0, "longest_pause": 8.0, "bursts": 2}
+	var lazy_total := 0.0
+	var read_total := 0.0
+	var read_voice := {"mic": true, "duration": 18.0, "speak_ratio": 0.85, "avg_db": -22.0, "peak_db": -12.0, "variation": 6.0, "longest_pause": 1.2, "bursts": 10}
+	for i in 40:
+		lazy_total += ReelData.heuristic({"premise": premise, "tone": ReelData.TONES[0], "voice": lazy, "followers": 37}, rng)["views"]
+		read_total += ReelData.heuristic({"premise": premise, "tone": ReelData.TONES[0], "voice": read_voice, "followers": 37}, rng)["views"]
+	_assert(read_total > lazy_total * 3.0, "juge local : lire le texte rapporte bien plus que se taire")
 	var good_voice := {"mic": true, "duration": 24.0, "speak_ratio": 0.85, "avg_db": -18.0, "peak_db": -8.0, "variation": 8.0, "longest_pause": 1.0, "bursts": 12}
 	var bad_voice := {"mic": true, "duration": 6.0, "speak_ratio": 0.1, "avg_db": -40.0, "peak_db": -34.0, "variation": 0.5, "longest_pause": 5.0, "bursts": 1}
 	var total_good := 0.0
@@ -68,6 +84,7 @@ func _initialize() -> void:
 	_assert(partial["views"] == 500 and partial.has("verdict") and partial.has("title"), "réponse tronquée : complétée sans écraser le LLM")
 	var msgs := ReelData.judge_messages({"premise": premise, "tone": tone, "voice": good_voice, "followers": 37, "previous": ["Un autre"], "decor": ["Mayo Zedong"]}, PackedByteArray())
 	_assert(msgs.size() == 2 and (msgs[1]["content"] as String).contains("Mayo Zedong"), "prompt : le décor acheté est transmis au jury")
+	_assert((msgs[1]["content"] as String).contains("Écoutez-moi bien") and (msgs[1]["content"] as String).contains("Lecture :"), "prompt : le texte et la durée de lecture sont transmis")
 	var msgs_img := ReelData.judge_messages({"premise": premise, "tone": tone, "voice": good_voice, "followers": 37, "previous": [], "decor": []}, PackedByteArray([1, 2, 3]))
 	_assert(msgs_img[1]["content"] is Array and msgs_img[1]["content"][1]["type"] == "image_url", "prompt : l'image part au format vision")
 
@@ -102,6 +119,8 @@ func _initialize() -> void:
 	_assert((main.xr_camera.cull_mask & ReelMode.AVATAR_LAYER) == 0, "réels : l'avatar n'est visible que de la caméra du trépied")
 	_assert(not main.creepy_voices.enabled and main.sanity == Main.START_SANITY, "réels : pas de voix de folie")
 	_assert(reel.premises.size() == 3 and reel._premise_cards.size() == 3 and reel._tone_cards.size() == 4, "réels : 3 idées et 4 tons au tableau")
+	_assert(main.apartment is StudioMap and main.apartment.get_node_or_null("Shell/Console") != null, "réels : tournage dans le studio dédié")
+	_assert(String(reel.premises[0]["script"]) != "", "réels : chaque idée a son texte à lire")
 	_assert(not reel.rec_button.enabled, "réels : REC grisé tant que rien n'est choisi")
 	reel._premise_cards[1].interact()
 	reel._tone_cards[2].interact()
@@ -112,6 +131,8 @@ func _initialize() -> void:
 	_assert(reel.state == ReelMode.State.COUNTDOWN, "réels : compte à rebours lancé")
 	await create_timer(3.3).timeout
 	_assert(reel.state == ReelMode.State.RECORDING, "réels : tournage en cours après 3-2-1")
+	_assert(reel._take_limit > reel._script_duration and reel._script_words.size() > 20, "réels : la prise dure le temps du texte (%.0f s)" % reel._take_limit)
+	_assert(reel._prompter_text(0.0).contains("[color=#ffe27a]") and reel._prompter_text(reel._script_duration * 0.5).contains("[color=#7d7d86]"), "réels : le prompteur grise les mots déjà lus")
 	reel.rec_button.interact()
 	_assert(reel.state == ReelMode.State.RECORDING, "réels : STOP refusé avant la durée minimale")
 	await create_timer(0.5).timeout
