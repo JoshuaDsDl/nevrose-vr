@@ -2,6 +2,9 @@ class_name EntranceDoor
 extends Node3D
 ## Porte d'entrée de la maison : vantail réel, pivot sur charnière et collision mobile.
 
+## Porte d'entrée de l'appartement : verrouillée, elle ne s'ouvre pas et reste infranchissable.
+@export var verrouillee := true
+
 var _closed_rot_y := 0.0
 var _is_open := false
 var _tween: Tween = null
@@ -45,7 +48,7 @@ func on_unpointed() -> void:
 
 
 func interact(_holding_key: Node3D = null) -> void:
-	if _tween and _tween.is_valid():
+	if verrouillee or (_tween and _tween.is_valid()):
 		return
 	_is_open = not _is_open
 	var target_y := _closed_rot_y + deg_to_rad(-100.0 if _is_open else 0.0)

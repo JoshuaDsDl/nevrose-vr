@@ -291,22 +291,22 @@ func _initialize() -> void:
 	_assert(entrance_door != null, "E+: porte d'entrée présente")
 	if entrance_door != null:
 		_assert(entrance_door.get_node_or_null("area") is Area3D, "E+: la porte d'entrée possède son enfant area")
+		# Porte de l'appartement verrouillée : elle ne pivote pas et bloque la sortie.
 		var rotation_fermee: float = entrance_door.rotation.y
 		entrance_door.interact()
 		await create_timer(0.45).timeout
-		_assert(not is_equal_approx(entrance_door.rotation.y, rotation_fermee), "E+: la porte d'entrée pivote à l'ouverture")
-		entrance_door.interact()
-		await create_timer(0.45).timeout
-		_assert(is_equal_approx(entrance_door.rotation.y, rotation_fermee), "E+: la porte d'entrée retrouve sa rotation fermée")
-		# Une troisième ouverture doit laisser la capsule passer dans le couloir.
-		main.xr_origin.position = Vector3(3.4, 1.7, 2.0)
-		entrance_door.interact()
-		await create_timer(0.45).timeout
-		main._move_with_collisions(Vector3(2.0, 0.0, 0.0))
+		_assert(is_equal_approx(entrance_door.rotation.y, rotation_fermee), "E+: la porte d'entrée verrouillée ne s'ouvre pas")
+		main.xr_origin.position = Vector3(9.6, 1.7, 2.0)
+		main._move_with_collisions(Vector3(1.5, 0.0, 0.0))
 		await physics_frame
 		await physics_frame
-		_assert(main.xr_origin.position.x > 4.3, "E+: la porte ouverte laisse passer le joueur (x = %.2f)" % main.xr_origin.position.x)
-		entrance_door.interact()
+		_assert(main.xr_origin.position.x < 10.1, "E+: la porte d'entrée bloque la sortie (x = %.2f)" % main.xr_origin.position.x)
+	# Passage salon -> couloir : libre, sans porte.
+	main.xr_origin.position = Vector3(3.4, 1.7, 2.0)
+	main._move_with_collisions(Vector3(2.0, 0.0, 0.0))
+	await physics_frame
+	await physics_frame
+	_assert(main.xr_origin.position.x > 4.3, "E+: le passage salon -> couloir reste libre (x = %.2f)" % main.xr_origin.position.x)
 
 	# --- E+ : carillon spatial de la pilule, limité à cinq mètres ---
 	var dose_audio := apt.get_dose()

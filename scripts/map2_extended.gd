@@ -728,8 +728,8 @@ func _register_spawn_spots() -> void:
 	for path in surfaces:
 		_spawn_spots.append({"pos": _surface_point(path, 0.09), "container": null})
 
-	for pos in [Vector3.ZERO, Vector3(7.3, 0.0, 2.0),
-			Vector3(7.3, 0.0, 4.6), Vector3(6.3, 0.0, -0.6)]:
+	for pos in [Vector3.ZERO, Vector3(8.0, 0.0, 2.2),
+			Vector3(5.6, 0.0, 4.2), Vector3(6.3, 0.0, -0.6)]:
 		_spawn_spots.append({"pos": pos, "container": null, "floor": true})
 
 
@@ -742,7 +742,7 @@ func _key_spots() -> Array[Vector3]:
 		"Shell/ExtensionEst/SDB/Lavabo", "Shell/ExtensionEst/Dressing/Armoire2",
 	]:
 		spots.append(_surface_point(path))
-	spots.append(Vector3(7.3, 0.0, 2.0)) # sol du couloir
+	spots.append(Vector3(8.0, 0.0, 2.2)) # sol du couloir (libre, à côté du portemanteau)
 	return spots
 
 
