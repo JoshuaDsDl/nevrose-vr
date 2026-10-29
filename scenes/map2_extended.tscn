@@ -950,20 +950,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.68, -2.2)
 transform = Transform3D(-2.1855694e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, -2.1855694e-08, 10.7, 0, 2.45)
 script = ExtResource("60_36jk5")
 
-
-[node name="MurChambreOuest" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, -3.9375)
-material_override = SubResource("mat_mur")
-mesh = SubResource("bx_0")
-
 [node name="PlafonnierWC" parent="ExtensionEst" instance=ExtResource("mob_plafonnier")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.45, 2.68, -3.0)
 
-
-[node name="MurChambreOuest" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, -3.9375)
-material_override = SubResource("mat_mur")
-mesh = SubResource("bx_0")
+[node name="CadreEntreeN" type="MeshInstance3D" parent="ExtensionEst"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 1.07, 1.5)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_porte_montant") [node name="CadreEntreeS" type="MeshInstance3D" parent="ExtensionEst"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 1.07, 2.5)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_porte_montant") [node name="CadreEntreeLinteau" type="MeshInstance3D" parent="ExtensionEst"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 2.2, 2.0)
+material_override = SubResource("mat_cadre")
+mesh = SubResource("mesh_porte_linteau")
 
 [node name="MurChambreOuest" type="MeshInstance3D" parent="ExtensionEst"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, -3.9375)
@@ -1179,14 +1178,3 @@ mesh = SubResource("bx_26")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0000, 2.7500, 5.3000)
 material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_26")
-
-[node name="CadreEntreeN" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 1.07, 1.5)
-material_override = SubResource("mat_cadre")
-mesh = SubResource("mesh_porte_montant") [node name="CadreEntreeS" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 1.07, 2.5)
-material_override = SubResource("mat_cadre")
-mesh = SubResource("mesh_porte_montant") [node name="CadreEntreeLinteau" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8, 2.2, 2.0)
-material_override = SubResource("mat_cadre")
-mesh = SubResource("mesh_porte_linteau")
