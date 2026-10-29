@@ -48,7 +48,6 @@ const FOLIE_CRITIQUE := 88.0 # teinte critique + messages urgents
 # XRController3D parent et pilote le blend tree automatiquement.
 var _left_hand_mesh: Node3D = null
 var _right_hand_mesh: Node3D = null
-var _body: VRBody = null
 var _held_key: KeyObject = null ## Clé actuellement dans la main (GDD §5.6)
 var phone: Phone = null ## Smartphone avec Messenger
 var vr_gameover_label: Label3D = null ## Game over 3D visible dans le casque OpenXR
@@ -72,6 +71,12 @@ var _desktop_yaw := 0.0
 var _desktop_pitch := 0.0
 var _movement_body: CharacterBody3D = null
 var _pointed: Node = null # conteneur/pilule actuellement pointé
+# Seuil gâchette analogique (action float "trigger") : front montant = appui,
+# réarmement sous TRIGGER_OFF. État "tenu" par main.
+const TRIGGER_ON := 0.6
+const TRIGGER_OFF := 0.4
+var _right_trigger_held := false
+var _left_trigger_held := false
 var _chat_hold := 0.0 # temps restant avant retour au compte à rebours
 var _chat_accum := 0.0
 var _creepy_idx := 0
@@ -127,6 +132,11 @@ func _ready() -> void:
 	_log("MAIN", "lobby : _ready()")
 	right_hand.button_pressed.connect(_on_right_button_pressed)
 	left_hand.button_pressed.connect(_on_left_button_pressed)
+	# Gâchettes : l'action "trigger" de l'action map est FLOAT, donc
+	# button_pressed ne se déclenche jamais — seuil maison appliqué ici
+	# (recommandation doc Godot pour les entrées analogiques).
+	right_hand.input_float_changed.connect(_on_right_float_changed)
+	left_hand.input_float_changed.connect(_on_left_float_changed)
 	_init_openxr()
 	_build_player_body()
 	_build_player_collision()
@@ -289,8 +299,7 @@ func _build_world() -> void:
 
 
 # ---------------------------------------------------------------------------
-# Joueur : mains VR (modèles low-poly) + corps FPV visible en baissant les yeux.
-# Les mains sont attachées aux XRController3D ; le corps à l'origine XR.
+# Joueur : mains VR (modèles low-poly godot-xr-tools) attachées aux manettes.
 # ---------------------------------------------------------------------------
 func _build_player_body() -> void:
 	_right_hand_mesh = HAND_SCENE_R.instantiate()
@@ -300,15 +309,6 @@ func _build_player_body() -> void:
 	left_hand.add_child(_left_hand_mesh)
 	_left_hand_mesh.visible = xr_active
 	_log("WORLD", "mains animées (godot-xr-tools) attachées : grip=pointer, grip+trigger=saisir")
-	# Corps FPV : uniquement en VR. En fallback bureau la caméra est à 1,7 m
-	# fixe → on se retrouverait à l'intérieur du buste (torse à y=1,25).
-	if not xr_active:
-		return
-	_body = VRBody.new()
-	_body.name = "PlayerBody"
-	xr_origin.add_child(_body)
-	_body.setup(xr_camera)
-	_log("WORLD", "corps FPV ajouté (visible en baissant les yeux)")
 
 
 
@@ -985,6 +985,28 @@ func _on_left_button_pressed(action_name: String) -> void:
 	# Le menu pa gauche sert de reset rapide si le joueur est coincé.
 	if action_name == &"menu_button" and game_over:
 		_restart()
+
+
+func _on_right_float_changed(action_name: String, value: float) -> void:
+	if action_name == &"trigger":
+		_right_trigger_held = _apply_trigger_threshold(value, _right_trigger_held, right_hand)
+
+
+func _on_left_float_changed(action_name: String, value: float) -> void:
+	if action_name == &"trigger":
+		_left_trigger_held = _apply_trigger_threshold(value, _left_trigger_held, left_hand)
+
+
+## Seuil maison sur la gâchette analogique : front montant ≥ TRIGGER_ON =
+## interact (même dispatch que le clic bureau), réarmement ≤ TRIGGER_OFF.
+## Retourne l'état "tenu" de la gâchette.
+func _apply_trigger_threshold(value: float, held: bool, hand: XRController3D) -> bool:
+	if not held and value >= TRIGGER_ON:
+		interact(hand)
+		return true
+	if held and value <= TRIGGER_OFF:
+		return false
+	return held
 
 
 func _process(delta: float) -> void:
