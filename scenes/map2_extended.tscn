@@ -324,6 +324,96 @@ roughness = 0.92
 albedo_color = Color(0.500, 0.500, 0.500, 1)
 roughness = 0.92
 
+[sub_resource type="BoxMesh" id="bx_0"]
+size = Vector3(0.1500, 2.7000, 1.8750)
+
+[sub_resource type="BoxMesh" id="bx_1"]
+size = Vector3(0.1500, 2.7000, 4.4500)
+
+[sub_resource type="BoxMesh" id="bx_2"]
+size = Vector3(0.1500, 2.7000, 1.4750)
+
+[sub_resource type="BoxMesh" id="bx_3"]
+size = Vector3(0.1500, 2.7000, 3.4250)
+
+[sub_resource type="BoxMesh" id="bx_4"]
+size = Vector3(0.1500, 2.7000, 1.0500)
+
+[sub_resource type="BoxMesh" id="bx_5"]
+size = Vector3(0.1500, 2.7000, 2.5000)
+
+[sub_resource type="BoxMesh" id="bx_6"]
+size = Vector3(0.1500, 0.6000, 0.9000)
+
+[sub_resource type="BoxMesh" id="bx_7"]
+size = Vector3(0.1500, 2.7000, 3.4750)
+
+[sub_resource type="BoxMesh" id="bx_8"]
+size = Vector3(0.1500, 2.7000, 2.3250)
+
+[sub_resource type="BoxMesh" id="bx_9"]
+size = Vector3(0.1500, 2.7000, 2.3000)
+
+[sub_resource type="BoxMesh" id="bx_10"]
+size = Vector3(7.4000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_11"]
+size = Vector3(3.7000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_12"]
+size = Vector3(1.6000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_13"]
+size = Vector3(2.7000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_14"]
+size = Vector3(0.3000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_15"]
+size = Vector3(2.5000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_16"]
+size = Vector3(0.9000, 0.6000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_17"]
+size = Vector3(1.3000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_18"]
+size = Vector3(8.0000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_19"]
+size = Vector3(10.2000, 2.7000, 0.1500)
+
+[sub_resource type="BoxMesh" id="bx_20"]
+size = Vector3(6.2500, 0.1000, 2.1500)
+
+[sub_resource type="BoxMesh" id="bx_21"]
+size = Vector3(5.0500, 0.1000, 5.6500)
+
+[sub_resource type="BoxMesh" id="bx_22"]
+size = Vector3(2.0500, 0.1000, 3.2500)
+
+[sub_resource type="BoxMesh" id="bx_23"]
+size = Vector3(3.5500, 0.1000, 2.2500)
+
+[sub_resource type="BoxMesh" id="bx_24"]
+size = Vector3(5.0500, 0.1000, 4.4500)
+
+[sub_resource type="BoxMesh" id="bx_25"]
+size = Vector3(4.8500, 0.1000, 4.4500)
+
+[sub_resource type="StandardMaterial3D" id="mat_moquette"]
+albedo_color = Color(0.800, 0.700, 0.650, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="mat_carrelage"]
+albedo_color = Color(0.900, 0.900, 0.880, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="mat_beton"]
+albedo_color = Color(0.500, 0.500, 0.500, 1)
+roughness = 0.92
+
 [node name="Map2Extended" type="Node3D" unique_id=1239910875]
 
 [node name="Floor" type="StaticBody3D" parent="." unique_id=1252020866]
@@ -666,7 +756,7 @@ transform = Transform3D(0.65335906, 0.7503995, 0.10010639, -0.62969816, 0.465277
 transform = Transform3D(0, 0, -1.875, 0, 1.875, 0, 1.875, 0, 0, 10.0778, 0, 1.59753)
 
 [node name="PorteManteau" parent="ExtensionEst/Couloir" unique_id=896876277 instance=ExtResource("mob_coatrack")]
-transform = Transform3D(2.875, 0, 0, 0, 2.875, 0, 0, 0, 2.875, 7.5, 0, 1.6)
+transform = Transform3D(2.875, 0, 0, 0, 2.875, 0, 0, 0, 2.875, 7.5, 0, 1.35)
 
 [node name="PlanteCouloir" parent="ExtensionEst/Couloir" unique_id=288939372 instance=ExtResource("mob_plantsmall")]
 transform = Transform3D(3.125, 0, 0, 0, 3.125, 0, 0, 0, 3.125, 9.5, 0, 2.5)
@@ -683,7 +773,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.44, 2.68, 2.06)
 [node name="Garage" type="Node3D" parent="ExtensionEst" unique_id=1622907729]
 
 [node name="LaveLinge" parent="ExtensionEst/Garage" unique_id=1657318772 instance=ExtResource("mob_washer")]
-transform = Transform3D(0, 0, 2.25, 0, 2.25, 0, -2.25, 0, 0, 5.19875, 0, 3.93875)
+transform = Transform3D(0, 0, 2.25, 0, 2.25, 0, -2.25, 0, 0, 5.19875, 0, 4.13875)
 
 [node name="Etabli" parent="ExtensionEst/Garage" unique_id=1661155701 instance=ExtResource("mob_desk")]
 transform = Transform3D(-2.375, 0, 0, 0, 2.375, 0, 0, 0, -2.375, 7.24844, 0, 6.61336)
@@ -701,7 +791,7 @@ transform = Transform3D(-1.23101, 0, 0.21706, 0, 1.25, 0, -0.21706, 0, -1.23101,
 transform = Transform3D(2.05259, 0, 0.54999, 0, 2.125, 0, -0.54999, 0, 2.05259, 5.44035, 0, 6.37652)
 
 [node name="Carton2" parent="ExtensionEst/Garage" unique_id=1946914343 instance=ExtResource("mob_boxopen")]
-transform = Transform3D(1.9259, 0, -0.898062, 0, 2.125, 0, 0.898062, 0, 1.9259, 5.39995, 0, 4.50921)
+transform = Transform3D(1.9259, 0, -0.898062, 0, 2.125, 0, 0.898062, 0, 1.9259, 5.59995, 0, 4.60921)
 
 [node name="Carton3" parent="ExtensionEst/Garage" unique_id=1924250518 instance=ExtResource("mob_boxclosed")]
 transform = Transform3D(1.62784, 0, 1.36592, 0, 2.12499, 0, -1.36592, 0, 1.62784, 5.57217, 0.597124, 6.41809)
@@ -739,7 +829,7 @@ transform = Transform3D(1.875, 0, 0, 0, 1.875, 0, 0, 0, 1.875, 5.0875, 0.6251, -
 transform = Transform3D(0, 0, 2.375, 0, 2.375, 0, -2.375, 0, 0, 9.13664, 0, 0.24844)
 
 [node name="ChaiseBureau" parent="ExtensionEst/Chambre" unique_id=1502538878 instance=ExtResource("mob_chairdesk")]
-transform = Transform3D(0, 0, -1.875, 0, 1.875, 0, 1.875, 0, 0, 7.40534, 0, -0.914015)
+transform = Transform3D(0, 0, -1.875, 0, 1.875, 0, 1.875, 0, 0, 7.40534, 0, -0.914016)
 
 [node name="TapisChambre" parent="ExtensionEst/Chambre" unique_id=1271591647 instance=ExtResource("mob_rugrect")]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 5.6225, 0, -1.61)
@@ -775,7 +865,7 @@ transform = Transform3D(0, 0, 2.75, 0, 2.75, 0, -2.75, 0, 0, 5.09375, 0, -0.85)
 [node name="SDB" type="Node3D" parent="ExtensionEst" unique_id=2062315239]
 
 [node name="Baignoire" parent="ExtensionEst/SDB" unique_id=776093777 instance=ExtResource("mob_bathtub")]
-transform = Transform3D(0, 0, 1.8125, 0, 1.8125, 0, -1.8125, 0, 0, 12.9075, 0, 0.878438)
+transform = Transform3D(1.8125, 0, 0, 0, 1.8125, 0, 0, 0, 1.8125, 10.7716, 0, 0.7575)
 
 [node name="WC" parent="ExtensionEst/SDB" unique_id=660467442 instance=ExtResource("mob_toilet")]
 transform = Transform3D(-2.125, 0, 0, 0, 2.125, 0, 0, 0, -2.125, 10.2821, 0, 0.357)
@@ -787,7 +877,7 @@ transform = Transform3D(-1.75, 0, 0, 0, 1.75, 0, 0, 0, -1.75, 11.3763, -0.099414
 transform = Transform3D(-2, 0, 0, 0, 2, 0, 0, 0, -2, 11.3013, 1.2, -1.1382)
 
 [node name="TapisSDB" parent="ExtensionEst/SDB" unique_id=675742120 instance=ExtResource("mob_rugdoormat")]
-transform = Transform3D(1.875, 0, 0, 0, 1.875, 0, 0, 0, 1.875, 10.5975, 0, -0.177804)
+transform = Transform3D(1.875, 0, 0, 0, 1.875, 0, 0, 0, 1.875, 10.5975, 0, -0.327804)
 
 [node name="SpotSDB" type="SpotLight3D" parent="ExtensionEst/SDB" unique_id=1646101972]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 11.5, 2.62, -0.15)
@@ -966,10 +1056,10 @@ transform = Transform3D(-2.1855694e-08, 0, -0.5, 0, 0.5, 0, 0.5, 0, -2.1855694e-
 script = ExtResource("60_36jk5")
 
 [node name="PlanteSDB" parent="ExtensionEst/SDB" unique_id=1347712782 instance=ExtResource("deco_plant2")]
-transform = Transform3D(3.125, 0, 0, 0, 3.125, 0, 0, 0, 3.125, 11.1, 0, 0.75)
+transform = Transform3D(3.125, 0, 0, 0, 3.125, 0, 0, 0, 3.125, 12.9, 0, -0.95)
 
 [node name="PlanteGarage" parent="ExtensionEst/Garage" unique_id=1161973069 instance=ExtResource("deco_plant2")]
-transform = Transform3D(3.125, 0, 0, 0, 3.125, 0, 0, 0, 3.125, 9.1, 0, 3.3)
+transform = Transform3D(3.125, 0, 0, 0, 3.125, 0, 0, 0, 3.125, 9.2, 0, 3.45)
 
 [node name="TapisGarage" parent="ExtensionEst/Garage" unique_id=1423938499 instance=ExtResource("deco_rugsq")]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 7.22176, 0, 4.99)
@@ -992,8 +1082,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, -3.9375)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_0")
 
+[node name="Voiture" parent="ExtensionEst" instance=ExtResource("car_sedan")]
+transform = Transform3D(0, 0, 1.25, 0, 1.25, 0, -1.25, 0, 0, 12.2313, 0, 5.25)
+
+[node name="PlafonnierVoiture" parent="ExtensionEst" instance=ExtResource("mob_plafonnier")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.14, 2.68, 5.31)
+
+
+[node name="MurChambreOuest" type="MeshInstance3D" parent="ExtensionEst"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, -3.9375)
+material_override = SubResource("mat_mur")
+mesh = SubResource("bx_0")
+
 [node name="MurGarageOuest" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, 5.2500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3000, 1.3500, 5.3750)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_1")
 
@@ -1003,12 +1105,12 @@ material_override = SubResource("mat_mur")
 mesh = SubResource("bx_2")
 
 [node name="MurChambreEst_S" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5000, 1.3500, -0.7000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5000, 1.3500, -0.7875)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_3")
 
 [node name="MurGarageVoiture_N" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5000, 1.3500, 3.5500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5000, 1.3500, 3.6750)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_4")
 
@@ -1033,12 +1135,12 @@ material_override = SubResource("mat_mur")
 mesh = SubResource("bx_7")
 
 [node name="MurSDBEst" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.2000, 1.3500, -0.1875)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.2000, 1.3500, -0.3125)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_8")
 
 [node name="MurVoitureEst" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5000, 1.3500, 5.2500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5000, 1.3500, 5.3750)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_1")
 
@@ -1058,47 +1160,47 @@ material_override = SubResource("mat_mur")
 mesh = SubResource("bx_11")
 
 [node name="MurCouloirNord_1" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.1000, 1.3500, 1.1000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.1000, 1.3500, 0.8500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_12")
 
 [node name="MurCouloirNord_2" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.1500, 1.3500, 1.1000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.1500, 1.3500, 0.8500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_13")
 
 [node name="MurCouloirNord_3" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.6500, 1.3500, 1.1000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.6500, 1.3500, 0.8500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_14")
 
 [node name="MurSDBSud" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.9500, 1.3500, 1.1000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.9500, 1.3500, 0.8500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_15")
 
 [node name="LinteauChambre" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.3500, 2.4000, 1.1000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.3500, 2.4000, 0.8500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_16")
 
 [node name="LinteauSDB" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2500, 2.4000, 1.1000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2500, 2.4000, 0.8500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_16")
 
 [node name="MurCouloirSud_1" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9500, 1.3500, 2.9000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.9500, 1.3500, 3.1500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_17")
 
 [node name="MurCouloirSud_2" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5000, 1.3500, 2.9000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5000, 1.3500, 3.1500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_18")
 
 [node name="LinteauGarage" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0500, 2.4000, 2.9000)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0500, 2.4000, 3.1500)
 material_override = SubResource("mat_mur")
 mesh = SubResource("bx_16")
 
@@ -1118,12 +1220,12 @@ material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_20")
 
 [node name="SolChambre" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, -0.0500, -1.8500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, -0.0500, -1.9000)
 material_override = SubResource("mat_moquette")
 mesh = SubResource("bx_21")
 
 [node name="PlafondChambre" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, 2.7500, -1.8500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, 2.7500, -1.9000)
 material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_21")
 
@@ -1138,37 +1240,31 @@ material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_22")
 
 [node name="SolSDB" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.3500, -0.0500, -0.1500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.3500, -0.0500, -0.2000)
 material_override = SubResource("mat_carrelage")
 mesh = SubResource("bx_23")
 
 [node name="PlafondSDB" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.3500, 2.7500, -0.1500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.3500, 2.7500, -0.2000)
 material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_23")
 
 [node name="SolGarage" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, -0.0500, 5.2500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, -0.0500, 5.3000)
 material_override = SubResource("mat_beton")
 mesh = SubResource("bx_24")
 
 [node name="PlafondGarage" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, 2.7500, 5.2500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9000, 2.7500, 5.3000)
 material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_24")
 
 [node name="SolVoiture" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0000, -0.0500, 5.2500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0000, -0.0500, 5.3000)
 material_override = SubResource("mat_beton")
 mesh = SubResource("bx_25")
 
 [node name="PlafondVoiture" type="MeshInstance3D" parent="ExtensionEst"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0000, 2.7500, 5.2500)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0000, 2.7500, 5.3000)
 material_override = SubResource("mat_plafond")
 mesh = SubResource("bx_25")
-
-[node name="Voiture" parent="ExtensionEst" instance=ExtResource("car_sedan")]
-transform = Transform3D(0, 0, 1.25, 0, 1.25, 0, -1.25, 0, 0, 12.2313, 0, 5.25)
-
-[node name="PlafonnierVoiture" parent="ExtensionEst" instance=ExtResource("mob_plafonnier")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.14, 2.68, 5.31)

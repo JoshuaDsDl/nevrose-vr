@@ -14,6 +14,8 @@ const MOVE_SPEED := 1.8 # m/s, vitesse constante, aucune dérive (GDD §4)
 const STICK_DEADZONE := 0.15
 const SNAP_COOLDOWN := 0.25 # s entre deux snaps
 const RAY_LENGTH := 3.0
+const TRIGGER_PRESS := 0.75 # seuil de déclenchement de la gâchette (0..1)
+const TRIGGER_RELEASE := 0.35 # seuil de relâchement (hystérésis)
 
 const SANITY_RATE := 1.4 # points/seconde tant que pas de dose (monte "vite")
 const SANITY_DOSE_RELIEF := 55.0 # reset partiel à la prise (GDD §5.1)
@@ -68,6 +70,7 @@ var game_over := false
 var dose_count := 0
 
 var _snap_cooldown := 0.0
+var _trigger_down := {} # état « gâchette enfoncée » par main (&"left" / &"right")
 var _desktop_yaw := 0.0
 var _desktop_pitch := 0.0
 var _movement_body: CharacterBody3D = null
@@ -463,6 +466,8 @@ func _update_desktop_look(relative: Vector2) -> void:
 # Boucle principale
 # ---------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
+	# Gâchettes lues en continu : le game over se relance aussi par gâchette.
+	_poll_triggers()
 	if game_over:
 		return
 	if not game_started:
@@ -966,17 +971,31 @@ func _pulse_haptics(amplitude := 0.45, duration := 0.12,
 # ---------------------------------------------------------------------------
 # Signaux manettes VR (gâchettes)
 # ---------------------------------------------------------------------------
-func _on_right_button_pressed(action_name: String) -> void:
-	# Gâchette index droite = interagir (ouvrir / prendre), au rayon ou au contact.
-	if action_name == &"trigger":
-		interact(right_hand)
+## La gâchette est une action analogique (float) dans openxr_action_map.tres :
+## Godot n'émet pas button_pressed pour elle. On lit donc sa valeur et on
+## détecte le front montant (seuil haut) puis le retour (seuil bas).
+func _poll_triggers() -> void:
+	if not xr_active:
+		return
+	_poll_trigger(right_hand, &"right")
+	_poll_trigger(left_hand, &"left")
+
+
+func _poll_trigger(hand: XRController3D, key: StringName) -> void:
+	var value := hand.get_float(&"trigger")
+	var was_down: bool = _trigger_down.get(key, false)
+	if not was_down and value > TRIGGER_PRESS:
+		_trigger_down[key] = true
+		interact(hand)
+	elif was_down and value < TRIGGER_RELEASE:
+		_trigger_down[key] = false
+
+
+func _on_right_button_pressed(_action_name: String) -> void:
+	pass
 
 
 func _on_left_button_pressed(action_name: String) -> void:
-	# Gâchette index gauche = aussi interagir (symétrique, confort ambidextre).
-	if action_name == &"trigger":
-		interact(left_hand)
-		return
 	# Boutons X/Y ou grip gauche = sortir / ranger le smartphone
 	if action_name in [&"ax_button", &"by_button", &"grip_click", &"primary_click"]:
 		if phone:

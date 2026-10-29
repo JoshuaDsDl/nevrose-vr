@@ -19,6 +19,10 @@ func setup(camera: XRCamera3D) -> void:
 func _process(_delta: float) -> void:
 	if _camera == null:
 		return
+	# Le corps suit la tête en XZ : se pencher ou se déplacer dans la pièce réelle
+	# ne le laisse plus à l'origine (sinon on se voit dissocié de son corps).
+	position.x = _camera.position.x
+	position.z = _camera.position.z
 	# Yaw uniquement : on ignore le pitch/roll de la tête pour le corps.
 	var fwd := -_camera.global_transform.basis.z
 	fwd.y = 0.0
