@@ -185,7 +185,7 @@ func _build_collision_geometry() -> void:
 		"Shell/ExtensionEst/SDB/MeubleSDB",
 		"Shell/ExtensionEst/Dressing/Armoire1", "Shell/ExtensionEst/Dressing/Armoire2",
 		"Shell/ExtensionEst/Dressing/PorteManteauDressing",
-		"Shell/ExtensionEst/Dressing/CartonDressing",
+		"Shell/ExtensionEst/Dressing/CartonDressing", "Shell/ExtensionEst/Voiture",
 	]
 	for path in furniture:
 		var node := get_node_or_null(path) as Node3D
@@ -729,7 +729,7 @@ func _register_spawn_spots() -> void:
 		_spawn_spots.append({"pos": _surface_point(path, 0.09), "container": null})
 
 	for pos in [Vector3.ZERO, Vector3(8.0, 0.0, 2.2),
-			Vector3(5.6, 0.0, 4.2), Vector3(6.3, 0.0, -0.6)]:
+			Vector3(7.7, 0.0, 6.2), Vector3(6.3, 0.0, -0.6)]:
 		_spawn_spots.append({"pos": pos, "container": null, "floor": true})
 
 

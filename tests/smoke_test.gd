@@ -115,7 +115,8 @@ func _initialize() -> void:
 	main.xr_camera.rotation.x = 0.0
 
 	# --- B : collisions de la capsule avec les murs et les meubles ---
-	main.xr_origin.position = Vector3(6.5, 1.7, 2.0)
+	# x = 7.5 : hors de la porte de la chambre (x 5.9-6.8), donc sur le mur du couloir
+	main.xr_origin.position = Vector3(7.5, 1.7, 2.0)
 	main._move_with_collisions(Vector3(0.0, 0.0, -2.0))
 	await physics_frame
 	await physics_frame
@@ -296,11 +297,11 @@ func _initialize() -> void:
 		entrance_door.interact()
 		await create_timer(0.45).timeout
 		_assert(is_equal_approx(entrance_door.rotation.y, rotation_fermee), "E+: la porte d'entrée verrouillée ne s'ouvre pas")
-		main.xr_origin.position = Vector3(9.6, 1.7, 2.0)
-		main._move_with_collisions(Vector3(1.5, 0.0, 0.0))
+		main.xr_origin.position = Vector3(10.2, 1.7, 2.0)
+		main._move_with_collisions(Vector3(1.0, 0.0, 0.0))
 		await physics_frame
 		await physics_frame
-		_assert(main.xr_origin.position.x < 10.1, "E+: la porte d'entrée bloque la sortie (x = %.2f)" % main.xr_origin.position.x)
+		_assert(main.xr_origin.position.x < 10.5, "E+: la porte d'entrée bloque la sortie (x = %.2f)" % main.xr_origin.position.x)
 	# Passage salon -> couloir : libre, sans porte.
 	main.xr_origin.position = Vector3(3.4, 1.7, 2.0)
 	main._move_with_collisions(Vector3(2.0, 0.0, 0.0))
