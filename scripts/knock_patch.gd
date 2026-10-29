@@ -242,13 +242,13 @@ func _build_hole() -> void:
 	black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	for i in 6:
+	for i in 10:
 		var m := MeshInstance3D.new()
 		var qm := QuadMesh.new()
-		qm.size = Vector2(rng.randf_range(0.28, 0.6), rng.randf_range(0.28, 0.6))
+		qm.size = Vector2(rng.randf_range(0.14, 0.42), rng.randf_range(0.14, 0.42))
 		m.mesh = qm
 		m.material_override = black
-		m.position = Vector3(rng.randf_range(-0.08, 0.08), rng.randf_range(-0.08, 0.08), 0.014 + i * 0.0005)
+		m.position = Vector3(rng.randf_range(-0.16, 0.16), rng.randf_range(-0.16, 0.16), 0.014 + i * 0.0005)
 		m.rotation.z = rng.randf_range(0.0, PI)
 		add_child(m)
 	# Éclats de plâtre sur le pourtour.

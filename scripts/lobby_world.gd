@@ -127,6 +127,8 @@ func _build_shop() -> void:
 		board.add_child(card)
 		card.setup(Vector2(0.62, 0.46), String(item["name"]), "", Color(0.9, 0.75, 0.3), 0.0021, 0.0015)
 		card.title_label.position.y = 0.08
+		card.title_label.font_size = 38
+		card.tag_label.font_size = 30
 		var col := i % cols
 		var row := i / cols
 		card.position = Vector3((col - (cols - 1) * 0.5) * 0.7, 2.05 - row * 0.54, 0.02)
@@ -157,6 +159,6 @@ func _refresh_tokens() -> void:
 		if profile.owns(id):
 			card.set_state("✔ POSSÉDÉ", Color(0.3, 0.95, 0.85), false)
 		elif profile.tokens >= price:
-			card.set_state("%d tokens — ACHETER" % price, Color(0.5, 1.0, 0.4), true)
+			card.set_state("ACHETER %d ◆" % price, Color(0.5, 1.0, 0.4), true)
 		else:
-			card.set_state("%d tokens" % price, Color(0.85, 0.3, 0.25), false)
+			card.set_state("%d ◆" % price, Color(0.85, 0.3, 0.25), false)

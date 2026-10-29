@@ -175,7 +175,7 @@ transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -1.6, 0.965, -1.65)
 transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -2.5133986, 0, 2.410011)
 
 [node name="Plant" parent="Furniture" unique_id=306796162 instance=ExtResource("9_vwf6o")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0.66241133, 0, 2.146269)
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 2.3, 0, -1.2)
 
 [node name="Bookcase" parent="Furniture" unique_id=1001164260 instance=ExtResource("10_iwi7x")]
 transform = Transform3D(-2.4998972, 0, -0.022670314, 0, 2.5, 0, 0.022670314, 0, -2.4998972, 2.2079875, 0, 1.84443)
