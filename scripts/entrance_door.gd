@@ -16,27 +16,23 @@ func _ready() -> void:
 	if leaf == null or leaf.mesh == null:
 		push_error("EntranceDoor: vantail Door_1 introuvable")
 		return
-	var bounds := leaf.mesh.get_aabb()
-	_add_collision_box("Collision", bounds, true)
-	_add_collision_box("area", bounds.grow(0.025), false)
+	# Boîte du vantail en coordonnées monde : le parent est mis à l'échelle 0,5,
+	# une boîte en repère local serait deux fois trop petite.
+	var world := leaf.global_transform * leaf.mesh.get_aabb()
+	_add_world_box("Collision", world, true)
+	_add_world_box("area", world.grow(0.025), false)
 
 
-func _add_collision_box(node_name: String, bounds: AABB, solid: bool) -> void:
+func _add_world_box(node_name: String, box: AABB, solid: bool) -> void:
 	var shape := BoxShape3D.new()
-	shape.size = bounds.size
+	shape.size = box.size
 	var collision := CollisionShape3D.new()
 	collision.shape = shape
-	collision.position = bounds.get_center()
-	if solid:
-		var body := StaticBody3D.new()
-		body.name = node_name
-		body.add_child(collision)
-		add_child(body)
-	else:
-		var area := Area3D.new()
-		area.name = node_name
-		area.add_child(collision)
-		add_child(area)
+	var body: Node3D = StaticBody3D.new() if solid else Area3D.new()
+	body.name = node_name
+	body.add_child(collision)
+	add_child(body)
+	body.global_transform = Transform3D(Basis(), box.get_center())
 
 
 func on_pointed() -> void:

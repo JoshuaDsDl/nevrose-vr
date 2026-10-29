@@ -36,6 +36,9 @@ const ROOM_MAX := Vector2(15.0, 8.0)
 const LOBBY_SCENE := preload("res://scenes/lobby.tscn")
 const LOBBY_MIN := Vector2(-2.25, -2.15)
 const LOBBY_MAX := Vector2(2.25, 2.15)
+const LOBBY_SPAWN := Vector2(1.0, 1.35)
+const APARTMENT_SPAWN := Vector2(-1.0, 0.0) # salon, zone libre
+const RESET_HOLD := 1.0 # secondes de maintien de la combinaison X + A
 
 const HAND_SCENE_R := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn")
 const HAND_SCENE_L := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn")
@@ -87,6 +90,7 @@ var _pointed: Node = null ## conteneur, clé ou pilule actuellement visé
 var _held_key: KeyObject = null
 var _held_pill: Dose = null
 var _pill_ready := false ## la pilule tenue est dans la bouche
+var _reset_hold := 0.0 ## temps de maintien de la combinaison de réinitialisation
 var _snap_cooldown := 0.0
 var _trigger_down := {} ## état « gâchette enfoncée » par main
 var _desktop_yaw := 0.0
@@ -300,6 +304,7 @@ func _register_debug_inputs() -> void:
 	_add_key_action(&"dbg_turn_left", [KEY_Q])
 	_add_key_action(&"dbg_turn_right", [KEY_E])
 	_add_key_action(&"dbg_interact", [KEY_F])
+	_add_key_action(&"dbg_reset", [KEY_R])
 	_add_key_action(&"dbg_phone", [KEY_TAB, KEY_T, KEY_P])
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
@@ -343,6 +348,7 @@ func _update_desktop_look(relative: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	# La gâchette reste active pendant le game over : elle sert à recommencer.
 	_poll_triggers()
+	_poll_reset(delta)
 	if game_over:
 		return
 	if not game_started:
@@ -365,6 +371,8 @@ func _process(delta: float) -> void:
 			interact()
 		if Input.is_action_just_pressed(&"dbg_snap_right"):
 			snap_turn(1.0)
+		if Input.is_action_just_pressed(&"dbg_reset"):
+			reset_position()
 	if Input.is_action_just_pressed(&"dbg_phone") and phone:
 		phone.toggle_pocket()
 
@@ -591,6 +599,31 @@ func _poll_trigger(hand: XRController3D, key: StringName) -> void:
 		_trigger_down[key] = false
 
 
+## Combinaison de réinitialisation : maintenir X (gauche) et A (droite) ensemble
+## pendant RESET_HOLD secondes ramène le joueur au point de départ.
+func _poll_reset(delta: float) -> void:
+	if not xr_active:
+		return
+	var combo := left_hand.is_button_pressed(&"ax_button") and right_hand.is_button_pressed(&"ax_button")
+	if not combo:
+		_reset_hold = 0.0
+		return
+	_reset_hold += delta
+	if _reset_hold >= RESET_HOLD:
+		_reset_hold = 0.0
+		reset_position()
+
+
+## Remet le joueur au point de départ, orienté vers l'avant, sans toucher à la partie.
+func reset_position() -> void:
+	var spawn := LOBBY_SPAWN if not game_started else APARTMENT_SPAWN
+	xr_origin.position = Vector3(spawn.x, xr_origin.position.y, spawn.y)
+	xr_origin.rotation = Vector3.ZERO
+	_desktop_yaw = 0.0
+	_pulse_haptics(0.3, 0.1)
+	_log("GAME", "réinitialisation de position")
+
+
 ## Boutons X/Y et grip : sortir ou ranger le téléphone. Menu : relancer après game over.
 func _on_button_pressed(action_name: String) -> void:
 	if action_name in [&"ax_button", &"by_button", &"grip_click", &"primary_click"]:
@@ -746,7 +779,10 @@ func _spawn_dose() -> void:
 # Téléphone : compte à rebours et messages (le seul retour écrit du jeu)
 # ---------------------------------------------------------------------------
 ## Un message du subconscient, affiché et lu sur le téléphone (diégétique).
-func _say(text: String, is_alert := false) -> void:
+## Après l'assimilation, le téléphone ne reçoit plus rien, sauf le message de fin.
+func _say(text: String, is_alert := false, force := false) -> void:
+	if game_over and not force:
+		return
 	if phone:
 		phone.receive_message(text, is_alert)
 
@@ -784,10 +820,25 @@ func _tick_phone(delta: float) -> void:
 func _trigger_game_over() -> void:
 	game_over = true
 	_log("GAME", "game over : assimilation")
-	_say(GAME_OVER_TEXT, true)
+	_say(GAME_OVER_TEXT, true, true)
 	if phone and not phone.is_in_hand:
 		phone.toggle_pocket()
 	_set_laser_target(false)
+	# Les mimics cessent d'agir : plus de contact ni de message après la fin.
+	for mimic in _all_mimics():
+		mimic.set_physics_process(false)
+		mimic.set_process(false)
+
+
+func _all_mimics() -> Array:
+	var all: Array = []
+	for mimic in apartment.mimics:
+		if is_instance_valid(mimic):
+			all.append(mimic)
+	for child in get_children():
+		if child is Mimic:
+			all.append(child)
+	return all
 
 
 func _restart() -> void:
@@ -796,6 +847,12 @@ func _restart() -> void:
 	sanity_rate = SANITY_RATE
 	dose_count = 0
 	_message_timer = 0.0
+	for mimic in _all_mimics():
+		if mimic.is_mobile:
+			mimic.queue_free()
+		else:
+			mimic.set_physics_process(true)
+			mimic.set_process(true)
 	_consume_pill()
 	_consume_key()
 	apartment.reset_containers()

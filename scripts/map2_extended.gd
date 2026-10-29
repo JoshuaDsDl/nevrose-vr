@@ -24,11 +24,11 @@ const FURNITURE_COLLISIONS := [
 	"Shell/ExtensionEst/Garage/Tabouret", "Shell/ExtensionEst/Garage/EtagereGarage",
 	"Shell/ExtensionEst/Garage/Carton1", "Shell/ExtensionEst/Garage/Carton2",
 	"Shell/ExtensionEst/Garage/Carton3", "Shell/ExtensionEst/Garage/Poubelle",
-	"Shell/ExtensionEst/Garage/TableStockage", "Shell/ExtensionEst/Garage/CartonStockage",
+	"Shell/ExtensionEst/Garage/CartonStockage",
 	"Shell/ExtensionEst/Chambre/LitDouble", "Shell/ExtensionEst/Chambre/TableNuit",
 	"Shell/ExtensionEst/Chambre/Bureau", "Shell/ExtensionEst/Chambre/ChaiseBureau",
 	"Shell/ExtensionEst/Chambre/EtagereChambre", "Shell/ExtensionEst/SDB/Baignoire",
-	"Shell/ExtensionEst/SDB/WC", "Shell/ExtensionEst/SDB/Lavabo",
+	"Shell/ExtensionEst/WC", "Shell/ExtensionEst/SDB/Lavabo",
 	"Shell/ExtensionEst/SDB/MeubleSDB",
 	"Shell/ExtensionEst/Dressing/Armoire1", "Shell/ExtensionEst/Dressing/Armoire2",
 	"Shell/ExtensionEst/Dressing/PorteManteauDressing",
@@ -67,6 +67,7 @@ func build() -> void:
 	living.name = "LivingRoom"
 	add_child(living)
 	_build_extension()
+	_paint_car()
 	_build_existing_gameplay()
 	_register_spawn_spots()
 	_build_keys(_key_spots())
@@ -266,6 +267,27 @@ func _build_extension() -> void:
 		InteractiveContainer.Mode.SLIDE, InteractiveContainer.LockType.KEY, 0.30)
 	_container_part("Shell/ExtensionEst/Dressing/Armoire1", "doorLeft", "DresserDrawer",
 		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.FORCEABLE, 0.0, -105.0)
+
+
+## Couleurs de la voiture du garage : carrosserie rouge, pneus noirs.
+func _paint_car() -> void:
+	var car := get_node_or_null("Shell/ExtensionEst/Voiture")
+	if car == null:
+		return
+	var paint := _solid_material(Color(0.62, 0.07, 0.06))
+	var tyre := _solid_material(Color(0.05, 0.05, 0.05))
+	for mi in _collect_meshes(car):
+		if mi.name.begins_with("body") or mi.name.begins_with("spoiler"):
+			mi.material_override = paint
+		elif mi.name.begins_with("wheel"):
+			mi.material_override = tyre
+
+
+func _solid_material(color: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.roughness = 0.5
+	return mat
 
 
 ## Conteneurs du salon et de la cuisine.

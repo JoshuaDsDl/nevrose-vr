@@ -11,6 +11,10 @@ const VIEWS := {
 	"sdb": [Vector3(9.8, 1.6, 0.1), Vector3(12.6, 1.2, -0.3)],
 	"garage": [Vector3(5.0, 1.6, 6.8), Vector3(9.0, 1.3, 4.0)],
 	"garage_voiture": [Vector3(9.8, 1.6, 4.4), Vector3(12.2, 1.1, 5.25)],
+	"chambre_lit": [Vector3(7.8, 1.6, 0.5), Vector3(6.2, 1.1, -4.4)],
+	"chambre_mur_nord": [Vector3(4.6, 1.6, -0.5), Vector3(5.2, 1.4, -4.7)],
+	"porte_entree": [Vector3(9.8, 1.6, 2.0), Vector3(10.7, 1.4, 2.0)],
+	"wc": [Vector3(11.3, 1.6, -2.8), Vector3(12.4, 1.1, -4.3)],
 	"dessus": [Vector3(9.0, 26.0, 2.0), Vector3(9.0, 0.0, 2.0)],
 }
 
