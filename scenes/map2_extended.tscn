@@ -871,10 +871,10 @@ transform = Transform3D(1.8125, 0, 0, 0, 1.8125, 0, 0, 0, 1.8125, 10.7716, 0, 0.
 transform = Transform3D(-2.125, 0, 0, 0, 2.125, 0, 0, 0, -2.125, 10.2821, 0, 0.357)
 
 [node name="Lavabo" parent="ExtensionEst/SDB" unique_id=1030075106 instance=ExtResource("mob_sink")]
-transform = Transform3D(-1.75, 0, 0, 0, 1.75, 0, 0, 0, -1.75, 11.3763, -0.099414, -1.585)
+transform = Transform3D(1.75, 0, 0, 0, 1.75, 0, 0, 0, 1.75, 10.6237, -0.099414, -0.535)
 
 [node name="Miroir" parent="ExtensionEst/SDB" unique_id=1730042219 instance=ExtResource("mob_mirror")]
-transform = Transform3D(-2, 0, 0, 0, 2, 0, 0, 0, -2, 11.3013, 1.2, -1.1382)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 10.6987, 1.2, -1.2318)
 
 [node name="TapisSDB" parent="ExtensionEst/SDB" unique_id=675742120 instance=ExtResource("mob_rugdoormat")]
 transform = Transform3D(1.875, 0, 0, 0, 1.875, 0, 0, 0, 1.875, 10.5975, 0, -0.327804)
