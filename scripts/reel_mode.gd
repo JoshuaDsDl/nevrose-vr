@@ -27,6 +27,11 @@ const END_PAD := 2.5 ## secondes après la fin du texte avant l'arrêt automatiq
 const CAPTURE_AT := 6.0 ## seconde de la prise où l'on photographie le cadre
 const AVATAR_LAYER := 1 << 19 ## visible seulement de la caméra du trépied
 
+# Palette de l'interface : rouge studio, ambre pour ce qui est choisi, acier pour le secondaire.
+const RED := Color(1.0, 0.24, 0.3)
+const AMBER := Color(1.0, 0.78, 0.3)
+const STEEL := Color(0.62, 0.7, 0.82)
+
 # Plan du studio (StudioMap) : le décor est le mur du fond au nord, la caméra le filme
 # depuis le sud. Le joueur se tient sur la croix et regarde vers le sud, vers le trépied.
 const MARK := Vector3(0.0, 0.0, -1.5)
@@ -92,11 +97,9 @@ var _feed_clock := 0.0
 var _heart_clock := 0.0
 var _cam_clock := 0.0
 var _seen_premises: Array[String] = []
-var _ideas_client: LlmClient = null
 var _judge_client: LlmClient = null
 var _judging: Dictionary = {}
 var _queue: Array[Dictionary] = []
-var _live_slot := 0
 var _rng := RandomNumberGenerator.new()
 var _warned_mark := false
 
@@ -128,18 +131,12 @@ func start() -> void:
 	add_child(_judge_client)
 	_judge_client.line_received.connect(_on_judge_line)
 	_judge_client.finished.connect(_on_judge_finished)
-	_ideas_client = LlmClient.new()
-	_ideas_client.name = "IdeasClient"
-	add_child(_ideas_client)
-	_ideas_client.line_received.connect(_on_idea_line)
-	_ideas_client.finished.connect(_on_ideas_finished)
 	camera.set("cull_mask", int(camera.get("cull_mask")) & ~AVATAR_LAYER)
 	_pick_local_premises()
 	_refresh_board()
 	_show_monitor()
-	monitor.show_standby("Place-toi sur la croix rose,\nface à l'objectif.")
+	monitor.show_standby("Place-toi sur la croix rouge,\nface à l'objectif.")
 	started = true
-	_request_live_ideas()
 	message.emit("Studio prêt. Choisis une idée et un ton sur le tableau, place-toi sur la croix rose et appuie sur REC.", false)
 
 
@@ -148,9 +145,8 @@ func shutdown() -> void:
 		camera.set("cull_mask", int(camera.get("cull_mask")) | AVATAR_LAYER)
 	if voice != null:
 		voice.stop()
-	for c in [_judge_client, _ideas_client]:
-		if c != null:
-			c.cancel()
+	if _judge_client != null:
+		_judge_client.cancel()
 
 
 ## Position de départ du joueur : sur la croix, face au trépied.
@@ -164,9 +160,11 @@ func player_start() -> Vector3:
 func _brighten_scene() -> void:
 	if environment == null:
 		return
-	environment.ambient_light_color = Color(0.85, 0.82, 0.92)
-	environment.ambient_light_energy = 1.0
-	environment.fog_density = 0.004
+	# Ambiance studio : pièce sombre et rouge, seul le plateau est éclairé.
+	environment.ambient_light_color = Color(0.5, 0.2, 0.22)
+	environment.ambient_light_energy = 0.6
+	environment.fog_light_color = Color(0.16, 0.03, 0.04)
+	environment.fog_density = 0.012
 
 
 func _build_set() -> void:
@@ -176,7 +174,7 @@ func _build_set() -> void:
 	mark.position = MARK + Vector3(0, 0.012, 0)
 	add_child(mark)
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.3, 0.65)
+	mat.albedo_color = Color(1.0, 0.18, 0.22)
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	for i in 2:
 		var bar := MeshInstance3D.new()
@@ -482,7 +480,7 @@ func _refresh_tabs() -> void:
 		b.name = "Onglet_%d" % i
 		_tabs.add_child(b)
 		var title := "CAMÉRA" if i == 0 else "RÉEL %d" % i
-		b.setup(Vector2(0.3, 0.14), title, "", Color(0.95, 0.3, 0.62), 0.0013, 0.001)
+		b.setup(Vector2(0.3, 0.14), title, "", RED, 0.0013, 0.001)
 		b.title_label.position.y = 0.025
 		b.title_label.font_size = 36
 		b.tag_label.font_size = 30
@@ -493,7 +491,7 @@ func _refresh_tabs() -> void:
 			var e := reels[i - 1]
 			tag = ReelData.format_count(int(e["result"].get("views", 0))) + " vues" if e["state"] == "done" else "analyse…"
 		var current := (i == 0 and _selected == -1) or (i > 0 and _selected == i - 1)
-		b.set_state(tag, Color(1.0, 0.85, 0.3) if current else Color(0.95, 0.3, 0.62), true)
+		b.set_state(tag, AMBER if current else RED, true, current)
 		var target := i - 1
 		b.pressed.connect(func() -> void: _show_entry(target) if target >= 0 else _show_monitor())
 		_tab_buttons.append(b)
@@ -510,26 +508,12 @@ func _build_board() -> void:
 	add_child(_board)
 	_board.rotation.y = atan2(MARK.x - BOARD_POS.x, MARK.z - BOARD_POS.z)
 
-	var back := MeshInstance3D.new()
-	var bq := QuadMesh.new()
-	bq.size = Vector2(2.45, 1.95)
-	back.mesh = bq
-	var bmat := StandardMaterial3D.new()
-	bmat.albedo_color = Color(0.05, 0.05, 0.075)
-	bmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	back.material_override = bmat
-	back.position = Vector3(0, 1.45, -0.01)
+	var back := LobbyButton.make_panel(Vector2(2.45, 1.95), RED, 0.09, 0.8,
+		Color(0.1, 0.04, 0.05), Color(0.025, 0.015, 0.02), 0.012, 0.97, -6)
+	back.position = Vector3(0, 1.45, -0.012)
 	_board.add_child(back)
-	var rim := MeshInstance3D.new()
-	var rq := QuadMesh.new()
-	rq.size = Vector2(2.5, 2.0)
-	rim.mesh = rq
-	var rmat := StandardMaterial3D.new()
-	rmat.albedo_color = Color(0.95, 0.3, 0.62)
-	rmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	rim.material_override = rmat
-	rim.position = Vector3(0, 1.45, -0.014)
-	_board.add_child(rim)
+	var post_mat := StandardMaterial3D.new()
+	post_mat.albedo_color = Color(0.06, 0.05, 0.06)
 	for x in [-1.1, 1.1]:
 		var post_mesh := MeshInstance3D.new()
 		var pc := CylinderMesh.new()
@@ -537,27 +521,35 @@ func _build_board() -> void:
 		pc.bottom_radius = 0.025
 		pc.height = 0.5
 		post_mesh.mesh = pc
-		post_mesh.material_override = bmat
+		post_mesh.material_override = post_mat
 		post_mesh.position = Vector3(x, 0.25, -0.03)
 		_board.add_child(post_mesh)
 
-	var title := _board_label("TENDANCES DU JOUR", 56, Color(1.0, 0.85, 0.35), Vector3(0, 2.33, 0.01))
+	var title := _board_label("TENDANCES DU JOUR", 54, Color(0.97, 0.97, 1.0), Vector3(0, 2.3, 0.01))
 	_board.add_child(title)
-	_status_label = _board_label("", 32, Color(0.6, 0.85, 1.0), Vector3(0, 2.2, 0.01))
+	var bar := LobbyButton.make_panel(Vector2(0.7, 0.012), RED, 0.006, 0.9, RED, RED, 0.0, 1.0, -4)
+	bar.position = Vector3(0, 2.2, 0.004)
+	_board.add_child(bar)
+	_status_label = _board_label("Une idée, un ton, puis REC", 28, STEEL, Vector3(0, 2.13, 0.01))
+	_status_label.font = null
 	_board.add_child(_status_label)
-	_hint_label = _board_label("", 34, Color(0.85, 0.85, 0.9), Vector3(0, 0.58, 0.01))
+	_hint_label = _board_label("", 30, Color(0.82, 0.84, 0.9), Vector3(0, 0.56, 0.01))
+	_hint_label.font = null
 	_board.add_child(_hint_label)
 
 	for i in 3:
 		var card := LobbyButton.new()
 		card.name = "Idee_%d" % i
 		_board.add_child(card)
-		card.setup(Vector2(0.76, 0.88), "", "", Color(0.95, 0.3, 0.62), 0.0021, 0.0017)
-		card.position = Vector3((i - 1) * 0.8, 1.68, 0.02)
-		card.title_label.position.y = 0.3
-		card.title_label.font_size = 36
+		card.setup(Vector2(0.76, 0.9), "", "", RED, 0.0021, 0.0017)
+		card.position = Vector3((i - 1) * 0.8, 1.66, 0.02)
+		# Titre en haut (2 lignes possibles), texte juste dessous : rien ne se chevauche.
+		card.title_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		card.title_label.position.y = 0.4
+		card.title_label.font_size = 38
+		card.body_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		card.body_label.position.y = 0.14
 		card.body_label.font_size = 32
-		card.body_label.position.y = -0.1
 		card.pressed.connect(_on_premise_pressed.bind(i))
 		_premise_cards.append(card)
 		interactables.append(card)
@@ -567,10 +559,10 @@ func _build_board() -> void:
 		var chip := LobbyButton.new()
 		chip.name = "Ton_%s" % t["id"]
 		_board.add_child(chip)
-		chip.setup(Vector2(0.54, 0.26), String(t["label"]), String(t["desc"]), Color(0.3, 0.9, 0.85), 0.0017, 0.0011)
-		chip.title_label.position.y = 0.055
-		chip.title_label.font_size = 40
-		chip.body_label.position.y = -0.05
+		chip.setup(Vector2(0.54, 0.26), String(t["label"]), String(t["desc"]), STEEL, 0.0017, 0.0011)
+		chip.title_label.position.y = 0.08
+		chip.title_label.font_size = 44
+		chip.body_label.position.y = 0.005
 		chip.body_label.font_size = 34
 		chip.position = Vector3((i - 1.5) * 0.59, 1.07, 0.02)
 		chip.pressed.connect(_on_tone_pressed.bind(i))
@@ -580,7 +572,7 @@ func _build_board() -> void:
 	_reroll_button = LobbyButton.new()
 	_reroll_button.name = "AutresIdees"
 	_board.add_child(_reroll_button)
-	_reroll_button.setup(Vector2(0.76, 0.2), "AUTRES IDÉES", "", Color(0.6, 0.85, 1.0), 0.0018, 0.001)
+	_reroll_button.setup(Vector2(0.76, 0.2), "AUTRES IDÉES", "", STEEL, 0.0018, 0.001)
 	_reroll_button.title_label.position.y = 0.0
 	_reroll_button.position = Vector3(-0.8, 0.78, 0.02)
 	_reroll_button.pressed.connect(_on_reroll_pressed)
@@ -589,7 +581,7 @@ func _build_board() -> void:
 	_end_button = LobbyButton.new()
 	_end_button.name = "Terminer"
 	_board.add_child(_end_button)
-	_end_button.setup(Vector2(0.76, 0.2), "TERMINER", "", Color(1.0, 0.45, 0.35), 0.0018, 0.001)
+	_end_button.setup(Vector2(0.76, 0.2), "TERMINER", "", RED, 0.0018, 0.001)
 	_end_button.title_label.position.y = 0.0
 	_end_button.position = Vector3(0.8, 0.78, 0.02)
 	_end_button.pressed.connect(_on_end_pressed)
@@ -601,7 +593,9 @@ func _board_label(text: String, font_size: int, color: Color, pos: Vector3) -> L
 	l.text = text
 	l.font_size = font_size
 	l.pixel_size = 0.0022
-	l.outline_size = 6
+	l.font = LobbyButton.bold_font()
+	l.outline_size = 5
+	l.outline_modulate = Color(0, 0, 0, 0.6)
 	l.modulate = color
 	l.position = pos
 	return l
@@ -632,14 +626,12 @@ func _refresh_board() -> void:
 		card.title_label.text = String(p["title"])
 		card.body_label.text = String(p["hook"])
 		var chosen := i == premise_index
-		var tag := "✔ CHOISIE" if chosen else ("EN DIRECT" if p.get("live", false) else "")
-		var accent := Color(1.0, 0.85, 0.3) if chosen else (Color(0.5, 0.95, 0.65) if p.get("live", false) else Color(0.95, 0.3, 0.62))
-		card.set_state(tag, accent, state == State.CHOOSING)
+		card.set_state("✔ CHOISIE" if chosen else "", AMBER if chosen else RED, state == State.CHOOSING, chosen)
 	for i in _tone_cards.size():
 		var chosen := i == tone_index
-		_tone_cards[i].set_state("✔" if chosen else "", Color(1.0, 0.85, 0.3) if chosen else Color(0.3, 0.9, 0.85), state == State.CHOOSING)
-	_reroll_button.set_state("", Color(0.6, 0.85, 1.0), state == State.CHOOSING)
-	_end_button.set_state("", Color(1.0, 0.45, 0.35), state == State.CHOOSING)
+		_tone_cards[i].set_state("✔ CHOISI" if chosen else "", AMBER if chosen else STEEL, state == State.CHOOSING, chosen)
+	_reroll_button.set_state("", STEEL, state == State.CHOOSING)
+	_end_button.set_state("", RED, state == State.CHOOSING)
 	_refresh_rec_button()
 	if state == State.CHOOSING:
 		_update_prompter_idle()
@@ -653,7 +645,7 @@ func _refresh_board() -> void:
 	elif tone_index < 0:
 		_hint_label.text = "Maintenant, choisis le ton de ta voix."
 	else:
-		_hint_label.text = "Va sur la croix rose, appuie sur REC au trépied et lis le texte à voix haute."
+		_hint_label.text = "Va sur la croix rouge, appuie sur REC au trépied et lis le texte à voix haute."
 
 
 func _on_premise_pressed(i: int) -> void:
@@ -675,7 +667,6 @@ func _on_reroll_pressed() -> void:
 		return
 	_pick_local_premises()
 	_refresh_board()
-	_request_live_ideas()
 
 
 func _on_end_pressed() -> void:
@@ -685,48 +676,13 @@ func _on_end_pressed() -> void:
 
 
 # ---------------------------------------------------------------------------
-# Idées en direct (LLM) : elles remplacent les cartes non choisies à leur arrivée
-# ---------------------------------------------------------------------------
-func _request_live_ideas() -> void:
-	if _ideas_client == null or _ideas_client.busy or not LlmClient.is_available():
-		if not LlmClient.is_available():
-			_status_label.text = "Mode hors ligne : idées locales"
-		return
-	if not _judging.is_empty() or not _queue.is_empty():
-		return # le serveur est occupé à juger un réel
-	_status_label.text = "● L'Algorithme cherche des tendances…"
-	_ideas_client.ask(ReelData.ideas_messages(), 150, 1.0)
-
-
-func _on_idea_line(line: String) -> void:
-	var idea := ReelData.parse_idea(line)
-	if idea.is_empty():
-		return
-	for k in 3:
-		var slot := (_live_slot + k) % 3
-		if slot != premise_index:
-			premises[slot] = idea
-			_live_slot = (slot + 1) % 3
-			break
-	_status_label.text = "● Tendances en direct"
-	_refresh_board()
-
-
-func _on_ideas_finished(ok: bool, _text: String) -> void:
-	if not ok:
-		_status_label.text = "Serveur injoignable : idées locales"
-	elif _status_label.text.begins_with("● L'Algorithme"):
-		_status_label.text = ""
-
-
-# ---------------------------------------------------------------------------
 # Bouton REC / STOP du trépied
 # ---------------------------------------------------------------------------
 func _build_rec_button() -> void:
 	rec_button = LobbyButton.new()
 	rec_button.name = "Rec"
 	add_child(rec_button)
-	rec_button.setup(Vector2(0.4, 0.36), "REC", "", Color(0.35, 0.95, 0.5), 0.0022, 0.0015)
+	rec_button.setup(Vector2(0.4, 0.36), "REC", "", Color(0.35, 0.95, 0.5), 0.0024, 0.0015)
 	rec_button.title_label.position.y = 0.04
 	rec_button.position = REC_POS
 	rec_button.rotation.y = atan2(MARK.x - rec_button.position.x, MARK.z - rec_button.position.z)
@@ -792,9 +748,7 @@ func _begin_countdown() -> void:
 	_refresh_board()
 	if not _warned_mark and Vector2(camera.global_position.x - MARK.x, camera.global_position.z - MARK.z).length() > 1.4:
 		_warned_mark = true
-		message.emit("Tu n'es pas sur la croix rose : tu risques de ne pas être dans le cadre.", false)
-	if _ideas_client.busy:
-		_ideas_client.cancel() # le serveur doit rester libre pour le jury
+		message.emit("Tu n'es pas sur la croix rouge : tu risques de ne pas être dans le cadre.", false)
 	for n in [3, 2, 1]:
 		monitor.show_countdown(n)
 		_play(Sfx.beep(false), SCREEN_POS, -4.0)
@@ -1054,8 +1008,6 @@ func _pump_queue() -> void:
 	if not LlmClient.is_available():
 		_judge_client.ask([], 1) # échec immédiat → juge local
 		return
-	if _ideas_client.busy:
-		_ideas_client.cancel()
 	_judge_client.ask(ReelData.judge_messages(ctx, _judging["jpeg"]), 320, 0.9)
 
 

@@ -33,11 +33,14 @@ func _initialize() -> void:
 	_assert(ReelData.parse_line(r, "VUES: beaucoup") == "", "jury : nombre absent ignoré")
 	_assert(ReelData.parse_number("1.2M") == 1200000.0, "nombre : 1.2M")
 	_assert(ReelData.format_count(12400) == "12,4 k" and ReelData.format_count(1250000) == "1,25 M" and ReelData.format_count(87) == "87", "affichage des compteurs")
-	var idea := ReelData.parse_idea("IDEE: Pigeons miners | Les pigeons n'existent pas, ils minent. Chaque roucoulement est un hash validé. Si vous en voyez un immobile, il mine votre quartier en secret. Abonnez-vous.")
-	_assert(idea.get("title", "") == "Pigeons miners" and idea.get("live", false), "idée en direct lue")
-	_assert(String(idea.get("script", "")).contains("hash validé") and String(idea["hook"]).begins_with("Les pigeons n'existent pas, ils minent.") and String(idea["hook"]).length() <= 100, "idée : texte à lire et accroche de carte")
-	_assert(ReelData.parse_idea("IDEE: Court | Trop court.").is_empty(), "idée : texte trop court refusé")
-	_assert(ReelData.parse_idea("Voici mes idées :").is_empty(), "idée : préambule ignoré")
+	# --- Les 30 textes écrits à la main ---
+	_assert(ReelData.SCRIPTS.size() >= 30, "idées : au moins 30 textes écrits à la main (%d)" % ReelData.SCRIPTS.size())
+	var seen := {}
+	for sc in ReelData.SCRIPTS:
+		var title: String = sc["title"]
+		_assert(title.length() <= 26 and not seen.has(title), "idée « %s » : titre court et unique" % title) if (title.length() > 26 or seen.has(title)) else null
+		seen[title] = true
+	_assert(ReelData.teaser(ReelData.SCRIPTS[0]["script"]).length() <= 100, "idée : accroche de carte courte")
 
 	# --- Garde-fous et tokens ---
 	var wild := {"views": 99999999, "likes": 99999999, "comments": 99999999, "shares": 99999999, "followers": 99999999, "score": 42}
@@ -121,6 +124,8 @@ func _initialize() -> void:
 	_assert(reel.premises.size() == 3 and reel._premise_cards.size() == 3 and reel._tone_cards.size() == 4, "réels : 3 idées et 4 tons au tableau")
 	_assert(main.apartment is StudioMap and main.apartment.get_node_or_null("Shell/Console") != null, "réels : tournage dans le studio dédié")
 	_assert(String(reel.premises[0]["script"]) != "", "réels : chaque idée a son texte à lire")
+	for card in reel._premise_cards:
+		_assert(card.title_label.text.length() <= 26, "réels : titre de carte « %s » tient dans le panneau" % card.title_label.text)
 	_assert(not reel.rec_button.enabled, "réels : REC grisé tant que rien n'est choisi")
 	reel._premise_cards[1].interact()
 	reel._tone_cards[2].interact()

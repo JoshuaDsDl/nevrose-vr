@@ -8,7 +8,8 @@ extends RefCounted
 
 const MAX_VIEWS := 3000000
 
-## Chaque idée : un titre et un court texte à LIRE À VOIX HAUTE devant la caméra.
+## Chaque idée : un titre (26 caractères max) et un court texte à LIRE À VOIX HAUTE devant
+## la caméra. Les textes sont écrits à la main : aucun appel réseau pour les idées.
 const SCRIPTS: Array[Dictionary] = [
 	{"title": "Bitcoin = lézards", "script": "Écoutez-moi bien. Satoshi Nakamoto n'existe pas. C'est un lézard géant qui mine du bitcoin dans ma cave depuis deux mille neuf. J'ai trouvé une écaille sur ma carte graphique. Abonnez-vous avant qu'il efface cette vidéo avec sa queue."},
 	{"title": "Le halving est truqué", "script": "Le halving, ils disent que ça divise les récompenses. Faux. Ça divise votre temps de sommeil. Chaque nuit, un bloc est validé pendant que vous dormez, et le vôtre est toujours le dernier. Réveillez-vous. Abonnez-vous."},
@@ -26,14 +27,20 @@ const SCRIPTS: Array[Dictionary] = [
 	{"title": "Les ATM parlent", "script": "Les distributeurs de billets vous chuchotent le cours du jour. Collez l'oreille contre la fente. Écoutez. Ce n'est pas le bruit des billets, c'est une voix qui dit : achète. Elle dit toujours achète. Même à découvert."},
 	{"title": "Lundi est une arnaque", "script": "Le lundi est une arnaque orchestrée par le dimanche soir. Tout le monde a investi son week-end, et chaque lundi, la liquidité disparaît. J'ai des captures d'écran de mon réveil. Regardez-le pleurer."},
 	{"title": "Ma plante est une whale", "script": "Ma plante verte détient quatre pour cent de tout le Solana. Elle ne bouge pas, c'est la stratégie : garder. Elle fait de la photosynthèse avec vos frais de transaction. Ne l'arrosez pas, elle est déjà riche."},
-]
-
-## Thèmes bizarres tirés au hasard pour les idées écrites par le LLM.
-const WEIRD_THEMES := [
-	"les pigeons", "le micro-ondes", "les chaussettes orphelines", "la Lune", "les ascenseurs",
-	"les pâtes trop cuites", "le lundi", "les trottinettes", "les moustaches", "les aspirateurs",
-	"le fromage", "les nuages", "les escaliers", "les cactus", "les GPS", "les ombres",
-	"les canards en plastique", "le Wi-Fi", "les réveils", "les grille-pain",
+	{"title": "Le GPS est un oracle", "script": "Votre GPS ne se trompe jamais : il vous envoie exactement là où il détient des actions. Recalcul d'itinéraire, ça veut dire : achète. Demi-tour dès que possible, ça veut dire : vends. Suivez la voix, elle sait."},
+	{"title": "Les chaussettes minent", "script": "Où vont les chaussettes orphelines ? Elles minent. Chaque paire dépareillée est un nœud validé dans une blockchain souterraine, sous votre machine à laver. Regardez le tambour tourner : c'est un hash. Ne la lancez plus."},
+	{"title": "Le fromage décentralisé", "script": "Le camembert est la première monnaie décentralisée. Il vieillit, il prend de la valeur, personne ne le contrôle. La Banque centrale déteste ça. Mettez vos économies dans un fromage. Si ça sent fort, c'est que ça monte."},
+	{"title": "Trottinettes et staking", "script": "Les trottinettes électriques ne sont pas en libre-service. Elles font du staking. Chaque fois qu'elles se rechargent la nuit, elles touchent des intérêts. Vous croyez les louer, mais ce sont elles qui vous louent."},
+	{"title": "Les canards au Pentagone", "script": "Les canards en plastique du bain sont des capteurs. Ils notent le cours du bitcoin à chaque éclaboussure. Le vôtre ne flotte pas droit : il a perdu quarante pour cent ce mois-ci. Ça ne s'invente pas."},
+	{"title": "Le grille-pain Illuminati", "script": "Mon grille-pain grille toujours d'un seul côté. Ce n'est pas un défaut, c'est un message. Un côté brûlé, un côté cru : c'est le marché. Il me dit d'être patient et de garder mes jetons au chaud."},
+	{"title": "Nuages, serveurs volants", "script": "Les nuages ne sont pas de la vapeur d'eau, ce sont des serveurs flottants. C'est pour ça qu'on dit le cloud. Quand il pleut, c'est un serveur qui fond. Ouvrez un parapluie, ou prenez une assurance."},
+	{"title": "Les escaliers montent", "script": "Les escaliers montent toujours, jamais ils ne descendent. Ça ne vous choque pas ? C'est un marché haussier permanent, caché dans votre immeuble. L'ascenseur, lui, descend : c'est un krach. Prenez l'escalier. Soyez haussier."},
+	{"title": "Cactus millionnaire", "script": "Mon cactus n'a jamais soif et il ne dépense rien. Il a compris la finance avant vous. Vingt ans à garder ses piquants, vingt ans de rendement. Quand il fleurit, c'est qu'il touche des dividendes. Ne le touchez pas."},
+	{"title": "L'ombre a un compte", "script": "Votre ombre vous suit partout, mais pourquoi ? Pour surveiller votre portefeuille. Elle est plus longue le soir, parce que les marchés ferment. Éteignez la lumière : elle perd son accès, et vous aussi."},
+	{"title": "Moustache = antenne", "script": "Les moustaches captent le signal des marchés. Voilà pourquoi les traders en ont, ou s'en rasent après un krach. Regardez ma moustache frémir. Elle vient de me souffler un nom : Dogecoin. Elle ne ment jamais."},
+	{"title": "Le réveil sait tout", "script": "Mon réveil sonne toujours une minute avant le krach. Je l'ai noté sept fois. Il connaît l'avenir, mais il refuse de me le dire autrement que par un bip. Alors je me lève. Et je vends. Merci, petit bip."},
+	{"title": "Pâtes trop cuites", "script": "Les pâtes trop cuites ne sont pas ratées, elles sont liquides, comme un actif. Plus elles baignent, plus elles se diluent. Égouttez avant le krach. La passoire, c'est le véritable cold wallet de nos grands-mères."},
+	{"title": "L'escalator, couche deux", "script": "L'escalator mécanique est une solution de couche deux. Il vous emmène plus vite sans toucher à l'escalier principal, qui, lui, reste figé. Voilà pourquoi tout le monde l'emprunte. Et pourquoi il tombe en panne."},
 ]
 
 const READ_WORDS_PER_SEC := 2.5 ## rythme de lecture à voix haute, ~150 mots/minute
@@ -109,15 +116,6 @@ static func teaser(script: String) -> String:
 static func local_premise(index: int) -> Dictionary:
 	var p: Dictionary = SCRIPTS[index % SCRIPTS.size()]
 	return {"title": p["title"], "script": p["script"], "hook": teaser(p["script"])}
-
-
-static func ideas_messages() -> Array:
-	var themes := WEIRD_THEMES.duplicate()
-	themes.shuffle()
-	return [
-		{"role": "system", "content": "Tu écris des réels Instagram comiques : des théories du complot ABSURDES et très bizarres qui mélangent la crypto-monnaie et un thème farfelu imposé (satire évidente, jamais de vraie désinformation, ni haine, ni vraie politique ou santé). Chaque idée est un court texte que le créateur lira À VOIX HAUTE face caméra : phrases courtes, rythme oral, chute drôle. Réponds uniquement par 3 lignes, au format exact :\nIDEE: <titre de 3 mots max> | <texte à lire, 35 à 45 mots>"},
-		{"role": "user", "content": "Écris 3 idées complètement différentes. Thème de l'idée 1 : %s. Thème de l'idée 2 : %s. Thème de l'idée 3 : %s." % [themes[0], themes[1], themes[2]]},
-	]
 
 
 ## Contexte complet d'un réel pour le jury. `ctx` : premise, tone, voice, followers,
@@ -227,35 +225,6 @@ static func parse_number(text: String) -> float:
 	if digits == "" or digits == ".":
 		return -1.0
 	return float(digits) * mult
-
-
-## Titre court pour la carte : coupé à la fin d'un mot, jamais au milieu.
-static func _short_title(raw: String) -> String:
-	var t := raw.trim_prefix("«").trim_suffix("»").strip_edges()
-	if t.length() <= 26:
-		return t
-	var cut := t.left(26)
-	var space := cut.rfind(" ")
-	return (cut.left(space) if space > 8 else cut).rstrip(" ,;:-")
-
-
-## Une ligne IDEE: titre | texte à lire.
-static func parse_idea(raw: String) -> Dictionary:
-	var line := raw.strip_edges().replace("**", "").lstrip("-•* ").strip_edges()
-	if not line.to_upper().begins_with("IDEE") and not line.to_upper().begins_with("IDÉE"):
-		return {}
-	var colon := line.find(":")
-	if colon < 0:
-		return {}
-	var body := line.substr(colon + 1).strip_edges()
-	var bar := body.find("|")
-	if bar <= 0:
-		return {}
-	var title := _short_title(body.substr(0, bar).strip_edges())
-	var script := body.substr(bar + 1).strip_edges().trim_prefix("«").trim_suffix("»").strip_edges()
-	if title == "" or words(script).size() < 12:
-		return {}
-	return {"title": title, "script": script.left(420), "hook": teaser(script), "live": true}
 
 
 # ---------------------------------------------------------------------------

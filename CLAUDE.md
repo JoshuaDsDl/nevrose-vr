@@ -82,11 +82,12 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
 
 ### Mode Réels (3e mode)
 
-Pièce dédiée `scripts/studio_map.gd` (`StudioMap`, autre map que l'appartement : fond violet,
+Pièce dédiée `scripts/studio_map.gd` (`StudioMap`, autre map que l'appartement : ambiance sombre et rouge,
 néon, console, canapé ; les décorations achetées s'accrochent au mur du fond filmé).
 `scripts/reel_mode.gd` : tableau des tendances (3 idées bizarres tirées au hasard + 4 tons),
 trépied/REC, écran de retour avec avatar, fiche façon Instagram. Chaque idée est un **court
-texte à lire à voix haute** (écrit par le LLM, sinon réserve locale `ReelData.SCRIPTS`) ; le
+texte à lire à voix haute**, tiré de 30 textes écrits à la main (`ReelData.SCRIPTS`, titres ≤ 26
+caractères, aucun appel réseau pour les idées) ; le
 prompteur au-dessus de l'objectif le fait défiler pendant la prise. Le micro (`voice_meter.gd`,
 pas de reconnaissance vocale) mesure le temps de parole, le volume et l'intonation ; le jury
 (LLM) compare le temps parlé au temps de lecture normal du texte, et reçoit aussi une image de
@@ -100,4 +101,6 @@ Tokens selon vues/likes (`ReelData.compute_tokens`).
   modèle `google/gemini-2.5-flash-lite`. Sinon serveur llama.cpp (`user://llm.cfg` ou
   `NEVROSE_LLM_URL`, défaut Tailscale `http://100.113.199.15:8081`).
 - Android : permissions `internet` et `record_audio` dans `export_presets.cfg`.
+- Le LLM ne sert plus qu à juger le réel (vues, likes, verdict, commentaires).
+- UI : `LobbyButton` (shader à coins arrondis, halo, pilule) et `LobbyButton.make_panel` ; un fond doit avoir un `render_priority` plus bas que les cartes posées dessus.
 - Tests : `tests/test_reels.gd` (hors ligne) ; `tests/live_llm.gd` essai manuel réseau.

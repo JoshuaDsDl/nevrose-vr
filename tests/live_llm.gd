@@ -1,5 +1,5 @@
 extends SceneTree
-## Essai manuel contre le vrai serveur (Tailscale requis) : idées puis jugement d'un
+## Essai manuel contre le LLM (OpenRouter ou serveur local) : jugement d'un
 ## réel, avec l'image jointe si un PNG est donné en argument (--image=chemin).
 ##   Godot --headless --path . --script res://tests/live_llm.gd
 ## Pas dans la suite automatique : dépend du réseau et du serveur.
@@ -12,11 +12,7 @@ func _initialize() -> void:
 	client.line_received.connect(func(l: String) -> void:
 		print("  [%5.1fs] %s" % [(Time.get_ticks_msec() - t0) / 1000.0, l]))
 
-	print("--- idées ---")
-	client.ask(ReelData.ideas_messages(), 150, 1.0)
-	var res: Array = await client.finished
-	print("idées : ok=%s (%s) en %.1f s" % [res[0], client.last_error, (Time.get_ticks_msec() - t0) / 1000.0])
-
+	var res: Array = []
 	var jpeg := PackedByteArray()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--image="):

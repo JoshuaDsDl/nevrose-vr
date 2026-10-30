@@ -1,9 +1,9 @@
 class_name StudioMap
 extends MapBase
 ## Le studio d'enregistrement : une pièce à part, pensée pour filmer des réels.
-## Mur du fond violet avec une enseigne néon, console centrale, tapis rond sous la
-## croix de tournage, canapé et bibliothèque hors champ, bandes LED qui changent de
-## couleur. Les décorations achetées à la boutique s'accrochent au mur du fond :
+## Ambiance sombre et rouge : mur du fond bordeaux avec une enseigne néon, console
+## centrale, tapis rond sous la croix de tournage, canapé et bibliothèque hors champ,
+## bandes LED rouges qui respirent. Les décorations achetées à la boutique s'accrochent au mur du fond :
 ## c'est le décor que la caméra du trépied filme.
 ##
 ## Repère : la pièce occupe x ∈ [-3.5, 3.5], z ∈ [-3.0, 3.5] ; le mur du fond est au nord
@@ -54,12 +54,13 @@ func build() -> void:
 func _process(delta: float) -> void:
 	_clock += delta
 	for led in _leds:
-		var hue := fposmod(_clock * 0.05 + float(led["phase"]), 1.0)
-		var c := Color.from_hsv(hue, 0.75, 1.0)
+		# Rouge unique : seule l'intensité respire, doucement.
+		var pulse := 0.8 + 0.2 * sin(_clock * 1.3 + float(led["phase"]) * TAU)
+		var c := Color(1.0, 0.1, 0.12) * pulse
 		(led["mat"] as StandardMaterial3D).emission = c
 		(led["mat"] as StandardMaterial3D).albedo_color = c
 		if led["light"] != null:
-			(led["light"] as OmniLight3D).light_color = c
+			(led["light"] as OmniLight3D).light_energy = 0.4 * pulse
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +97,7 @@ func _plaster_mat(color: Color, uv := 3.0) -> StandardMaterial3D:
 
 func _build_shell() -> void:
 	var floor_mat := StandardMaterial3D.new()
-	floor_mat.albedo_color = Color(0.85, 0.66, 0.52)
+	floor_mat.albedo_color = Color(0.42, 0.3, 0.26)
 	floor_mat.albedo_texture = ProceduralTextures.wood(Color.WHITE)
 	floor_mat.uv1_scale = Vector3(3, 3, 1)
 	floor_mat.roughness = 0.45
@@ -105,9 +106,9 @@ func _build_shell() -> void:
 	var cx := (X_MAX + X_MIN) * 0.5
 	var cz := (Z_MAX + Z_MIN) * 0.5
 	_solid("Floor", Vector3(w, 0.1, d), Vector3(cx, -0.05, cz), floor_mat)
-	_solid("Ceiling", Vector3(w, 0.1, d), Vector3(cx, HEIGHT + 0.05, cz), _plaster_mat(Color(0.55, 0.54, 0.64)))
-	var back := _plaster_mat(Color(0.62, 0.4, 0.92)) # le décor : violet
-	var side := _plaster_mat(Color(0.6, 0.6, 0.72))
+	_solid("Ceiling", Vector3(w, 0.1, d), Vector3(cx, HEIGHT + 0.05, cz), _plaster_mat(Color(0.2, 0.15, 0.16)))
+	var back := _plaster_mat(Color(0.5, 0.09, 0.12)) # le décor : bordeaux
+	var side := _plaster_mat(Color(0.22, 0.17, 0.18))
 	_solid("WallN", Vector3(w + 0.2, HEIGHT, 0.1), Vector3(cx, HEIGHT * 0.5, Z_MIN - 0.05), back)
 	_solid("WallS", Vector3(w + 0.2, HEIGHT, 0.1), Vector3(cx, HEIGHT * 0.5, Z_MAX + 0.05), side)
 	_solid("WallW", Vector3(0.1, HEIGHT, d), Vector3(X_MIN - 0.05, HEIGHT * 0.5, cz), side)
@@ -200,9 +201,9 @@ func _bounds(n: Node3D, acc: Transform3D) -> AABB:
 func _build_lighting() -> void:
 	for pos in [Vector3(-1.5, HEIGHT - 0.15, -0.5), Vector3(1.5, HEIGHT - 0.15, -0.5), Vector3(-1.5, HEIGHT - 0.15, 2.0), Vector3(1.5, HEIGHT - 0.15, 2.0)]:
 		var l := OmniLight3D.new()
-		l.light_color = Color(0.9, 0.92, 1.0)
-		l.light_energy = 1.1
-		l.omni_range = 6.5
+		l.light_color = Color(1.0, 0.35, 0.3)
+		l.light_energy = 0.45
+		l.omni_range = 5.5
 		l.position = pos
 		_shell.add_child(l)
 		var panel := MeshInstance3D.new()
@@ -210,7 +211,7 @@ func _build_lighting() -> void:
 		bm.size = Vector3(0.6, 0.03, 0.6)
 		panel.mesh = bm
 		var pm := StandardMaterial3D.new()
-		pm.albedo_color = Color(1, 1, 1)
+		pm.albedo_color = Color(1.0, 0.45, 0.4)
 		pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		panel.material_override = pm
 		panel.position = pos + Vector3(0, 0.1, 0)
@@ -235,7 +236,8 @@ func _build_lighting() -> void:
 		mi.position = spec[1]
 		_shell.add_child(mi)
 		var light := OmniLight3D.new()
-		light.light_energy = 0.45
+		light.light_color = Color(1.0, 0.12, 0.12)
+		light.light_energy = 0.4
 		light.omni_range = 3.5
 		light.position = (spec[1] as Vector3) + Vector3(0, 0, 0.2) if absf((spec[0] as Vector3).x) > 1.0 else (spec[1] as Vector3) + Vector3(0.2 * signf(-(spec[1] as Vector3).x), 0, 0)
 		_shell.add_child(light)
@@ -250,13 +252,13 @@ func _build_sign() -> void:
 	sign_label.font_size = 96
 	sign_label.pixel_size = 0.0045
 	sign_label.outline_size = 14
-	sign_label.outline_modulate = Color(0.5, 0.0, 0.3)
-	sign_label.modulate = Color(1.0, 0.45, 0.8)
+	sign_label.outline_modulate = Color(0.45, 0.0, 0.03)
+	sign_label.modulate = Color(1.0, 0.3, 0.32)
 	sign_label.shaded = false
 	sign_label.position = Vector3(0.0, 3.0, Z_MIN + 0.04)
 	_shell.add_child(sign_label)
 	var glow := OmniLight3D.new()
-	glow.light_color = Color(1.0, 0.3, 0.7)
+	glow.light_color = Color(1.0, 0.1, 0.15)
 	glow.light_energy = 0.8
 	glow.omni_range = 3.0
 	glow.position = Vector3(0.0, 2.9, Z_MIN + 0.5)

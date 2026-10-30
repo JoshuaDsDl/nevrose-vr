@@ -98,12 +98,19 @@ Plus tu buzzes, plus tu gagnes de tokens.",
 
 	tokens_label = Label3D.new()
 	tokens_label.name = "Tokens"
+	tokens_label.font = LobbyButton.bold_font()
 	tokens_label.pixel_size = 0.003
-	tokens_label.font_size = 56
-	tokens_label.outline_size = 8
-	tokens_label.modulate = Color(1.0, 0.85, 0.35)
+	tokens_label.font_size = 52
+	tokens_label.outline_size = 6
+	tokens_label.outline_modulate = Color(0, 0, 0, 0.6)
+	tokens_label.modulate = Color(1.0, 0.82, 0.35)
 	tokens_label.position = Vector3(0.6, 2.2, -0.2)
 	holder.add_child(tokens_label)
+	# Bandeau lumineux sous le solde.
+	var underline := LobbyButton.make_panel(Vector2(0.9, 0.012), Color(1.0, 0.82, 0.35), 0.006, 0.9,
+		Color(1.0, 0.82, 0.35), Color(1.0, 0.82, 0.35), 0.0, 1.0)
+	underline.position = Vector3(0.6, 2.1, -0.2)
+	holder.add_child(underline)
 
 
 func _choose(p_mode: int) -> void:
@@ -127,11 +134,13 @@ func _build_shop() -> void:
 	add_child(board)
 
 	var header := Label3D.new()
-	header.text = "BOUTIQUE — décorations de l'appartement"
-	header.pixel_size = 0.0035
-	header.font_size = 48
-	header.outline_size = 6
-	header.modulate = Color(1.0, 0.85, 0.35)
+	header.text = "BOUTIQUE"
+	header.font = LobbyButton.bold_font()
+	header.pixel_size = 0.0038
+	header.font_size = 56
+	header.outline_size = 5
+	header.outline_modulate = Color(0, 0, 0, 0.6)
+	header.modulate = Color(0.97, 0.97, 1.0)
 	header.position = Vector3(0.0, 2.52, 0.01)
 	board.add_child(header)
 
