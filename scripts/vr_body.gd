@@ -4,7 +4,6 @@ extends Node3D
 ## sous la caméra. Suit le yaw de la caméra mais pas son pitch — sinon les
 ## jambes remonteraient quand on regarde ses pieds. Zéro mesh importé.
 
-const SHIRT := Color(0.30, 0.34, 0.42)
 const PANTS := Color(0.22, 0.22, 0.26)
 const SHOES := Color(0.12, 0.10, 0.10)
 
@@ -32,13 +31,15 @@ func _process(_delta: float) -> void:
 	global_rotation.y = _yaw_only
 
 
+## Adapte la taille du corps à la taille mesurée du joueur (1,7 m = taille de référence).
+func fit(height: float) -> void:
+	scale = Vector3.ONE * clampf(height / 1.7, 0.75, 1.25)
+
+
 func _init() -> void:
 	var unit := BoxMesh.new()
 	unit.size = Vector3.ONE
 
-	var m_shirt := StandardMaterial3D.new()
-	m_shirt.albedo_color = SHIRT
-	m_shirt.roughness = 0.85
 	var m_pants := StandardMaterial3D.new()
 	m_pants.albedo_color = PANTS
 	m_pants.roughness = 0.9
@@ -46,11 +47,7 @@ func _init() -> void:
 	m_shoes.albedo_color = SHOES
 	m_shoes.roughness = 0.7
 
-	# Torse (visible si on baisse vraiment la tête)
-	_box(unit, "Chest", Vector3(0.34, 0.30, 0.20), Vector3(0, 1.25, 0.05), m_shirt)
-	# Bassin
-	_box(unit, "Hips", Vector3(0.32, 0.16, 0.20), Vector3(0, 1.02, 0.02), m_pants)
-
+	# Pas de torse ni de bassin : sous la tête, ils formaient un gros cube devant les yeux.
 	# Cuisses + mollets + chaussures, légèrement écartés
 	for side in [-1.0, 1.0]:
 		var x: float = 0.09 * side

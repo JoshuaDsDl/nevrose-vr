@@ -99,6 +99,9 @@ var phone: Phone = null
 var creepy_voices: Node = null ## voix dans les murs (HRTF)
 
 var _body: VRBody = null
+const DEFAULT_HEIGHT := 1.7 ## taille de référence (corps et caméra de bureau)
+var player_height := DEFAULT_HEIGHT ## taille mesurée du joueur, à partir du casque
+var _fit_timer := -1.0 ## > 0 : délai avant de mesurer la taille (le casque se recale)
 var _movement_body: CharacterBody3D = null
 var _laser: MeshInstance3D = null ## rayon de visée de la main droite (VR)
 var _pointed: Node = null ## conteneur, clé ou pilule actuellement visé
@@ -197,6 +200,7 @@ func _build_lobby() -> void:
 	add_child(lobby)
 	lobby.setup(profile)
 	lobby.play_requested.connect(start_game)
+	_recalibrate()
 	if music != null:
 		music.resume()
 	xr_origin.position = Vector3(1.0, 1.7 if not xr_active else 0.0, 1.35)
@@ -423,6 +427,7 @@ func _physics_process(delta: float) -> void:
 	_poll_triggers()
 	_poll_reset(delta)
 	_poll_lobby_exit(delta)
+	_tick_fit(delta)
 	if game_over:
 		return
 	if not game_started:
@@ -940,8 +945,32 @@ func _tick_hunt_gps() -> void:
 	phone.update_gps(float(info["angle"]), float(info["distance"]), int(info["vertical"]))
 
 
+## Recentre le suivi du casque là où le joueur se tient, puis mesure sa taille.
+## Appelé au lancement et à la réinitialisation.
+func _recalibrate() -> void:
+	if xr_active:
+		XRServer.center_on_hmd(XRServer.RESET_FULL_ROTATION, true)
+	_fit_timer = 0.3
+
+
+func _tick_fit(delta: float) -> void:
+	if _fit_timer < 0.0:
+		return
+	_fit_timer -= delta
+	if _fit_timer > 0.0:
+		return
+	_fit_timer = -1.0
+	if xr_active:
+		var eyes := xr_camera.position.y # hauteur des yeux au-dessus du sol (origine à 0)
+		if eyes > 0.9 and eyes < 2.4:
+			player_height = eyes
+	if _body != null:
+		_body.fit(player_height)
+
+
 ## Remet le joueur au point de départ, orienté vers l'avant, sans toucher à la partie.
 func reset_position() -> void:
+	_recalibrate()
 	var spawn := LOBBY_SPAWN if not game_started else APARTMENT_SPAWN
 	_jump_y = 0.0
 	_jump_vy = 0.0
