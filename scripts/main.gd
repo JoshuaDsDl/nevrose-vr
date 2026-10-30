@@ -44,7 +44,7 @@ const LOBBY_MAX := Vector2(2.25, 2.15)
 const LOBBY_SPAWN := Vector2(1.0, 1.35)
 const APARTMENT_SPAWN := Vector2(-1.0, 0.0) # salon, zone libre
 const RESET_HOLD := 1.0 # secondes de maintien de la combinaison X + A
-const LOBBY_HOLD := 1.5 # secondes de maintien du bouton menu (manette gauche) pour revenir au lobby
+const LOBBY_HOLD := 1.2 # secondes de maintien d'un bouton « retour au lobby » (menu, Y ou B)
 
 const HAND_SCENE_R := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn")
 const HAND_SCENE_L := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn")
@@ -105,6 +105,7 @@ var _pill_ready := false ## la pilule tenue est dans la bouche
 var _reset_hold := 0.0 ## temps de maintien de la combinaison de réinitialisation
 var _lobby_hold := 0.0 ## temps de maintien du bouton « retour au lobby »
 var _lobby_ticks := 0 ## vibrations déjà données pendant le maintien
+var _lobby_hud: Label3D = null ## indicateur de progression devant les yeux
 var _snap_cooldown := 0.0
 var _trigger_down := {} ## état « gâchette enfoncée » par main
 var _desktop_yaw := 0.0
@@ -678,7 +679,11 @@ func _poll_reset(delta: float) -> void:
 func _poll_lobby_exit(delta: float) -> void:
 	var pressed := false
 	if xr_active:
-		pressed = left_hand.is_button_pressed(&"menu_button")
+		# Trois boutons au choix : le bouton menu (manette gauche) n'est pas toujours remonté
+		# par le système du Quest, Y (gauche) et B (droite) le sont toujours.
+		pressed = left_hand.is_button_pressed(&"menu_button") \
+			or left_hand.is_button_pressed(&"by_button") \
+			or right_hand.is_button_pressed(&"by_button")
 	elif InputMap.has_action(&"dbg_lobby"):
 		pressed = Input.is_action_pressed(&"dbg_lobby")
 	_tick_lobby_hold(pressed, delta)
@@ -687,10 +692,15 @@ func _poll_lobby_exit(delta: float) -> void:
 ## Séparé de la lecture des boutons pour pouvoir être testé en headless.
 func _tick_lobby_hold(pressed: bool, delta: float) -> void:
 	if not pressed or not game_started:
+		if _lobby_hold > 0.0:
+			_show_lobby_hud(false)
 		_lobby_hold = 0.0
 		_lobby_ticks = 0
 		return
+	if _lobby_hold == 0.0:
+		_log("GAME", "maintien du bouton retour au lobby détecté")
 	_lobby_hold += delta
+	_show_lobby_hud(true)
 	# Deux vibrations de plus en plus fortes annoncent le retour, pour pouvoir lâcher à temps.
 	var ticks := int(_lobby_hold / (LOBBY_HOLD / 3.0))
 	if ticks > _lobby_ticks and ticks < 3:
@@ -699,9 +709,34 @@ func _tick_lobby_hold(pressed: bool, delta: float) -> void:
 	if _lobby_hold >= LOBBY_HOLD:
 		_lobby_hold = 0.0
 		_lobby_ticks = 0
+		_show_lobby_hud(false)
 		_log("GAME", "retour au lobby demandé (bouton maintenu)")
 		_pulse_haptics(0.8, 0.2)
 		return_to_lobby()
+
+
+## Indicateur « Retour au lobby » : une barre qui se remplit, visible par-dessus le décor.
+func _show_lobby_hud(on: bool) -> void:
+	if not on:
+		if is_instance_valid(_lobby_hud):
+			_lobby_hud.visible = false
+		return
+	if not is_instance_valid(_lobby_hud):
+		_lobby_hud = Label3D.new()
+		_lobby_hud.name = "RetourLobby"
+		_lobby_hud.font = LobbyButton.bold_font()
+		_lobby_hud.pixel_size = 0.0007
+		_lobby_hud.font_size = 56
+		_lobby_hud.outline_size = 10
+		_lobby_hud.outline_modulate = Color(0, 0, 0, 0.9)
+		_lobby_hud.modulate = Color(1.0, 0.85, 0.35)
+		_lobby_hud.no_depth_test = true
+		_lobby_hud.render_priority = 100
+		_lobby_hud.position = Vector3(0.0, -0.12, -0.6)
+		xr_camera.add_child(_lobby_hud)
+	var filled := clampi(int(_lobby_hold / LOBBY_HOLD * 10.0), 0, 10)
+	_lobby_hud.text = "RETOUR AU LOBBY\n[%s%s]" % ["#".repeat(filled), "-".repeat(10 - filled)]
+	_lobby_hud.visible = true
 
 
 ## Remet le joueur au point de départ, orienté vers l'avant, sans toucher à la partie.

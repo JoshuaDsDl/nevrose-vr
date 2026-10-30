@@ -17,8 +17,9 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
   toutes les 4,5 à 7,5 s ; on casse la plaque (gâchette ou coup de poing, 4 coups) ; au
   dernier mur le monstre (`assets/monster/entity.glb`, mannequin Xbot de three.js,
   animé) apparaît puis se dissout. Tokens : 8 + 5 par mur.
-- **Retour au lobby** à tout moment : maintenir 1,5 s le bouton menu de la manette gauche
-  (Échap au bureau) ; deux vibrations annoncent le retour (`Main._poll_lobby_exit`).
+- **Retour au lobby** à tout moment : maintenir 1,2 s le bouton menu (gauche), Y (gauche) ou B (droite)
+  (Échap au bureau) ; une barre « RETOUR AU LOBBY » se remplit devant les yeux et deux vibrations
+  annoncent le retour (`Main._poll_lobby_exit`).
 - **Lobby** : trois cartes géantes (viser + gâchette) pour choisir le mode ; boutique
   de décorations au mur sud (`decor_catalog.gd`), profil sauvegardé (`player_profile.gd`).
 - Tests : `tests/smoke_test.gd` et `tests/test_modes.gd`.

@@ -120,10 +120,11 @@ func _initialize() -> void:
 	main._tick_lobby_hold(true, 0.5)
 	main._tick_lobby_hold(false, 0.1)
 	_assert(main.game_started, "lobby : un appui trop court ne fait rien")
-	main._tick_lobby_hold(true, 0.7)
-	main._tick_lobby_hold(true, 0.7)
+	main._tick_lobby_hold(true, 0.6)
+	main._tick_lobby_hold(true, 0.4)
 	_assert(main.game_started, "lobby : le maintien se remet à zéro quand on lâche")
-	main._tick_lobby_hold(true, 0.8)
+	_assert(is_instance_valid(main._lobby_hud) and main._lobby_hud.visible and main._lobby_hud.text.contains("#"), "lobby : une barre de progression s'affiche pendant le maintien")
+	main._tick_lobby_hold(true, 0.9)
 	await process_frame
 	_assert(not main.game_started and main.lobby != null and main.mode == Main.Mode.NONE, "lobby : maintien du bouton = retour au lobby")
 
