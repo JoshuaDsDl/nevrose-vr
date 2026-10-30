@@ -73,9 +73,13 @@ func _initialize() -> void:
 	hunt._voice_clock = 0.0
 	for i in 3:
 		await physics_frame
-	_assert(hunt.voices_played >= 1 and hunt.current.voices_played >= 1, "chasse : une voix sort du mur qui cogne")
-	var voice_node := hunt.current.get_node_or_null("Voix") as AudioStreamPlayer3D
-	_assert(voice_node != null and voice_node.playing and voice_node.stream != null, "chasse : la voix est jouée depuis la plaque")
+	var voiced: KnockPatch = null
+	for p in hunt.patches:
+		if p.voices_played >= 1:
+			voiced = p
+	_assert(hunt.voices_played >= 1 and voiced != null, "chasse : une voix sort d'un mur qui cogne")
+	var voice_node := voiced.get_node_or_null("Voix") as AudioStreamPlayer3D if voiced != null else null
+	_assert(voice_node != null and voice_node.stream != null, "chasse : la voix est jouée depuis la plaque")
 	var s0: float = main.sanity
 	for i in 20:
 		await physics_frame

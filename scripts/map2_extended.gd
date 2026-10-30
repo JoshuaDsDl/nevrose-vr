@@ -68,6 +68,7 @@ func build() -> void:
 	living.name = "LivingRoom"
 	add_child(living)
 	_build_extension()
+	_add_threshold_floor()
 	_paint_car()
 	_build_existing_gameplay()
 	_register_spawn_spots()
@@ -280,6 +281,21 @@ func _build_extension() -> void:
 		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.NONE, 0.0, -105.0)
 
 
+## Sol continu sous tout l'appartement : les seuils entre deux pièces n'en avaient pas,
+## le joueur avait l'impression de marcher dans le vide. Posé sous les sols existants.
+func _add_threshold_floor() -> void:
+	var mi := MeshInstance3D.new()
+	mi.name = "SolSeuils"
+	var box := BoxMesh.new()
+	box.size = Vector3(19.0, 0.1, 13.0)
+	mi.mesh = box
+	mi.position = Vector3(5.15, -0.07, 1.45)
+	var source := get_node_or_null("Floor/Mesh") as MeshInstance3D
+	if source != null:
+		mi.material_override = source.get_active_material(0)
+	add_child(mi)
+
+
 ## Couleurs de la voiture du garage : carrosserie rouge, pneus noirs.
 func _paint_car() -> void:
 	var car := get_node_or_null("Shell/ExtensionEst/Voiture")
@@ -345,16 +361,35 @@ func _register_spawn_spots() -> void:
 	for pos in FLOOR_SPOTS:
 		_spawn_spots.append({"pos": pos, "container": null, "floor": true})
 	# Et dans les rangements : tiroir de cuisine, frigo, commode du salon (lueur à travers la porte).
-	var holders := ["Shell/kitchenCabinetDrawer", "Shell/kitchenFridge", "Shell/sideTableDrawers"]
-	for i in mini(containers.size(), holders.size()):
-		var holder := get_node_or_null(holders[i]) as Node3D
-		if holder == null:
+	# Associés par nom : l'ordre de création des conteneurs ne correspond pas à cette liste.
+	var holders := {"KitchenDrawerKey": "Shell/kitchenCabinetDrawer", "FridgeDoor": "Shell/kitchenFridge", "ClosetDoor": "Shell/sideTableDrawers"}
+	for cname in holders:
+		var c := _container_named(cname)
+		var holder := get_node_or_null(holders[cname]) as Node3D
+		if c == null or holder == null:
 			continue
-		var b := _world_bounds(holder)
-		_spawn_spots.append({
-			"pos": Vector3(b.get_center().x, b.position.y + b.size.y * 0.45, b.get_center().z),
-			"container": containers[i],
-		})
+		_spawn_spots.append({"pos": _stored_spot(c, _world_bounds(holder)), "container": c})
+
+
+func _container_named(cname: String) -> InteractiveContainer:
+	for c in containers:
+		if String(c.name) == cname:
+			return c
+	return null
+
+
+## Où se trouve la pilule dans un rangement. Tiroir : dans le tiroir (il glisse avec lui).
+## Porte : dans la carcasse, juste derrière la face avant, visible quand la porte s'ouvre.
+func _stored_spot(c: InteractiveContainer, b: AABB) -> Vector3:
+	if c.mode == InteractiveContainer.Mode.SLIDE:
+		return c.transform * c.content_offset
+	var center := b.get_center()
+	var front := Vector3(c.basis.z.x, 0.0, c.basis.z.z).normalized()
+	var toward_door := Vector3(c.global_position.x - center.x, 0.0, c.global_position.z - center.z)
+	if front.dot(toward_door) < 0.0:
+		front = -front
+	var reach := absf(front.x) * b.size.x * 0.5 + absf(front.z) * b.size.z * 0.5
+	return Vector3(center.x, b.position.y + b.size.y * 0.45, center.z) + front * maxf(reach - 0.25, 0.0)
 
 
 func _key_spots() -> Array[Vector3]:

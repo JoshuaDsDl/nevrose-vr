@@ -10,6 +10,7 @@ signal hunt_finished(walls_broken: int, tokens: int)
 
 const WALLS_MIN := 4
 const WALLS_MAX := 6
+const CONCURRENT_PLATES := 3 ## endroits qui cognent en même temps : plusieurs murs à casser
 const TOKENS_BASE := 8
 const TOKENS_PER_WALL := 5
 const APT_MIN := Vector2(-3.9, -4.7)
@@ -34,7 +35,8 @@ var sandbox: HuntSandbox = null
 
 var target_count := 5
 var broken_count := 0
-var current: KnockPatch = null
+var current: KnockPatch = null ## plaque la plus proche : sert au GPS et à l'indice
+var live_plates: Array[KnockPatch] = [] ## toutes les plaques actives (qui cognent)
 var finished := false
 var started := false
 var monster: Monster = null
@@ -80,7 +82,10 @@ func start() -> void:
 	_collect_candidates()
 	started = true
 	message.emit("Quelqu'un cogne dans les murs. Écoute. Casse là où ça cogne : gâchette, ou frappe du poing.", false)
-	_activate_next()
+	_voice_clock = VOICE_FIRST_DELAY
+	for i in CONCURRENT_PLATES:
+		_activate_next()
+	_refresh_current()
 
 
 # ---------------------------------------------------------------------------
@@ -186,9 +191,12 @@ func _pick_candidate() -> Dictionary:
 
 
 func _activate_next() -> void:
+	if finished:
+		return
 	var c := _pick_candidate()
 	if c.is_empty():
-		_finish_hunt()
+		if _live().is_empty():
+			_finish_hunt()
 		return
 	var patch := KnockPatch.new()
 	patch.name = "Knock_%d" % patches.size()
@@ -197,16 +205,41 @@ func _activate_next() -> void:
 	patch.place(c["pos"], c["normal"])
 	patch.broken.connect(_on_patch_broken)
 	patches.append(patch)
-	current = patch
-	nav.build_distance_field(patch.global_position + patch.normal * 0.7)
+	live_plates.append(patch)
 	patch.activate()
-	_hint_clock = 0.0
-	_voice_clock = VOICE_FIRST_DELAY
 
+
+## Plaques actives et non cassées.
+func _live() -> Array[KnockPatch]:
+	var out: Array[KnockPatch] = []
+	for p in live_plates:
+		if is_instance_valid(p) and p.active and not p.is_broken:
+			out.append(p)
+	return out
+
+
+## La plaque la plus proche devient « current » (GPS, indice). On ne change qu'avec 1 m d'avance.
+func _refresh_current() -> void:
+	var live := _live()
+	if live.is_empty():
+		current = null
+		return
+	var from := camera.global_position
+	var best: KnockPatch = live[0]
+	for p in live:
+		if p.global_position.distance_to(from) < best.global_position.distance_to(from):
+			best = p
+	var lost := current == null or not is_instance_valid(current) or not current.active or current.is_broken
+	if lost or (best != current and best.global_position.distance_to(from) + 1.0 < current.global_position.distance_to(from)):
+		current = best
+		if nav != null and nav.is_ready():
+			nav.build_distance_field(best.global_position + best.normal * 0.7)
+		_hint_clock = 0.0
 
 func _on_patch_broken(patch: KnockPatch) -> void:
 	broken_count += 1
-	if broken_count >= target_count or candidates.is_empty():
+	live_plates.erase(patch)
+	if broken_count >= target_count or (candidates.is_empty() and _live().is_empty()):
 		_reveal_monster(patch)
 		return
 	var lines := [
@@ -216,11 +249,9 @@ func _on_patch_broken(patch: KnockPatch) -> void:
 		"Encore rien. Il est plus rapide que toi.",
 	]
 	message.emit(lines[(broken_count - 1) % lines.size()], false)
-	current = patch
 	get_tree().create_timer(2.8).timeout.connect(func() -> void:
 		if not finished and is_inside_tree():
 			_activate_next())
-
 
 func _reveal_monster(patch: KnockPatch) -> void:
 	finished = true
@@ -294,20 +325,23 @@ func _next_voice_index() -> int:
 
 
 func _play_wall_voice() -> void:
-	if current == null or not current.active or current.is_broken:
+	var live := _live()
+	if live.is_empty():
 		return
 	var idx := _next_voice_index()
 	if idx < 0:
 		return
-	current.play_voice(voice_streams[idx])
+	live.pick_random().play_voice(voice_streams[idx])
 	voices_played += 1
-
 
 # ---------------------------------------------------------------------------
 # Indices et coups de poing
 # ---------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
-	if not started or finished or current == null or not current.active:
+	if not started or finished:
+		return
+	_refresh_current()
+	if current == null:
 		return
 	_voice_clock -= delta
 	if _voice_clock <= 0.0:
@@ -317,7 +351,6 @@ func _physics_process(delta: float) -> void:
 	if _hint_clock >= HINT_PERIOD:
 		_hint_clock = 0.0
 		message.emit(_direction_hint(), false)
-
 
 ## « Ça cogne à ta gauche, assez loin » : relatif à la direction du regard.
 func _direction_hint() -> String:
@@ -337,24 +370,25 @@ func _direction_hint() -> String:
 
 ## Un tir : si le projectile passe tout près de la plaque qui cogne, elle encaisse.
 func _on_shot(origin: Vector3, end: Vector3, power: float) -> void:
-	if current == null or not current.active or finished:
+	if finished:
 		return
 	var seg := end - origin
-	var t := clampf((current.global_position - origin).dot(seg) / maxf(seg.length_squared(), 0.0001), 0.0, 1.0)
-	if (origin + seg * t).distance_to(current.global_position) < 0.4:
-		current.hit(maxi(int(round(power * 0.8)), 1))
-
+	for p in _live():
+		var t := clampf((p.global_position - origin).dot(seg) / maxf(seg.length_squared(), 0.0001), 0.0, 1.0)
+		if (origin + seg * t).distance_to(p.global_position) < 0.4:
+			p.hit(maxi(int(round(power * 0.8)), 1))
 
 ## Un coup du bac à sable (poing ou arme) : s'il touche la plaque qui cogne, elle encaisse.
 func _on_swing(tip: Vector3, _prev: Vector3, _velocity: Vector3, power: float, hand: Node3D) -> void:
-	if current == null or not current.active or finished:
+	if finished:
 		return
-	if tip.distance_to(current.global_position) < PUNCH_REACH:
-		current.hit(maxi(int(round(power)), 1))
-		var main := get_tree().get_first_node_in_group("main")
-		if main != null and main.has_method(&"pulse_haptics"):
-			main.pulse_haptics(0.8, 0.12, hand as XRController3D)
-
+	for p in _live():
+		if tip.distance_to(p.global_position) < PUNCH_REACH:
+			p.hit(maxi(int(round(power)), 1))
+			var main := get_tree().get_first_node_in_group("main")
+			if main != null and main.has_method(&"pulse_haptics"):
+				main.pulse_haptics(0.8, 0.12, hand as XRController3D)
+			return
 
 ## Pour le téléphone : angle de la flèche (0 = droit devant, + = à droite), distance et plafond.
 func gps_info() -> Dictionary:

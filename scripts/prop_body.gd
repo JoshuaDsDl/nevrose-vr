@@ -18,6 +18,7 @@ var breakable := true ## faux en mode Résistance : on peut jeter les objets, pa
 
 var _last_speed := 0.0
 var _flash := 0.0
+var _grace := 0.0 ## secondes sans casse après le réveil (les voisins qui chevauchent poussent fort au premier tour)
 
 
 ## Prépare la physique d'après l'emprise : masse proportionnelle au volume, PV à l'avenant.
@@ -45,14 +46,14 @@ func configure(p_size: Vector3, p_tint: Color, p_hanging: bool) -> void:
 	cs.shape = box
 	add_child(cs)
 	body_entered.connect(_on_body_entered)
-	if hanging:
-		freeze = true
-		freeze_mode = RigidBody3D.FREEZE_MODE_STATIC
-	else:
-		sleeping = true # posé au sol : on ne réveille que ce qu'on touche
+	# Figé au départ : sans ça, les boîtes de collision qui chevauchent le sol ou les autres
+	# meubles projetaient toute la pièce au démarrage. Il redevient physique au premier contact.
+	freeze = true
+	freeze_mode = RigidBody3D.FREEZE_MODE_STATIC
 
 
 func _physics_process(_delta: float) -> void:
+	_grace = maxf(_grace - _delta, 0.0)
 	_last_speed = linear_velocity.length()
 	if _flash > 0.0:
 		_flash = maxf(_flash - _delta, 0.0)
@@ -60,14 +61,14 @@ func _physics_process(_delta: float) -> void:
 
 ## Réveille l'objet (décroche un tableau, sort du sommeil).
 func wake() -> void:
-	if hanging:
-		hanging = false
-		freeze = false
+	if freeze:
+		_grace = 0.6
+	freeze = false
+	hanging = false
 	sleeping = false
 
-
 func _on_body_entered(_other: Node) -> void:
-	if is_dead or not breakable:
+	if is_dead or not breakable or _grace > 0.0:
 		return
 	var impact := _last_speed
 	if impact > IMPACT_SPEED:

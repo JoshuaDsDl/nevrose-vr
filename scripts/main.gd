@@ -42,6 +42,7 @@ const LOBBY_SCENE := preload("res://scenes/lobby.tscn")
 const LOBBY_MIN := Vector2(-2.25, -2.15)
 const LOBBY_MAX := Vector2(2.25, 2.15)
 const LOBBY_SPAWN := Vector2(1.0, 1.35)
+const CAPSULE_CENTER_Y := 0.75 ## centre de la capsule de déplacement : pieds à 25 cm (passe les seuils), tête à 1,25 m
 const APARTMENT_SPAWN := Vector2(0.0, 0.0) # centre du salon (libre, vérifié par la marche)
 const RESET_HOLD := 0.5 # secondes de maintien de la combinaison A + B (manette droite)
 const JUMP_SPEED := 3.1 # m/s : un saut d'environ 0,5 m
@@ -326,12 +327,12 @@ func _build_player() -> void:
 	_movement_body.collision_mask = 1
 	_movement_body.safe_margin = 0.02
 	xr_origin.add_child(_movement_body)
-	_movement_body.position.y = -1.7 if not xr_active else 0.0
+	_movement_body.position.y = CAPSULE_CENTER_Y - xr_origin.position.y
 	var collision := CollisionShape3D.new()
 	collision.name = "Capsule"
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = 0.28
-	capsule.height = 1.7
+	capsule.height = 1.0
 	collision.shape = capsule
 	collision.position.y = 0.85
 	_movement_body.add_child(collision)
@@ -534,7 +535,7 @@ func _tick_movement(delta: float) -> void:
 func _move_with_collisions(displacement: Vector3) -> void:
 	if _movement_body == null or displacement.is_zero_approx():
 		return
-	_movement_body.position = Vector3(0.0, -xr_origin.position.y if not xr_active else 0.0, 0.0)
+	_movement_body.position = Vector3(0.0, CAPSULE_CENTER_Y - xr_origin.position.y, 0.0)
 	var body_start := _movement_body.global_position
 	var motion := displacement
 	for i in 3:
@@ -555,7 +556,7 @@ func _move_with_collisions(displacement: Vector3) -> void:
 	clamped.x = clampf(clamped.x, bounds_min.x, bounds_max.x)
 	clamped.z = clampf(clamped.z, bounds_min.y, bounds_max.y)
 	xr_origin.position = clamped
-	_movement_body.position = Vector3(0.0, -xr_origin.position.y if not xr_active else 0.0, 0.0)
+	_movement_body.position = Vector3(0.0, CAPSULE_CENTER_Y - xr_origin.position.y, 0.0)
 
 
 func snap_turn(direction: float) -> void:
@@ -946,7 +947,7 @@ func reset_position() -> void:
 	_jump_vy = 0.0
 	xr_origin.position = Vector3(spawn.x, 0.0 if xr_active else 1.7, spawn.y)
 	xr_origin.rotation = Vector3.ZERO
-	_movement_body.position = Vector3(0.0, -xr_origin.position.y if not xr_active else 0.0, 0.0)
+	_movement_body.position = Vector3(0.0, CAPSULE_CENTER_Y - xr_origin.position.y, 0.0)
 	_desktop_yaw = 0.0
 	_pulse_haptics(0.3, 0.1)
 	_log("GAME", "réinitialisation de position")
@@ -1017,7 +1018,10 @@ func _tick_pill_feedback() -> void:
 		return
 	var ready := _held_pill.can_eat()
 	if ready and not _pill_ready:
+		# Pilule à la bouche : on l'avale tout de suite, sans appuyer sur la gâchette.
 		_pulse_haptics(0.3, 0.06, right_hand)
+		_held_pill.interact()
+		ready = false
 	_pill_ready = ready
 
 
