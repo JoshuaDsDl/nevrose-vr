@@ -18,6 +18,7 @@ const MOVE_SPEED := 1.8 # m/s, vitesse constante (GDD §4)
 const STICK_DEADZONE := 0.15
 const RAY_LENGTH := 3.0
 const PROXIMITY_RADIUS := 0.45 # interaction au contact sans viser
+const DOSE_REACH := 0.75 # une pilule se prend en se penchant : la main peut descendre (tiroir bas, sol)
 const TRIGGER_PRESS := 0.75 # gâchette analogique : seuil d'appui…
 const TRIGGER_RELEASE := 0.35 # …et seuil de relâchement (hystérésis)
 
@@ -281,7 +282,7 @@ func _build_world() -> void:
 		apartment.name = "Map2Extended"
 	add_child(apartment)
 	apartment.build()
-	apartment.apply_decorations(profile.owned)
+	apartment.apply_decorations(profile.active_items())
 
 	for c in apartment.containers:
 		if c.lock_type != InteractiveContainer.LockType.NONE:
@@ -697,7 +698,7 @@ func _nearest_interactable() -> Node:
 		var dose: Node = apartment.get_dose()
 		if dose != null and is_instance_valid(dose) and dose.has_method(&"interact"):
 			var dd: float = origin.distance_to(dose.global_transform.origin)
-			if dd < best_d:
+			if dd < DOSE_REACH and (best == null or dd < best_d):
 				best_d = dd
 				best = dose
 	return best
@@ -843,7 +844,7 @@ func _start_resist_extras() -> void:
 	sandbox = HuntSandbox.new()
 	sandbox.name = "Sandbox"
 	add_child(sandbox)
-	sandbox.setup(apartment, xr_camera, hands, profile.owned, true)
+	sandbox.setup(apartment, xr_camera, hands, profile.active_items(), true)
 	nav = NavGrid.new()
 	nav.name = "Nav"
 	add_child(nav)
@@ -1291,7 +1292,7 @@ func _start_hunt() -> void:
 	add_child(hunt)
 	var hands: Array[Node3D] = [left_hand, right_hand]
 	hunt.setup(apartment, xr_camera, hands)
-	hunt.owned_items = profile.owned
+	hunt.owned_items = profile.active_items()
 	hunt.message.connect(_on_hunt_message)
 	hunt.hunt_finished.connect(_on_hunt_finished)
 	# Les objets deviennent physiques : le joueur est bloqué par eux (couche 8) mais pas par ses propres armes.

@@ -10,6 +10,7 @@ const CELL := 0.3
 const PLAYER_RADIUS := 0.3
 
 var reachable := {} ## Vector2i -> true
+var _done := false ## vrai seulement une fois le calcul entièrement terminé
 var origin := Vector2(-4.0, -4.8)
 
 var _dist := {} ## Vector2i -> nombre de pas jusqu'à la cible du GPS
@@ -24,7 +25,7 @@ func cell_center(c: Vector2i) -> Vector3:
 
 
 func is_ready() -> bool:
-	return not reachable.is_empty()
+	return _done and not reachable.is_empty()
 
 
 func has_point(p: Vector3) -> bool:
@@ -43,6 +44,7 @@ func _cell_free(space: PhysicsDirectSpaceState3D, params: PhysicsShapeQueryParam
 ## Coroutine : étale le calcul sur plusieurs images physiques (casque).
 func compute_reachable(from_pos: Vector3, bounds_min: Vector2, bounds_max: Vector2) -> void:
 	reachable.clear()
+	_done = false
 	var space := get_world_3d().direct_space_state
 	var params := PhysicsShapeQueryParameters3D.new()
 	var shape := SphereShape3D.new()
@@ -86,6 +88,7 @@ func compute_reachable(from_pos: Vector3, bounds_min: Vector2, bounds_max: Vecto
 			budget += 1
 			if budget % 400 == 0:
 				await get_tree().physics_frame
+	_done = true
 
 
 ## Distance (en pas) de chaque case praticable jusqu'à `goal`, par parcours en largeur.

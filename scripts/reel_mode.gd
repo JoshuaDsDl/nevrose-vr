@@ -1039,7 +1039,7 @@ func _decor_names() -> Array:
 	if profile == null:
 		return names
 	for item in DecorCatalog.ITEMS:
-		if profile.owns(String(item["id"])):
+		if profile.is_active(String(item["id"])):
 			names.append(String(item["name"]))
 	return names
 

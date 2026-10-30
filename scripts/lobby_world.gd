@@ -191,8 +191,13 @@ func _on_beta_pressed() -> void:
 		profile.add_tokens(BETA_TOKENS)
 
 
+## Achète un article, ou l'active / le met de côté une fois acheté.
 func _on_shop_pressed(id: String) -> void:
-	if profile != null and profile.buy(id):
+	if profile == null:
+		return
+	if profile.owns(id):
+		profile.toggle_active(id)
+	elif profile.buy(id):
 		_refresh_tokens()
 
 
@@ -211,7 +216,10 @@ func _refresh_tokens() -> void:
 		var item := DecorCatalog.get_item(id)
 		var price := int(item["price"])
 		if profile.owns(id):
-			card.set_state("POSSÉDÉ", Color(0.3, 0.95, 0.85), false)
+			if profile.is_active(id):
+				card.set_state("ACTIVÉ · toucher pour ranger", Color(0.3, 0.95, 0.85), true)
+			else:
+				card.set_state("RANGÉ · toucher pour activer", Color(0.6, 0.6, 0.65), true)
 		elif profile.tokens >= price:
 			card.set_state("ACHETER %d" % price, Color(0.5, 1.0, 0.4), true)
 		else:

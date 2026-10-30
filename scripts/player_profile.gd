@@ -14,6 +14,7 @@ const START_FOLLOWERS := 37 ## le compte démarre petit : « dont ta mère »
 
 var tokens := 0
 var owned: Array[String] = []
+var disabled: Array[String] = [] ## achetés mais mis de côté : ni posés dans le décor, ni utilisables
 var followers := START_FOLLOWERS ## mode Réels : l'audience s'accumule d'une session à l'autre
 var reels_posted := 0
 var best_views := 0
@@ -46,6 +47,32 @@ func owns(id: String) -> bool:
 	return id in owned
 
 
+## Possédé et activé : c'est ce qui est posé dans l'appartement et utilisable en Chasse.
+func is_active(id: String) -> bool:
+	return owns(id) and not (id in disabled)
+
+
+## Achats activés (liste à passer au décor, aux armes et aux réels).
+func active_items() -> Array:
+	var out: Array = []
+	for id in owned:
+		if not (id in disabled):
+			out.append(id)
+	return out
+
+
+## Active ou met de côté un achat déjà possédé.
+func toggle_active(id: String) -> void:
+	if not owns(id):
+		return
+	if id in disabled:
+		disabled.erase(id)
+	else:
+		disabled.append(id)
+	tokens_changed.emit(tokens)
+	save_profile()
+
+
 ## Achète une décoration : faux si déjà possédée, inconnue ou trop chère.
 func buy(id: String) -> bool:
 	var item := DecorCatalog.get_item(id)
@@ -65,6 +92,7 @@ func save_profile() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("profile", "tokens", tokens)
 	cfg.set_value("profile", "owned", owned)
+	cfg.set_value("profile", "disabled", disabled)
 	cfg.set_value("profile", "followers", followers)
 	cfg.set_value("profile", "reels_posted", reels_posted)
 	cfg.set_value("profile", "best_views", best_views)
@@ -84,3 +112,6 @@ func load_profile() -> void:
 	owned.clear()
 	for id in cfg.get_value("profile", "owned", []):
 		owned.append(String(id))
+	disabled.clear()
+	for id in cfg.get_value("profile", "disabled", []):
+		disabled.append(String(id))

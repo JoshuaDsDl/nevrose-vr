@@ -37,11 +37,11 @@ const FURNITURE_COLLISIONS := [
 ]
 
 # Surfaces où la dose peut apparaître, et où une clé peut se trouver
+# Surfaces où l'on peut poser une pilule à portée de main (pas le milieu d'un lit, ni un lavabo
+# collé au mur : la pilule y serait hors d'atteinte, vérifié par tests/test_pills.gd).
 const SURFACES := [
 	"Shell/kitchenCabinetDrawer", "Shell/table",
-	"Shell/sideTableDrawers", "Shell/ExtensionEst/Garage/Etabli",
-	"Shell/ExtensionEst/Chambre/LitDouble", "Shell/ExtensionEst/Chambre/Bureau",
-	"Shell/ExtensionEst/SDB/Lavabo",
+	"Shell/sideTableDrawers",
 ]
 
 # Points au sol libres (hors meubles)
