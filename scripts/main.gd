@@ -44,6 +44,7 @@ const LOBBY_MAX := Vector2(2.25, 2.15)
 const LOBBY_SPAWN := Vector2(1.0, 1.35)
 const APARTMENT_SPAWN := Vector2(-1.0, 0.0) # salon, zone libre
 const RESET_HOLD := 1.0 # secondes de maintien de la combinaison X + A
+const LOBBY_HOLD := 1.5 # secondes de maintien du bouton menu (manette gauche) pour revenir au lobby
 
 const HAND_SCENE_R := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn")
 const HAND_SCENE_L := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn")
@@ -102,6 +103,8 @@ var _held_key: KeyObject = null
 var _held_pill: Dose = null
 var _pill_ready := false ## la pilule tenue est dans la bouche
 var _reset_hold := 0.0 ## temps de maintien de la combinaison de réinitialisation
+var _lobby_hold := 0.0 ## temps de maintien du bouton « retour au lobby »
+var _lobby_ticks := 0 ## vibrations déjà données pendant le maintien
 var _snap_cooldown := 0.0
 var _trigger_down := {} ## état « gâchette enfoncée » par main
 var _desktop_yaw := 0.0
@@ -340,6 +343,7 @@ func _register_debug_inputs() -> void:
 	_add_key_action(&"dbg_turn_right", [KEY_E])
 	_add_key_action(&"dbg_interact", [KEY_F])
 	_add_key_action(&"dbg_reset", [KEY_R])
+	_add_key_action(&"dbg_lobby", [KEY_ESCAPE])
 	_add_key_action(&"dbg_phone", [KEY_TAB, KEY_T, KEY_P])
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
@@ -384,6 +388,7 @@ func _physics_process(delta: float) -> void:
 	# La gâchette reste active pendant le game over : elle sert à recommencer.
 	_poll_triggers()
 	_poll_reset(delta)
+	_poll_lobby_exit(delta)
 	if game_over:
 		return
 	if not game_started:
@@ -668,6 +673,37 @@ func _poll_reset(delta: float) -> void:
 		reset_position()
 
 
+## Maintenir le bouton menu (manette gauche ; Échap au bureau) ramène au lobby depuis
+## n'importe quel mode, y compris pendant une partie. Les tokens déjà gagnés sont gardés.
+func _poll_lobby_exit(delta: float) -> void:
+	var pressed := false
+	if xr_active:
+		pressed = left_hand.is_button_pressed(&"menu_button")
+	elif InputMap.has_action(&"dbg_lobby"):
+		pressed = Input.is_action_pressed(&"dbg_lobby")
+	_tick_lobby_hold(pressed, delta)
+
+
+## Séparé de la lecture des boutons pour pouvoir être testé en headless.
+func _tick_lobby_hold(pressed: bool, delta: float) -> void:
+	if not pressed or not game_started:
+		_lobby_hold = 0.0
+		_lobby_ticks = 0
+		return
+	_lobby_hold += delta
+	# Deux vibrations de plus en plus fortes annoncent le retour, pour pouvoir lâcher à temps.
+	var ticks := int(_lobby_hold / (LOBBY_HOLD / 3.0))
+	if ticks > _lobby_ticks and ticks < 3:
+		_lobby_ticks = ticks
+		_pulse_haptics(0.2 + 0.25 * ticks, 0.08, left_hand)
+	if _lobby_hold >= LOBBY_HOLD:
+		_lobby_hold = 0.0
+		_lobby_ticks = 0
+		_log("GAME", "retour au lobby demandé (bouton maintenu)")
+		_pulse_haptics(0.8, 0.2)
+		return_to_lobby()
+
+
 ## Remet le joueur au point de départ, orienté vers l'avant, sans toucher à la partie.
 func reset_position() -> void:
 	var spawn := LOBBY_SPAWN if not game_started else APARTMENT_SPAWN
@@ -683,8 +719,7 @@ func _on_button_pressed(action_name: String) -> void:
 	if action_name in [&"ax_button", &"by_button", &"grip_click", &"primary_click"]:
 		if phone:
 			phone.toggle_pocket()
-	elif action_name == &"menu_button" and game_over:
-		_restart()
+	# Le bouton menu sert au retour au lobby (maintien) : voir _poll_lobby_exit.
 
 
 # ---------------------------------------------------------------------------

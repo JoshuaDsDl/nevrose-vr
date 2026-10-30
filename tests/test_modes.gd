@@ -113,6 +113,20 @@ func _initialize() -> void:
 	_assert(main.lobby != null and main.mode == Main.Mode.NONE, "chasse : retour au lobby")
 	_assert(main.profile.owns("radio"), "lobby : les achats sont conservés")
 
+	# --- Retour au lobby par maintien du bouton (en pleine partie) ---
+	main.start_game(Main.Mode.RESIST)
+	await process_frame
+	_assert(main.game_started and main.lobby == null, "lobby : partie en cours avant le maintien")
+	main._tick_lobby_hold(true, 0.5)
+	main._tick_lobby_hold(false, 0.1)
+	_assert(main.game_started, "lobby : un appui trop court ne fait rien")
+	main._tick_lobby_hold(true, 0.7)
+	main._tick_lobby_hold(true, 0.7)
+	_assert(main.game_started, "lobby : le maintien se remet à zéro quand on lâche")
+	main._tick_lobby_hold(true, 0.8)
+	await process_frame
+	_assert(not main.game_started and main.lobby != null and main.mode == Main.Mode.NONE, "lobby : maintien du bouton = retour au lobby")
+
 	# --- Mode Résistance : pilule visible et loin ---
 	main.start_game(Main.Mode.RESIST)
 	await process_frame
