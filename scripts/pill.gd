@@ -11,10 +11,10 @@ extends Area3D
 const PILL_COLOR := Color(0.35, 1.0, 0.85)
 const AURA_LOOP_SECONDS := 12.0
 const AURA_MIX_RATE := 22050
-const AURA_VOLUME_DB := -18.0
-const AURA_MAX_DISTANCE_M := 5.0
+const AURA_VOLUME_DB := -9.0 # audible à travers l'appartement : on la suit à l'oreille
+const AURA_MAX_DISTANCE_M := 14.0
 const BEAM_HEIGHT := 2.6 ## faisceau de repérage : la pilule se voit de loin
-const AURA_UNIT_SIZE_M := 1.5
+const AURA_UNIT_SIZE_M := 2.5
 
 var _spin := true
 var _beam: MeshInstance3D = null
@@ -75,8 +75,8 @@ func _create_beam() -> void:
 	_beam = MeshInstance3D.new()
 	_beam.name = "Faisceau"
 	var cyl := CylinderMesh.new()
-	cyl.top_radius = 0.03
-	cyl.bottom_radius = 0.06
+	cyl.top_radius = 0.05
+	cyl.bottom_radius = 0.1
 	cyl.height = BEAM_HEIGHT
 	cyl.radial_segments = 8
 	cyl.rings = 1
@@ -85,7 +85,7 @@ func _create_beam() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(0.25, 0.9, 0.8, 0.35)
+	mat.albedo_color = Color(0.25, 0.95, 0.85, 0.55)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_beam.material_override = mat
 	_beam.position.y = BEAM_HEIGHT * 0.5
@@ -93,11 +93,45 @@ func _create_beam() -> void:
 	var glow := OmniLight3D.new()
 	glow.name = "Lueur"
 	glow.light_color = PILL_COLOR
-	glow.light_energy = 0.9
-	glow.omni_range = 2.2
+	glow.light_energy = 1.5
+	glow.omni_range = 3.2
 	glow.position.y = 0.15
 	add_child(glow)
 	_glow = glow
+	# Halo : un grand disque qui fait toujours face au joueur, visible de très loin même
+	# derrière un angle de mur (le faisceau fin se perd dans la résolution du casque).
+	var halo := MeshInstance3D.new()
+	halo.name = "Halo"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.9, 0.9)
+	halo.mesh = quad
+	var hmat := StandardMaterial3D.new()
+	hmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	hmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	hmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	hmat.albedo_texture = _halo_texture()
+	hmat.no_depth_test = false
+	halo.material_override = hmat
+	halo.position.y = 0.12
+	add_child(halo)
+
+
+static var _halo_tex: ImageTexture = null
+
+
+## Disque lumineux dégradé (rayon de 64 px), généré une seule fois.
+static func _halo_texture() -> ImageTexture:
+	if _halo_tex == null:
+		var img := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+		for y in 64:
+			for x in 64:
+				var d := Vector2(x - 31.5, y - 31.5).length() / 32.0
+				var a := clampf(1.0 - d, 0.0, 1.0)
+				a = a * a * 0.9
+				img.set_pixel(x, y, Color(0.35, 1.0, 0.9, a))
+		_halo_tex = ImageTexture.create_from_image(img)
+	return _halo_tex
 
 
 ## Reprend après un reparentage (notamment vers la main), une fois les enfants

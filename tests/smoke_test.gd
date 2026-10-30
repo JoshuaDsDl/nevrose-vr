@@ -68,11 +68,11 @@ func _initialize() -> void:
 
 	# --- A : smartphone (créé après le départ) ---
 	_assert(main.phone != null, "A: smartphone Messenger présent")
-	_assert(not main.phone.is_in_hand, "A: téléphone initialement dans la poche")
+	_assert(main.phone.is_in_hand, "A: téléphone sorti d'office au départ (il porte le GPS de la pilule)")
+	main.phone.toggle_pocket()
+	_assert(not main.phone.is_in_hand, "A: rangement du téléphone dans la poche")
 	main.phone.toggle_pocket()
 	_assert(main.phone.is_in_hand, "A: sortie du téléphone de la poche vers la main")
-	main.phone.toggle_pocket()
-	_assert(not main.phone.is_in_hand, "A: retour du téléphone dans la poche")
 
 	# --- B : appartement (Map2Extended — salon + cuisine + extension) ---
 	var apt: MapBase = main.apartment
@@ -136,7 +136,7 @@ func _initialize() -> void:
 	# --- B : voix : les 15 fichiers servent, le chevauchement croît avec la folie ---
 	_assert(main.creepy_voices._is_voice_playing(), "B: le murmure d'introduction est actif")
 	_assert(main.creepy_voices._streams.size() == 15, "B: les 15 voix sont chargées")
-	_assert(main.creepy_voices.max_simultaneous(0.1) == 1, "B: une seule voix à la fois au début")
+	_assert(main.creepy_voices.max_simultaneous(0.1) == 2, "B: deux voix possibles dès le début")
 	_assert(main.creepy_voices.max_simultaneous(1.0) >= 5, "B: plusieurs voix en pleine crise")
 	for player in main.creepy_voices._players:
 		player.stop()
@@ -320,7 +320,7 @@ func _initialize() -> void:
 		_assert(audio_dose != null, "E+: la pilule possède un AudioStreamPlayer3D")
 		if audio_dose != null:
 			_assert(audio_dose.stream != null, "E+: le carillon de la pilule possède un stream")
-			_assert(audio_dose.max_distance > 0.0 and audio_dose.max_distance <= 5.0, "E+: la portée du carillon ne dépasse pas 5 m (%.2f)" % audio_dose.max_distance)
+			_assert(audio_dose.max_distance >= 12.0 and audio_dose.max_distance <= 20.0, "E+: le carillon porte à travers l'appartement (%.2f m)" % audio_dose.max_distance)
 
 	# --- E+ : cooldown des notifications du téléphone ---
 	var derniere_alerte_ms: int = main.phone._last_alert_notification_ms

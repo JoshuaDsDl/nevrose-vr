@@ -108,6 +108,13 @@ var _reset_hold := 0.0 ## temps de maintien de la combinaison de réinitialisati
 var _lobby_hold := 0.0 ## temps de maintien du bouton « retour au lobby »
 var _lobby_ticks := 0 ## vibrations déjà données pendant le maintien
 var _lobby_hud: Label3D = null ## indicateur de progression devant les yeux
+var sandbox: HuntSandbox = null ## objets attrapables du mode Résistance (en Chasse : hunt.sandbox)
+var nav: NavGrid = null ## carte d'accessibilité : GPS vers la pilule (mode Résistance)
+var easter: EasterEgg = null
+var _pill_gps_on := false
+var _touch_state := {} ## main -> touche-t-elle un objet ? (retours haptiques)
+var _touch_prev := {}
+var _touch_shape: SphereShape3D = null
 var _jump_y := 0.0 ## hauteur du saut en cours (mode Chasse)
 var _jump_vy := 0.0
 var _fps_clock := 0.0
@@ -134,6 +141,11 @@ func _ready() -> void:
 	_build_player()
 	_build_lobby()
 	_register_debug_inputs()
+	easter = EasterEgg.new()
+	easter.name = "EasterEgg"
+	add_child(easter)
+	easter.setup(left_hand, right_hand, xr_camera)
+	easter.message.connect(func(text: String) -> void: _say(text, false, true))
 	left_hand.button_pressed.connect(_on_button_pressed.bind(left_hand))
 	right_hand.button_pressed.connect(_on_button_pressed.bind(right_hand))
 	left_hand.button_released.connect(_on_button_released.bind(left_hand))
@@ -218,8 +230,9 @@ func start_game(p_mode: int = Mode.RESIST) -> void:
 		_start_reel()
 	else:
 		_spawn_dose()
-		_say("Les voix reviennent. Trouve la lumière cyan : c'est ta pilule.")
+		_say("Les voix reviennent. Suis la flèche du GPS : c'est ta pilule.")
 		creepy_voices.play_intro_whisper()
+		_start_resist_extras()
 	_pulse_haptics()
 	_log("GAME", "début de partie (mode %s)" % ["résistance", "chasse", "réels"][clampi(int(mode) - 1, 0, 2)])
 
@@ -410,8 +423,11 @@ func _physics_process(delta: float) -> void:
 	_tick_movement(delta)
 	_tick_interaction_ray()
 	_tick_jump(delta)
+	_tick_touch_haptics(delta)
 	if mode == Mode.HUNT:
 		_tick_hunt_gps()
+	elif mode == Mode.RESIST:
+		_tick_pill_gps()
 	if mode == Mode.HUNT or mode == Mode.REEL:
 		return # ni folie ni voix : les coups dans les murs, ou le studio de réels
 	run_time += delta
@@ -597,6 +613,11 @@ func interact(source_hand: XRController3D = null) -> void:
 	if game_over:
 		return_to_lobby()
 		return
+	# Chasse avec une arme à feu ou une grenade : la gâchette droite tire / lance.
+	var sb := _sbx()
+	if mode == Mode.HUNT and sb != null and sb.uses_trigger() and source_hand != left_hand:
+		sb.trigger_pressed(source_hand if source_hand != null else xr_camera)
+		return
 	# Pilule tenue : gâchette = avaler si elle est dans la bouche.
 	if _held_pill and is_instance_valid(_held_pill):
 		_held_pill.interact()
@@ -767,26 +788,116 @@ func _show_lobby_hud(on: bool) -> void:
 
 
 func _on_button_released(action_name: String, hand: XRController3D) -> void:
-	if action_name == &"grip_click" and mode == Mode.HUNT and hunt != null and hunt.sandbox != null:
-		hunt.sandbox.release(hand)
+	var sb := _sbx()
+	if action_name == &"grip_click" and sb != null:
+		sb.release(hand)
+
+
+## Le bac à sable de la partie en cours : celui de la Chasse, ou celui (léger) de la Résistance.
+func _sbx() -> HuntSandbox:
+	if mode == Mode.HUNT:
+		return hunt.sandbox if hunt != null else null
+	return sandbox
 
 
 ## Grip : attrape l'objet visé ou touché ; relâché, l'objet part avec l'élan de la main.
 ## Au bureau (touche G) la même touche attrape puis lâche.
 func _toggle_grab(hand: Node3D, force_grab := false) -> void:
-	if hunt == null or hunt.sandbox == null:
+	var sb := _sbx()
+	if sb == null:
 		return
-	if hunt.sandbox.is_holding(hand) and not force_grab:
-		hunt.sandbox.release(hand)
+	if sb.is_holding(hand) and not force_grab:
+		sb.release(hand)
 	else:
-		hunt.sandbox.grab(hand)
+		sb.grab(hand)
 
 
 func _cycle_weapon() -> void:
-	if hunt == null or hunt.sandbox == null:
+	var sb := _sbx()
+	if sb == null:
 		return
-	hunt.sandbox.cycle_weapon()
-	_say("Arme : %s" % hunt.sandbox.weapon_name())
+	sb.cycle_weapon()
+	_say("Arme : %s" % sb.weapon_name())
+
+
+# ---------------------------------------------------------------------------
+# Mode Résistance : objets attrapables et GPS vers la pilule
+# ---------------------------------------------------------------------------
+func _start_resist_extras() -> void:
+	var hands: Array[Node3D] = [left_hand, right_hand]
+	sandbox = HuntSandbox.new()
+	sandbox.name = "Sandbox"
+	add_child(sandbox)
+	sandbox.setup(apartment, xr_camera, hands, profile.owned, true)
+	nav = NavGrid.new()
+	nav.name = "Nav"
+	add_child(nav)
+	# Le téléphone sort tout de suite : il porte le GPS de la pilule.
+	if phone != null:
+		phone.set_gps(true, "GPS  -  TA PILULE")
+		_pill_gps_on = true
+		if not phone.is_in_hand:
+			phone.toggle_pocket()
+	await nav.compute_reachable(xr_camera.global_position, Vector2(-3.9, -4.7), Vector2(14.2, 7.3))
+	_refresh_pill_nav()
+
+
+func _refresh_pill_nav() -> void:
+	if nav == null or apartment == null:
+		return
+	var dose := apartment.get_dose()
+	if dose != null and is_instance_valid(dose):
+		nav.build_distance_field(dose.global_position)
+
+
+## Flèche vers la pilule tant qu'on ne l'a pas en main ; elle s'éteint quand on la tient.
+func _tick_pill_gps() -> void:
+	if phone == null or nav == null or apartment == null:
+		return
+	var dose := apartment.get_dose()
+	var holding := is_instance_valid(_held_pill)
+	if dose == null or not is_instance_valid(dose) or holding or game_over:
+		if _pill_gps_on:
+			phone.set_gps(false)
+			_pill_gps_on = false
+		return
+	if not _pill_gps_on:
+		phone.set_gps(true, "GPS  -  TA PILULE")
+		_pill_gps_on = true
+	var info := nav.gps_info(xr_camera, dose.global_position, 0)
+	if not info.is_empty():
+		phone.update_gps(float(info["angle"]), float(info["distance"]), 0)
+
+
+# ---------------------------------------------------------------------------
+# Retours haptiques : la manette vibre quand la main touche un meuble, un mur, un objet
+# ---------------------------------------------------------------------------
+func _tick_touch_haptics(delta: float) -> void:
+	if not xr_active or not game_started or game_over:
+		return
+	if _touch_shape == null:
+		_touch_shape = SphereShape3D.new()
+		_touch_shape.radius = 0.1
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape = _touch_shape
+	params.collision_mask = 1 | PropBody.LAYER
+	var space := get_world_3d().direct_space_state
+	for hand in [left_hand, right_hand]:
+		var pos: Vector3 = hand.global_position
+		var speed := 0.0
+		if _touch_prev.has(hand) and delta > 0.0:
+			speed = (pos - (_touch_prev[hand] as Vector3)).length() / delta
+		_touch_prev[hand] = pos
+		params.transform = Transform3D(Basis.IDENTITY, pos)
+		var touching := not space.intersect_shape(params, 1).is_empty()
+		var was: bool = _touch_state.get(hand, false)
+		if touching and not was:
+			# Choc d'arrivée : d'autant plus fort que la main arrive vite.
+			_pulse_haptics(clampf(0.3 + speed * 0.18, 0.3, 0.9), 0.08, hand)
+		elif touching and speed > 0.25:
+			# On frotte contre la surface : petit grondement continu.
+			_pulse_haptics(0.12, 0.04, hand)
+		_touch_state[hand] = touching
 
 
 ## Saut (mode Chasse) : un petit bond, pas de plafond de verre — la capsule suit.
@@ -832,10 +943,11 @@ func reset_position() -> void:
 ## Boutons X/Y et grip : sortir ou ranger le téléphone. Menu : relancer après game over.
 func _on_button_pressed(action_name: String, hand: XRController3D) -> void:
 	# Mode Chasse : grip = attraper/lancer, A = sauter, clic du stick droit = changer d'arme.
-	if mode == Mode.HUNT and game_started and not game_over:
+	if game_started and not game_over and (mode == Mode.HUNT or mode == Mode.RESIST):
 		if action_name == &"grip_click":
 			_toggle_grab(hand, true)
 			return
+	if mode == Mode.HUNT and game_started and not game_over:
 		if action_name == &"ax_button" and hand == right_hand:
 			jump()
 			return
@@ -1018,6 +1130,7 @@ func on_mimic_purged() -> void:
 
 func _spawn_dose() -> void:
 	apartment.spawn_dose(xr_camera.global_position)
+	_refresh_pill_nav()
 	_log("GAME", "dose spawnée")
 
 
@@ -1145,7 +1258,7 @@ func _start_hunt() -> void:
 			mimic.set_process(false)
 	# Le téléphone sort tout de suite : c'est le GPS.
 	if phone != null:
-		phone.set_gps(true)
+		phone.set_gps(true, "GPS  -  ÇA COGNE")
 		if not phone.is_in_hand:
 			phone.toggle_pocket()
 	hunt.start()
@@ -1214,6 +1327,13 @@ func return_to_lobby() -> void:
 	_movement_body.collision_mask = 1
 	_jump_y = 0.0
 	_jump_vy = 0.0
+	for node in [sandbox, nav]:
+		if is_instance_valid(node):
+			node.queue_free()
+	sandbox = null
+	nav = null
+	_pill_gps_on = false
+	_touch_state.clear()
 	if is_instance_valid(_pointed) and _pointed.has_method(&"on_unpointed"):
 		_pointed.on_unpointed()
 	_pointed = null

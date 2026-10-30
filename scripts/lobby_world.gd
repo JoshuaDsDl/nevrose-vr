@@ -145,20 +145,28 @@ func _build_shop() -> void:
 	board.add_child(header)
 
 	var cols := 4
+	var slot := 0
+	var weapons_started := false
 	for i in DecorCatalog.ITEMS.size():
 		var item: Dictionary = DecorCatalog.ITEMS[i]
+		if item["kind"] == "weapon" and not weapons_started:
+			weapons_started = true
+			slot = int(ceil(float(slot) / cols)) * cols # les armes commencent sur une nouvelle rangée
 		var card := LobbyButton.new()
 		card.name = "Achat_%s" % item["id"]
 		board.add_child(card)
 		var is_weapon: bool = item["kind"] == "weapon"
-		card.setup(Vector2(0.62, 0.46), String(item["name"]), "mode Chasse" if is_weapon else "",
+		card.setup(Vector2(0.62, 0.4), String(item["name"]), "mode Chasse" if is_weapon else "",
 			Color(1.0, 0.4, 0.35) if is_weapon else Color(0.9, 0.75, 0.3), 0.0021, 0.0013)
-		card.title_label.position.y = 0.08
-		card.title_label.font_size = 38
-		card.tag_label.font_size = 30
-		var col := i % cols
-		var row := i / cols
-		card.position = Vector3((col - (cols - 1) * 0.5) * 0.7, 2.05 - row * 0.54, 0.02)
+		card.title_label.position.y = 0.085 if not is_weapon else 0.1
+		card.title_label.font_size = 36
+		card.body_label.position.y = 0.02
+		card.tag_label.font_size = 28
+		card.tag_label.position.y = -0.135
+		var col := slot % cols
+		var row := slot / cols
+		slot += 1
+		card.position = Vector3((col - (cols - 1) * 0.5) * 0.7, 2.12 - row * 0.455, 0.02)
 		card.pressed.connect(_on_shop_pressed.bind(String(item["id"])))
 		shop_cards[item["id"]] = card
 		interactables.append(card)

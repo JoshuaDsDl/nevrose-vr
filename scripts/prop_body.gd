@@ -14,6 +14,7 @@ var size := Vector3.ONE ## emprise monde de l'objet
 var tint := Color(0.72, 0.66, 0.6)
 var hanging := false ## accroché au mur : fige jusqu'au premier coup
 var is_dead := false
+var breakable := true ## faux en mode Résistance : on peut jeter les objets, pas les casser
 
 var _last_speed := 0.0
 var _flash := 0.0
@@ -66,7 +67,7 @@ func wake() -> void:
 
 
 func _on_body_entered(_other: Node) -> void:
-	if is_dead:
+	if is_dead or not breakable:
 		return
 	var impact := _last_speed
 	if impact > IMPACT_SPEED:
@@ -82,6 +83,8 @@ func damage(amount: float, at := Vector3.ZERO, impulse := Vector3.ZERO) -> void:
 	if impulse != Vector3.ZERO:
 		var arm := (at - global_position) if at != Vector3.ZERO else Vector3.ZERO
 		apply_impulse(impulse, arm)
+	if not breakable:
+		return
 	hp -= amount
 	_flash = 0.15
 	if hp <= 0.0:

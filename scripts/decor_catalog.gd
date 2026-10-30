@@ -6,8 +6,9 @@ extends RefCounted
 ## kind "node"  : nœud déjà présent dans la scène, masqué par défaut.
 ## kind "frame" : cadre procédural accroché au mur.
 ## kind "glb"   : objet Kenney posé au sol ou sur une surface (`on` = nœud support).
-## kind "weapon": arme du mode Chasse (`damage` = puissance d'un coup, `reach` = portée au-delà
-##                de la main, en mètres, `swing` = vitesse minimale du geste pour frapper).
+## kind "weapon": arme du mode Chasse, utilisable SEULEMENT dans ce mode. `type` : "melee"
+##                (`swing` = vitesse minimale du geste), "gun" (`rate` = secondes entre deux tirs,
+##                `pellets`, `spread` en degrés, `auto`) ou "grenade" (`radius` de l'explosion).
 
 const KENNEY := "res://assets/kenney/furniture/"
 
@@ -33,10 +34,12 @@ const ITEMS: Array[Dictionary] = [
 		"glb": "radio.glb", "on": "kitchenCabinetDrawer", "offset": Vector3.ZERO, "scale": 2.5},
 	{"id": "nounours", "name": "Nounours", "price": 15, "kind": "glb",
 		"glb": "bear.glb", "on": "ExtensionEst/Chambre/LitDouble", "offset": Vector3.ZERO, "scale": 2.5},
-	{"id": "arme_marteau", "name": "Marteau", "price": 20, "kind": "weapon", "damage": 2.0, "reach": 0.45, "swing": 1.8},
-	{"id": "arme_pied", "name": "Pied-de-biche", "price": 24, "kind": "weapon", "damage": 2.4, "reach": 0.6, "swing": 1.8},
-	{"id": "arme_batte", "name": "Batte", "price": 28, "kind": "weapon", "damage": 2.8, "reach": 0.8, "swing": 2.0},
-	{"id": "arme_masse", "name": "Masse", "price": 45, "kind": "weapon", "damage": 4.5, "reach": 0.9, "swing": 2.4},
+	{"id": "arme_couteau", "name": "Couteau", "price": 15, "kind": "weapon", "type": "melee", "damage": 2.4, "swing": 1.5},
+	{"id": "arme_grenade", "name": "Grenade", "price": 25, "kind": "weapon", "type": "grenade", "damage": 16.0, "radius": 3.8},
+	{"id": "arme_pistolet", "name": "Pistolet", "price": 30, "kind": "weapon", "type": "gun", "damage": 1.8, "rate": 0.2, "pellets": 1, "spread": 0.4, "auto": false, "sound": "pistolet"},
+	{"id": "arme_revolver", "name": "Revolver", "price": 40, "kind": "weapon", "type": "gun", "damage": 4.2, "rate": 0.55, "pellets": 1, "spread": 0.3, "auto": false, "sound": "revolver"},
+	{"id": "arme_pompe", "name": "Fusil à pompe", "price": 55, "kind": "weapon", "type": "gun", "damage": 1.7, "rate": 0.95, "pellets": 8, "spread": 5.0, "auto": false, "sound": "pompe"},
+	{"id": "arme_fusil", "name": "Fusil d'assaut", "price": 70, "kind": "weapon", "type": "gun", "damage": 1.4, "rate": 0.1, "pellets": 1, "spread": 1.2, "auto": true, "sound": "fusil"},
 ]
 
 

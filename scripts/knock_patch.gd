@@ -97,8 +97,7 @@ func _build() -> void:
 	_audio = AudioStreamPlayer3D.new()
 	_audio.name = "Toc"
 	_audio.stream = Sfx.knock()
-	_audio.unit_size = 4.0
-	_audio.max_distance = 40.0
+	SpatialAudio.configure(_audio, 3.0, 40.0)
 	_audio.volume_db = 4.0
 	_audio.position.z = -0.05
 	add_child(_audio)
@@ -106,10 +105,8 @@ func _build() -> void:
 	# Voix qui sort du mur, au même endroit que les coups.
 	_voice = AudioStreamPlayer3D.new()
 	_voice.name = "Voix"
-	_voice.unit_size = 5.0
-	_voice.max_distance = 40.0
+	SpatialAudio.configure(_voice, 3.0, 40.0)
 	_voice.volume_db = 4.0
-	_voice.attenuation_filter_cutoff_hz = 7000.0 # étouffée par la distance, comme à travers une cloison
 	_voice.position.z = -0.08
 	add_child(_voice)
 
@@ -180,6 +177,10 @@ func _set_area_enabled(on: bool) -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
+	var cam := get_viewport().get_camera_3d() if get_viewport() != null else null
+	if cam != null:
+		SpatialAudio.tune(_audio, cam)
+		SpatialAudio.tune(_voice, cam)
 	_clock += delta
 	if _clock >= KNOCK_PERIOD:
 		_clock = 0.0

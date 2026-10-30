@@ -5,13 +5,15 @@ extends Node3D
 ## Intègre une réplique de Messenger affichant les messages du subconscient et le timer de folie.
 
 # Dimensions réalistes d'un smartphone moderne (~8 x 16 x 0.8 cm)
-const PHONE_WIDTH := 0.080
-const PHONE_HEIGHT := 0.160
-const PHONE_THICKNESS := 0.008
+# Deux fois la taille d'un vrai téléphone : l'écran du Quest 2 est peu résolu, un vrai format
+# donnerait des lettres de 4 pixels. Le texte fait ~2° de haut à 45 cm.
+const PHONE_WIDTH := 0.160
+const PHONE_HEIGHT := 0.320
+const PHONE_THICKNESS := 0.012
 
 # Dimensions de l'écran (~7.4 x 15 cm)
-const SCREEN_WIDTH := 0.074
-const SCREEN_HEIGHT := 0.150
+const SCREEN_WIDTH := 0.148
+const SCREEN_HEIGHT := 0.300
 
 # Résolution interne de l'écran Messenger (ratio 9:15)
 const VIEWPORT_WIDTH := 384
@@ -38,9 +40,9 @@ var _pocket_parent: Node3D = null
 var _pocket_local_pos := Vector3(-0.25, 0.8, 0.0)
 var _pocket_local_rot := Vector3(0.0, 0.0, 0.0)
 # Écran avancé à 12 cm de la manette pour éviter une lecture trop près du visage.
-var _hand_local_pos := Vector3(0.02, 0.04, -0.12)
+var _hand_local_pos := Vector3(0.05, 0.1, -0.22)
 var _hand_local_rot := Vector3(-35.0, 15.0, -10.0)
-var _desktop_cam_pos := Vector3(-0.16, -0.12, -0.32)
+var _desktop_cam_pos := Vector3(-0.2, -0.14, -0.52)
 var _desktop_cam_rot := Vector3(-12.0, 12.0, -4.0)
 
 # Composants 3D
@@ -67,6 +69,7 @@ var _chat_scroll: ScrollContainer = null
 var _gps_panel: Panel = null
 var _gps_arrow: Control = null
 var _gps_distance: Label = null
+var _gps_title: Label = null
 var _gps_hint: Label = null
 var _gps_angle := 0.0
 var _gps_near := false
@@ -188,7 +191,7 @@ func _build_2d_messenger_ui() -> void:
 	_clock_label.position = Vector2(12, 2)
 	_clock_label.size = Vector2(80, 20)
 	_clock_label.text = "03:42"
-	_clock_label.add_theme_font_size_override("font_size", 12)
+	_clock_label.add_theme_font_size_override("font_size", 16)
 	_clock_label.add_theme_color_override("font_color", Color(0.8, 0.82, 0.85))
 	sys_bar.add_child(_clock_label)
 
@@ -197,7 +200,7 @@ func _build_2d_messenger_ui() -> void:
 	_battery_label.size = Vector2(80, 20)
 	_battery_label.text = "87% [||||]"
 	_battery_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_battery_label.add_theme_font_size_override("font_size", 12)
+	_battery_label.add_theme_font_size_override("font_size", 16)
 	_battery_label.add_theme_color_override("font_color", Color(0.8, 0.82, 0.85))
 	sys_bar.add_child(_battery_label)
 
@@ -255,32 +258,32 @@ func _build_2d_messenger_ui() -> void:
 
 	# Nom du contact & titre Messenger
 	var contact_vbox := VBoxContainer.new()
-	contact_vbox.position = Vector2(88, 12)
+	contact_vbox.position = Vector2(88, 4)
 	contact_vbox.size = Vector2(160, 52)
 	_header_panel.add_child(contact_vbox)
 
 	var title_sub := Label.new()
 	title_sub.text = "MESSENGER"
-	title_sub.add_theme_font_size_override("font_size", 10)
+	title_sub.add_theme_font_size_override("font_size", 11)
 	title_sub.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 	contact_vbox.add_child(title_sub)
 
 	var contact_name := Label.new()
 	contact_name.text = "Subconscient"
-	contact_name.add_theme_font_size_override("font_size", 16)
+	contact_name.add_theme_font_size_override("font_size", 24)
 	contact_name.add_theme_color_override("font_color", Color.WHITE)
 	contact_vbox.add_child(contact_name)
 
 	_contact_status_label = Label.new()
 	_contact_status_label.text = "En ligne"
-	_contact_status_label.add_theme_font_size_override("font_size", 11)
+	_contact_status_label.add_theme_font_size_override("font_size", 13)
 	_contact_status_label.add_theme_color_override("font_color", Color(0.85, 1.0, 0.85))
 	contact_vbox.add_child(_contact_status_label)
 
 	# Badge compte à rebours / urgence dans l'en-tête (en haut à droite)
 	var timer_panel := Panel.new()
-	timer_panel.position = Vector2(VIEWPORT_WIDTH - 120, 18)
-	timer_panel.size = Vector2(110, 36)
+	timer_panel.position = Vector2(VIEWPORT_WIDTH - 136, 16)
+	timer_panel.size = Vector2(126, 42)
 	var tm_style := StyleBoxFlat.new()
 	tm_style.bg_color = Color(0.0, 0.0, 0.0, 0.45)
 	tm_style.corner_radius_top_left = 18
@@ -295,7 +298,7 @@ func _build_2d_messenger_ui() -> void:
 	_timer_badge_label.text = "--:--"
 	_timer_badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_timer_badge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_timer_badge_label.add_theme_font_size_override("font_size", 13)
+	_timer_badge_label.add_theme_font_size_override("font_size", 24)
 	_timer_badge_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.7))
 	timer_panel.add_child(_timer_badge_label)
 
@@ -388,7 +391,7 @@ func _build_gps_panel() -> void:
 	_gps_panel = Panel.new()
 	_gps_panel.name = "GPS"
 	_gps_panel.position = Vector2(12, 106)
-	_gps_panel.size = Vector2(VIEWPORT_WIDTH - 24, 232)
+	_gps_panel.size = Vector2(VIEWPORT_WIDTH - 24, 214)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.05, 0.06, 0.09)
 	style.border_color = Color(0.35, 1.0, 0.55)
@@ -399,53 +402,56 @@ func _build_gps_panel() -> void:
 	_ui_root.add_child(_gps_panel)
 
 	var title := Label.new()
-	title.text = "GPS  -  ÇA COGNE"
-	title.position = Vector2(0, 8)
-	title.size = Vector2(_gps_panel.size.x, 22)
+	title.text = "GPS"
+	title.position = Vector2(0, 6)
+	title.size = Vector2(_gps_panel.size.x, 28)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_font_size_override("font_size", 20)
 	title.add_theme_color_override("font_color", Color(0.6, 0.9, 0.7))
 	_gps_panel.add_child(title)
+	_gps_title = title
 
 	_gps_arrow = Control.new()
-	_gps_arrow.position = Vector2(_gps_panel.size.x * 0.5, 112)
+	_gps_arrow.position = Vector2(_gps_panel.size.x * 0.5, 88)
 	_gps_arrow.draw.connect(_draw_gps_arrow)
 	_gps_panel.add_child(_gps_arrow)
 
 	_gps_distance = Label.new()
-	_gps_distance.position = Vector2(0, 176)
-	_gps_distance.size = Vector2(_gps_panel.size.x, 34)
+	_gps_distance.position = Vector2(0, 146)
+	_gps_distance.size = Vector2(_gps_panel.size.x, 40)
 	_gps_distance.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_gps_distance.add_theme_font_size_override("font_size", 28)
+	_gps_distance.add_theme_font_size_override("font_size", 36)
 	_gps_distance.add_theme_color_override("font_color", Color.WHITE)
 	_gps_panel.add_child(_gps_distance)
 
 	_gps_hint = Label.new()
-	_gps_hint.position = Vector2(0, 208)
-	_gps_hint.size = Vector2(_gps_panel.size.x, 20)
+	_gps_hint.position = Vector2(0, 184)
+	_gps_hint.size = Vector2(_gps_panel.size.x, 26)
 	_gps_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_gps_hint.add_theme_font_size_override("font_size", 13)
+	_gps_hint.add_theme_font_size_override("font_size", 19)
 	_gps_hint.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 	_gps_panel.add_child(_gps_hint)
 
 
 func _draw_gps_arrow() -> void:
 	var color := Color(1.0, 0.8, 0.25) if _gps_near else Color(0.35, 1.0, 0.55)
-	_gps_arrow.draw_arc(Vector2.ZERO, 72.0, 0.0, TAU, 48, Color(1, 1, 1, 0.1), 3.0, true)
+	_gps_arrow.draw_arc(Vector2.ZERO, 56.0, 0.0, TAU, 48, Color(1, 1, 1, 0.12), 3.0, true)
 	_gps_arrow.draw_set_transform(Vector2.ZERO, _gps_angle, Vector2.ONE)
-	var pts := PackedVector2Array([Vector2(0, -62), Vector2(40, 34), Vector2(0, 14), Vector2(-40, 34)])
+	var pts := PackedVector2Array([Vector2(0, -54), Vector2(36, 30), Vector2(0, 12), Vector2(-36, 30)])
 	_gps_arrow.draw_colored_polygon(pts, color)
 	_gps_arrow.draw_polyline(PackedVector2Array([pts[0], pts[1], pts[2], pts[3], pts[0]]), Color(0, 0, 0, 0.5), 2.0, true)
 
 
 ## Active ou coupe le GPS ; le chat descend pour lui laisser la place.
-func set_gps(active: bool) -> void:
+func set_gps(active: bool, title := "GPS") -> void:
 	if _gps_panel == null:
 		return
 	_gps_panel.visible = active
+	_gps_title.text = title
 	if _chat_scroll != null:
-		_chat_scroll.position.y = 346.0 if active else 108.0
-		_chat_scroll.size.y = 230.0 if active else 468.0
+		_chat_scroll.position.y = 328.0 if active else 108.0
+		_chat_scroll.size.y = 248.0 if active else 468.0
+	_refresh_messages_ui()
 	if active:
 		_gps_arrow.queue_redraw()
 
@@ -587,7 +593,8 @@ func _refresh_messages_ui() -> void:
 	for child in _messages_container.get_children():
 		child.queue_free()
 
-	var first_visible := maxi(_messages_data.size() - MAX_VISIBLE_MESSAGES, 0)
+	var visible_count := 1 if (_gps_panel != null and _gps_panel.visible) else MAX_VISIBLE_MESSAGES
+	var first_visible := maxi(_messages_data.size() - visible_count, 0)
 	for i in range(first_visible, _messages_data.size()):
 		var msg: Dictionary = _messages_data[i]
 		var item_vbox := VBoxContainer.new()
@@ -596,7 +603,7 @@ func _refresh_messages_ui() -> void:
 		# Horodatage / En-tête de message
 		var meta_lbl := Label.new()
 		meta_lbl.text = "Subconscient • " + str(msg.get("time", "Maintenant"))
-		meta_lbl.add_theme_font_size_override("font_size", 14)
+		meta_lbl.add_theme_font_size_override("font_size", 19)
 		meta_lbl.add_theme_color_override("font_color", Color(0.6, 0.62, 0.66))
 		item_vbox.add_child(meta_lbl)
 
@@ -611,9 +618,9 @@ func _refresh_messages_ui() -> void:
 		b_style.corner_radius_bottom_right = 14
 		b_style.corner_radius_bottom_left = 4
 		b_style.content_margin_left = 14
-		b_style.content_margin_top = 10
+		b_style.content_margin_top = 8
 		b_style.content_margin_right = 14
-		b_style.content_margin_bottom = 10
+		b_style.content_margin_bottom = 8
 		bubble_panel.add_theme_stylebox_override("panel", b_style)
 
 		var msg_lbl := Label.new()
@@ -621,7 +628,7 @@ func _refresh_messages_ui() -> void:
 		msg_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		msg_lbl.custom_minimum_size = Vector2.ZERO
 		msg_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		msg_lbl.add_theme_font_size_override("font_size", 18)
+		msg_lbl.add_theme_font_size_override("font_size", 31)
 		msg_lbl.add_theme_color_override("font_color", Color.WHITE)
 		bubble_panel.add_child(msg_lbl)
 

@@ -344,6 +344,17 @@ func _register_spawn_spots() -> void:
 		_spawn_spots.append({"pos": _surface_point(path, 0.09), "container": null})
 	for pos in FLOOR_SPOTS:
 		_spawn_spots.append({"pos": pos, "container": null, "floor": true})
+	# Et dans les rangements : tiroir de cuisine, frigo, commode du salon (lueur à travers la porte).
+	var holders := ["Shell/kitchenCabinetDrawer", "Shell/kitchenFridge", "Shell/sideTableDrawers"]
+	for i in mini(containers.size(), holders.size()):
+		var holder := get_node_or_null(holders[i]) as Node3D
+		if holder == null:
+			continue
+		var b := _world_bounds(holder)
+		_spawn_spots.append({
+			"pos": Vector3(b.get_center().x, b.position.y + b.size.y * 0.45, b.get_center().z),
+			"container": containers[i],
+		})
 
 
 func _key_spots() -> Array[Vector3]:

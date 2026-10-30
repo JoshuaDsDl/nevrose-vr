@@ -20,6 +20,7 @@ var room_h := 2.7
 var containers: Array[InteractiveContainer] = []
 var mimics: Array[Mimic] = []
 var _dose: Dose = null
+var _dose_marker: Node3D = null ## lueur qui trahit une pilule rangée dans un placard fermé
 var _spawn_spots: Array[Dictionary] = [] # {pos, container, floor}
 var _insanity := 0.0
 
@@ -194,6 +195,9 @@ func set_insanity(t: float) -> void:
 
 
 func _process(_delta: float) -> void:
+	# Le marqueur d'un placard s'éteint dès que la pilule est visible (placard ouvert).
+	if is_instance_valid(_dose_marker):
+		_dose_marker.visible = is_instance_valid(_dose) and not _dose.visible
 	if _insanity <= 0.55:
 		return
 	var jitter := sin(Time.get_ticks_msec() / 37.0) * sin(Time.get_ticks_msec() / 91.0)
@@ -228,7 +232,20 @@ func spawn_dose(avoid := Vector3(1e9, 0.0, 1e9), min_dist := 5.0) -> void:
 		var q: Vector3 = sp["pos"]
 		if Vector2(q.x - avoid.x, q.z - avoid.z).length() >= min_dist:
 			far.append(sp)
-	var spot: Dictionary = far.pick_random() if not far.is_empty() else _spawn_spots.pick_random()
+	# Une fois sur deux la pilule est rangée dans un placard, un tiroir ou le frigo.
+	var stored: Array[Dictionary] = []
+	var open_air: Array[Dictionary] = []
+	for sp in far:
+		if sp["container"] != null:
+			stored.append(sp)
+		else:
+			open_air.append(sp)
+	var pool: Array[Dictionary] = far
+	if not stored.is_empty() and (open_air.is_empty() or randf() < 0.5):
+		pool = stored
+	elif not open_air.is_empty():
+		pool = open_air
+	var spot: Dictionary = pool.pick_random() if not pool.is_empty() else _spawn_spots.pick_random()
 	_dose = Dose.new()
 	_dose.name = "Dose"
 	if spot.get("floor", false):
@@ -250,15 +267,49 @@ func spawn_dose(avoid := Vector3(1e9, 0.0, 1e9), min_dist := 5.0) -> void:
 		_dose.visible = false
 		_dose.monitoring = false
 		_dose.monitorable = false
+		_dose_marker = _make_dose_marker(spot["pos"])
+		add_child(_dose_marker)
 	else:
 		add_child(_dose)
 		_dose.position = spot["pos"]
+
+
+## Lueur cyan et petit faisceau à l'emplacement d'un placard qui contient la pilule.
+func _make_dose_marker(pos: Vector3) -> Node3D:
+	var marker := Node3D.new()
+	marker.name = "MarqueurPilule"
+	marker.position = pos
+	var light := OmniLight3D.new()
+	light.light_color = Color(0.35, 1.0, 0.85)
+	light.light_energy = 1.8
+	light.omni_range = 3.4
+	marker.add_child(light)
+	var beam := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.03
+	cyl.bottom_radius = 0.07
+	cyl.height = 2.2
+	cyl.radial_segments = 8
+	beam.mesh = cyl
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.albedo_color = Color(0.25, 0.95, 0.85, 0.45)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	beam.material_override = mat
+	beam.position.y = 1.1
+	marker.add_child(beam)
+	return marker
 
 
 func clear_dose() -> void:
 	if is_instance_valid(_dose):
 		_dose.queue_free()
 	_dose = null
+	if is_instance_valid(_dose_marker):
+		_dose_marker.queue_free()
+	_dose_marker = null
 	for c in containers:
 		c.dose = null
 

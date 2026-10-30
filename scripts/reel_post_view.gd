@@ -178,24 +178,24 @@ func _build() -> void:
 
 	# Badge de tokens : claque à la toute fin sur la colonne de droite.
 	_badge = Control.new()
-	_badge.position = Vector2(COL_X + 100, 545)
+	_badge.position = Vector2(COL_X + 100, 556)
 	_badge.visible = false
 	var disc := Panel.new()
-	disc.position = Vector2(-62, -62)
-	disc.size = Vector2(124, 124)
-	var db := _round_box(Color(1.0, 0.8, 0.2), 62)
+	disc.position = Vector2(-52, -52)
+	disc.size = Vector2(104, 104)
+	var db := _round_box(Color(1.0, 0.8, 0.2), 52)
 	db.border_color = Color(1.0, 0.95, 0.6)
 	db.set_border_width_all(5)
 	disc.add_theme_stylebox_override("panel", db)
 	_badge.add_child(disc)
-	_badge_label = _label("+0", 40, Color(0.25, 0.14, 0.0))
-	_badge_label.position = Vector2(-62, -38)
-	_badge_label.size = Vector2(124, 46)
+	_badge_label = _label("+0", 38, Color(0.25, 0.14, 0.0))
+	_badge_label.position = Vector2(-52, -34)
+	_badge_label.size = Vector2(104, 44)
 	_badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_badge.add_child(_badge_label)
 	var unit := _label("TOKENS", 14, Color(0.25, 0.14, 0.0))
-	unit.position = Vector2(-62, 6)
-	unit.size = Vector2(124, 20)
+	unit.position = Vector2(-52, 8)
+	unit.size = Vector2(104, 20)
 	unit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_badge.add_child(unit)
 	add_child(_badge)
@@ -203,10 +203,12 @@ func _build() -> void:
 
 func _stat_row(index: int, icon: Texture2D, y: float) -> Label:
 	var tex := TextureRect.new()
+	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE # avant la taille : sinon l'icône garde ses 64 px
+	tex.stretch_mode = TextureRect.STRETCH_SCALE
+	tex.custom_minimum_size = Vector2(34, 34)
 	tex.texture = icon
 	tex.position = Vector2(COL_X, y)
 	tex.size = Vector2(34, 34)
-	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	add_child(tex)
 	var l := _label("—", 28, Color.WHITE)
 	l.position = Vector2(COL_X + 46, y - 2)

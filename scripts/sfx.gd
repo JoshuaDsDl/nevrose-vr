@@ -99,6 +99,68 @@ static func whoosh() -> AudioStreamWAV:
 	return _cache["whoosh"]
 
 
+## Coup de feu : claquement sec + queue grave. `kind` : "pistolet", "revolver", "pompe", "fusil".
+static func shot(kind: String) -> AudioStreamWAV:
+	var key := "shot_" + kind
+	if not _cache.has(key):
+		var length := 0.35
+		var body := 160.0
+		var snap := 90.0
+		var tail := 14.0
+		match kind:
+			"revolver":
+				length = 0.55
+				body = 95.0
+				tail = 8.0
+			"pompe":
+				length = 0.7
+				body = 70.0
+				snap = 55.0
+				tail = 6.0
+			"fusil":
+				length = 0.22
+				body = 130.0
+				snap = 120.0
+				tail = 20.0
+		_cache[key] = _synth(length, func(t: float, n: float) -> float:
+			var crack := n * exp(-t * snap) * 0.95
+			var boom := sin(TAU * body * t * exp(-t * 3.0)) * exp(-t * tail) * 0.9
+			return crack + boom)
+	return _cache[key]
+
+
+## Explosion de grenade : grondement long et fracas.
+static func boom() -> AudioStreamWAV:
+	if not _cache.has("boom"):
+		_cache["boom"] = _synth(1.8, func(t: float, n: float) -> float:
+			var rumble := sin(TAU * 42.0 * t * exp(-t * 1.2)) * exp(-t * 2.4) * 1.0
+			var blast := n * exp(-t * 5.0) * 0.9
+			var debris := n * (0.5 + 0.5 * sin(TAU * 11.0 * t)) * exp(-(t - 0.5) * (t - 0.5) * 8.0) * 0.25
+			return rumble + blast + debris)
+	return _cache["boom"]
+
+
+## Tic de grenade dégoupillée.
+static func tick() -> AudioStreamWAV:
+	if not _cache.has("tick"):
+		_cache["tick"] = _synth(0.06, func(t: float, _n: float) -> float:
+			return sin(TAU * 1800.0 * t) * exp(-t * 70.0) * 0.6)
+	return _cache["tick"]
+
+
+## « POP » de bouteille de champagne : claquement de bouchon, résonance du goulot, mousse.
+static func champagne() -> AudioStreamWAV:
+	if not _cache.has("champagne"):
+		_cache["champagne"] = _synth(1.6, func(t: float, n: float) -> float:
+			var pop := sin(TAU * (210.0 - 120.0 * minf(t / 0.12, 1.0)) * t) * exp(-t * 28.0) * 1.0
+			var thump := sin(TAU * 62.0 * t) * exp(-t * 14.0) * 0.8
+			var click := n * exp(-t * 160.0) * 0.9
+			var hiss := n * exp(-t * 2.8) * 0.28 * smoothstep(0.03, 0.14, t)
+			var neck := sin(TAU * 520.0 * t) * exp(-t * 9.0) * 0.25
+			return pop + thump + click + hiss + neck)
+	return _cache["champagne"]
+
+
 ## Génère un flux : `shape.call(t, bruit)` renvoie l'échantillon (-1..1).
 static func _synth(duration: float, shape: Callable) -> AudioStreamWAV:
 	var frames := int(RATE * duration)

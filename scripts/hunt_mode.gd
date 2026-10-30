@@ -18,8 +18,6 @@ const MIN_STEP_DISTANCE := 4.0 ## le prochain mur est au moins à 4 m du précé
 const HINT_PERIOD := 22.0
 const PUNCH_SPEED := 2.0 ## m/s : un vrai geste, pas un frôlement
 const PUNCH_REACH := 0.6
-const CELL := 0.3 ## maille de la carte d'accessibilité (GPS et choix des murs)
-const PLAYER_RADIUS := 0.3
 const TOKENS_PER_3_OBJECTS := 1 ## +1 token tous les 3 objets cassés
 const PUNCH_COOLDOWN := 0.4
 const VOICE_DIR := "res://assets/voices/"
@@ -50,9 +48,7 @@ var _voice_bag: Array[int] = []
 var _last_voice := -1
 var _voice_clock := 0.0
 var _hint_clock := 0.0
-var _reachable := {} ## Vector2i -> true : cases du sol où le joueur peut se tenir
-var _dist_field := {} ## Vector2i -> pas jusqu'à la plaque qui cogne (GPS)
-var _grid_origin := Vector2(-4.0, -4.8)
+var nav: NavGrid = null ## carte d'accessibilité + GPS
 
 
 func setup(p_apartment: MapBase, p_camera: Node3D, p_hands: Array[Node3D]) -> void:
@@ -69,12 +65,16 @@ func start() -> void:
 	await get_tree().physics_frame
 	# Carte des endroits où l'on peut vraiment se tenir (avant que les meubles ne deviennent mobiles) :
 	# aucune plaque ne sera placée derrière une porte verrouillée ni à l'extérieur.
-	await _compute_reachable()
+	nav = NavGrid.new()
+	nav.name = "Nav"
+	add_child(nav)
+	await nav.compute_reachable(camera.global_position, APT_MIN, APT_MAX)
 	sandbox = HuntSandbox.new()
 	sandbox.name = "Sandbox"
 	add_child(sandbox)
 	sandbox.setup(apartment, camera, hands, owned_items)
 	sandbox.swung.connect(_on_swing)
+	sandbox.shot.connect(_on_shot)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	_collect_candidates()
@@ -150,7 +150,7 @@ func _add_ceiling_candidates(mi: MeshInstance3D) -> void:
 ## Garde le point s'il est dans l'appartement et dégagé (pas derrière un meuble).
 func _try_candidate(pos: Vector3, n: Vector3, color: Color) -> void:
 	var front := pos + n * 0.9
-	if not _reachable.is_empty() and not _reachable.has(_cell_of(front)):
+	if nav != null and nav.is_ready() and not nav.has_point(front):
 		rejected.append(pos)
 		return # hors de portée : mur extérieur, pièce fermée, recoin inaccessible
 	if front.x < APT_MIN.x or front.x > APT_MAX.x or front.z < APT_MIN.y or front.z > APT_MAX.y:
@@ -198,7 +198,7 @@ func _activate_next() -> void:
 	patch.broken.connect(_on_patch_broken)
 	patches.append(patch)
 	current = patch
-	_build_distance_field(patch)
+	nav.build_distance_field(patch.global_position + patch.normal * 0.7)
 	patch.activate()
 	_hint_clock = 0.0
 	_voice_clock = VOICE_FIRST_DELAY
@@ -335,6 +335,16 @@ func _direction_hint() -> String:
 	return "Ça cogne %s, %s." % [side, far]
 
 
+## Un tir : si le projectile passe tout près de la plaque qui cogne, elle encaisse.
+func _on_shot(origin: Vector3, end: Vector3, power: float) -> void:
+	if current == null or not current.active or finished:
+		return
+	var seg := end - origin
+	var t := clampf((current.global_position - origin).dot(seg) / maxf(seg.length_squared(), 0.0001), 0.0, 1.0)
+	if (origin + seg * t).distance_to(current.global_position) < 0.4:
+		current.hit(maxi(int(round(power * 0.8)), 1))
+
+
 ## Un coup du bac à sable (poing ou arme) : s'il touche la plaque qui cogne, elle encaisse.
 func _on_swing(tip: Vector3, _prev: Vector3, _velocity: Vector3, power: float, hand: Node3D) -> void:
 	if current == null or not current.active or finished:
@@ -346,150 +356,8 @@ func _on_swing(tip: Vector3, _prev: Vector3, _velocity: Vector3, power: float, h
 			main.pulse_haptics(0.8, 0.12, hand as XRController3D)
 
 
-# ---------------------------------------------------------------------------
-# Accessibilité et GPS : le sol praticable est quadrillé (maille CELL) ; le GPS suit le
-# chemin le plus court depuis le joueur jusqu'à la plaque, portes et couloirs compris.
-# ---------------------------------------------------------------------------
-func _cell_of(p: Vector3) -> Vector2i:
-	return Vector2i(int(floor((p.x - _grid_origin.x) / CELL)), int(floor((p.z - _grid_origin.y) / CELL)))
-
-
-func _cell_center(c: Vector2i) -> Vector3:
-	return Vector3(_grid_origin.x + (c.x + 0.5) * CELL, 0.0, _grid_origin.y + (c.y + 0.5) * CELL)
-
-
-func _cell_free(space: PhysicsDirectSpaceState3D, params: PhysicsShapeQueryParameters3D, c: Vector2i) -> bool:
-	var center := _cell_center(c)
-	for h in [0.45, 1.2]:
-		params.transform = Transform3D(Basis.IDENTITY, Vector3(center.x, h, center.z))
-		if not space.intersect_shape(params, 1).is_empty():
-			return false
-	return true
-
-
-func _compute_reachable() -> void:
-	_reachable.clear()
-	var space := get_world_3d().direct_space_state
-	var params := PhysicsShapeQueryParameters3D.new()
-	var shape := SphereShape3D.new()
-	shape.radius = PLAYER_RADIUS
-	params.shape = shape
-	params.collision_mask = 1
-	var min_cell := _cell_of(Vector3(APT_MIN.x - 0.3, 0.0, APT_MIN.y - 0.3))
-	var max_cell := _cell_of(Vector3(APT_MAX.x + 0.3, 0.0, APT_MAX.y + 0.3))
-	var start := _cell_of(camera.global_position)
-	# Départ : la case libre la plus proche du joueur.
-	for radius in range(0, 6):
-		var picked := false
-		for dx in range(-radius, radius + 1):
-			for dy in range(-radius, radius + 1):
-				var c := Vector2i(start.x + dx, start.y + dy)
-				if _cell_free(space, params, c):
-					start = c
-					picked = true
-					break
-			if picked:
-				break
-		if picked:
-			break
-	var queue: Array[Vector2i] = [start]
-	_reachable[start] = true
-	var head := 0
-	var budget := 0
-	while head < queue.size():
-		var cell := queue[head]
-		head += 1
-		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var nxt: Vector2i = cell + d
-			if nxt.x < min_cell.x or nxt.y < min_cell.y or nxt.x > max_cell.x or nxt.y > max_cell.y:
-				continue
-			if _reachable.has(nxt):
-				continue
-			_reachable[nxt] = false # vu (évite de re-tester)
-			if _cell_free(space, params, nxt):
-				_reachable[nxt] = true
-				queue.append(nxt)
-			budget += 1
-			if budget % 400 == 0:
-				await get_tree().physics_frame # on étale le coût sur plusieurs images (casque)
-	# On ne garde que les cases libres.
-	for key in _reachable.keys():
-		if not _reachable[key]:
-			_reachable.erase(key)
-
-
-## Distance (en pas) de chaque case praticable jusqu'à la plaque, par parcours en largeur.
-func _build_distance_field(patch: KnockPatch) -> void:
-	_dist_field.clear()
-	if _reachable.is_empty():
-		return
-	var goal := _cell_of(patch.global_position + patch.normal * 0.7)
-	if not _reachable.has(goal):
-		var best := Vector2i.ZERO
-		var best_d := 1e9
-		for c in _reachable:
-			var d := (Vector2(c) - Vector2(goal)).length()
-			if d < best_d:
-				best_d = d
-				best = c
-		goal = best
-	var queue: Array[Vector2i] = [goal]
-	_dist_field[goal] = 0
-	var head := 0
-	while head < queue.size():
-		var cell := queue[head]
-		head += 1
-		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
-			var nxt: Vector2i = cell + d
-			if _dist_field.has(nxt) or not _reachable.has(nxt):
-				continue
-			_dist_field[nxt] = int(_dist_field[cell]) + 1
-			queue.append(nxt)
-
-
 ## Pour le téléphone : angle de la flèche (0 = droit devant, + = à droite), distance et plafond.
 func gps_info() -> Dictionary:
-	if camera == null or current == null or not current.active or finished:
+	if camera == null or current == null or not current.active or finished or nav == null:
 		return {}
-	var cam_pos := camera.global_position
-	var target := current.global_position
-	var distance := Vector2(target.x - cam_pos.x, target.z - cam_pos.z).length()
-	var cell := _cell_of(cam_pos)
-	# Si le joueur est dans une case non cartographiée (seuil de porte), on cherche la plus proche.
-	if not _dist_field.has(cell):
-		var best_d := 99.0
-		var found := cell
-		for dx in range(-3, 4):
-			for dy in range(-3, 4):
-				var c := Vector2i(cell.x + dx, cell.y + dy)
-				if _dist_field.has(c) and Vector2(dx, dy).length() < best_d:
-					best_d = Vector2(dx, dy).length()
-					found = c
-		cell = found
-	if _dist_field.has(cell) and int(_dist_field[cell]) > 3:
-		distance = float(_dist_field[cell]) * CELL
-		# On suit le gradient sur quelques cases pour lisser les virages.
-		var walk := cell
-		for i in 5:
-			var best_n := walk
-			var best_v := int(_dist_field[walk])
-			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
-				var n: Vector2i = walk + d
-				if _dist_field.has(n) and int(_dist_field[n]) < best_v:
-					best_v = int(_dist_field[n])
-					best_n = n
-			if best_n == walk:
-				break
-			walk = best_n
-		target = _cell_center(walk)
-	var to := target - cam_pos
-	to.y = 0.0
-	if to.length() < 0.05:
-		to = current.global_position - cam_pos
-		to.y = 0.0
-	var local := camera.global_transform.basis.inverse() * to
-	return {
-		"angle": atan2(local.x, -local.z),
-		"distance": distance,
-		"vertical": 1 if absf(current.normal.y) > 0.5 else 0,
-	}
+	return nav.gps_info(camera, current.global_position, 1 if absf(current.normal.y) > 0.5 else 0)

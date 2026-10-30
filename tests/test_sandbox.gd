@@ -17,9 +17,10 @@ func _assert(cond: bool, label: String) -> void:
 func _initialize() -> void:
 	print("=== TEST BAC À SABLE (CHASSE) ===")
 	LlmClient.force_offline = true
-	_assert(DecorCatalog.weapons().size() == 4, "boutique : 4 armes")
+	_assert(DecorCatalog.weapons().size() == 6, "boutique : 6 armes (couteau, grenade, pistolet, revolver, fusil à pompe, fusil d'assaut)")
 	for w in DecorCatalog.weapons():
-		_assert(WeaponModel.build(String(w["id"])).get_child_count() >= 1, "arme « %s » : modèle construit" % w["name"])
+		var model := WeaponModel.build(String(w["id"]))
+		_assert(model.get_child_count() >= 1 and model.has_meta("reach"), "arme « %s » : vrai modèle chargé (portée %.2f m)" % [w["name"], float(model.get_meta("reach", 0.0))])
 
 	var packed: PackedScene = load("res://scenes/main.tscn")
 	var main := packed.instantiate()
@@ -29,10 +30,10 @@ func _initialize() -> void:
 	main.profile.persist = false
 	main.profile.add_tokens(100)
 	var lobby: LobbyWorld = main.lobby
-	_assert(lobby.shop_cards.has("arme_batte") and lobby.shop_cards.has("arme_masse"), "lobby : les armes sont en vente")
-	(lobby.shop_cards["arme_batte"] as LobbyButton).interact()
-	_assert(main.profile.owns("arme_batte") and main.profile.tokens == 72, "lobby : la batte s'achète avec les tokens (28)")
-	(lobby.shop_cards["arme_marteau"] as LobbyButton).interact()
+	_assert(lobby.shop_cards.has("arme_pistolet") and lobby.shop_cards.has("arme_fusil") and lobby.shop_cards.has("arme_grenade"), "lobby : les armes sont en vente")
+	(lobby.shop_cards["arme_pistolet"] as LobbyButton).interact()
+	_assert(main.profile.owns("arme_pistolet") and main.profile.tokens == 70, "lobby : le pistolet s'achète avec les tokens (30)")
+	(lobby.shop_cards["arme_couteau"] as LobbyButton).interact()
 
 	main.start_game(Main.Mode.HUNT)
 	var waited := 0
@@ -46,22 +47,36 @@ func _initialize() -> void:
 		await physics_frame
 	_assert(box.props.size() > 20, "bac à sable : %d objets devenus physiques" % box.props.size())
 	_assert(hunt.rejected.size() > 0, "accessibilité : des points inaccessibles écartés (%d)" % hunt.rejected.size())
-	_assert(hunt._reachable.size() > 500, "accessibilité : carte du sol praticable (%d cases)" % hunt._reachable.size())
+	_assert(hunt.nav.reachable.size() > 500, "accessibilité : carte du sol praticable (%d cases)" % hunt.nav.reachable.size())
 	var all_reachable := true
 	for p in hunt.patches:
 		var front: Vector3 = p.global_position + p.normal * 0.9
-		if not hunt._reachable.has(hunt._cell_of(front)):
+		if not hunt.nav.has_point(front):
 			all_reachable = false
 	_assert(all_reachable, "accessibilité : la plaque active est toujours atteignable à pied")
 
 	# --- Armes ---
-	_assert(box.weapon_id == "arme_batte" and is_instance_valid(box.weapon_node), "armes : la meilleure arme possédée est équipée")
+	_assert(box.weapon_id == "arme_pistolet" and is_instance_valid(box.weapon_node), "armes : la meilleure arme possédée est équipée")
 	_assert(box.weapon_node.get_parent() == main.right_hand, "armes : tenue dans la main droite")
 	box.cycle_weapon()
 	_assert(box.weapon_id == "" and box.weapon_node == null, "armes : après la dernière arme, retour aux poings")
 	box.cycle_weapon()
-	_assert(box.weapon_id == "arme_marteau" and is_instance_valid(box.weapon_node), "armes : puis le cycle repart sur la première arme possédée")
-	box.equip("arme_batte")
+	_assert(box.weapon_id == "arme_couteau" and is_instance_valid(box.weapon_node), "armes : puis le cycle repart sur la première arme possédée")
+	box.equip("arme_pistolet")
+	_assert(box.uses_trigger() and box.weapon_type() == "gun", "armes : le pistolet utilise la gâchette")
+	# Tir : cadence, impact sur un objet, trou de balle dans un mur.
+	var hand_r: Node3D = main.right_hand
+	hand_r.global_position = Vector3(-1.0, 1.4, 0.0)
+	hand_r.global_rotation = Vector3.ZERO
+	await physics_frame
+	_assert(box.fire(hand_r) and box.shots_fired == 1, "tir : le premier coup part")
+	_assert(not box.fire(hand_r), "tir : la cadence empêche un deuxième coup immédiat")
+	await create_timer(0.3).timeout
+	_assert(box.fire(hand_r) and box.shots_fired == 2, "tir : le coup suivant part après la cadence")
+	var decals_before := box._decals.size()
+	box._shoot(Vector3(2.0, 1.4, 2.0), Vector3(0, 0, -1), 1.8)
+	await physics_frame
+	_assert(box._decals.size() >= decals_before, "tir : un impact de balle est posé sur le mur")
 
 	# --- Prise et lancer ---
 	var prop: PropBody = null
@@ -123,7 +138,7 @@ func _initialize() -> void:
 	box._wall_hit(Vector3(1, 0, 1), Vector3.UP, 5.0)
 	_assert(box._holes.size() == holes_before + 1, "murs : le sol ne se perce pas")
 	box._wall_hit(Vector3(2.0, 2.7, 1.0), Vector3.DOWN, 3.0)
-	_assert(box._holes.size() == holes_before + 2, "plafond : un coup de masse suffit à le percer")
+	_assert(box._holes.size() == holes_before + 2, "plafond : un coup fort suffit à le percer")
 
 	# --- Saut ---
 	var y_ground: float = main.xr_origin.position.y

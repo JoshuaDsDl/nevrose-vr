@@ -72,12 +72,18 @@ var _voice_idx := 0
 var enabled := true
 
 ## Fréquence de base (s) entre deux voix — réduite quand la schizo monte.
-const BASE_COOLDOWN := 9.0  ## ~9 s quand la folie vient de commencer
+const BASE_COOLDOWN := 5.0  ## ~5 s quand la folie vient de commencer
 const MIN_COOLDOWN := 1.1   ## ~1 s à sanity=100 : le chuchotement permanent
 
 ## Volume max (dB) — ajusté pour petits haut-parleurs Quest 2 (-10.0 à -2.0 dB)
-const MAX_VOLUME_DB := -2.0
-const MIN_VOLUME_DB := -14.0
+const MAX_VOLUME_DB := 0.0
+const MIN_VOLUME_DB := -10.0
+
+## Les fichiers durent 12 à 32 s : on n'en joue qu'un extrait de 7 à 11 s (début au hasard),
+## sinon une voix en occupait une autre pendant une demi-minute et on n'entendait que 5 ou 6
+## voix sur les 15 en une partie.
+const SEGMENT_MIN := 7.0
+const SEGMENT_MAX := 11.0
 
 
 func _ready() -> void:
@@ -104,8 +110,7 @@ func _create_players() -> void:
 		var p := AudioStreamPlayer3D.new()
 		p.name = "WallVoice_%d" % i
 		p.bus = "Master"
-		p.max_distance = 14.0
-		p.unit_size = 3.0
+		SpatialAudio.configure(p, 2.5, 18.0)
 		p.position = PLACEMENTS[i % PLACEMENTS.size()]
 		add_child(p)
 		_players.append(p)
@@ -150,7 +155,7 @@ func _synthesize_notification_sound() -> AudioStreamWAV:
 
 ## Nombre de voix qui peuvent se chevaucher : une seule au début, six en pleine crise.
 func max_simultaneous(t: float) -> int:
-	return clampi(1 + int(t * 5.0), 1, PLAYER_COUNT)
+	return clampi(2 + int(t * 6.0), 2, PLAYER_COUNT)
 
 
 func _playing_count() -> int:
@@ -166,6 +171,10 @@ func _playing_count() -> int:
 func tick(t: float, delta: float) -> void:
 	if not enabled or _streams.is_empty():
 		return
+	# Sons situés derrière / très hauts ou bas : plus sourds (repère devant-derrière).
+	for p in _players:
+		if is_instance_valid(p) and p.playing:
+			SpatialAudio.tune(p, listener)
 	_cooldown -= delta
 	if _cooldown > 0.0:
 		return
@@ -223,7 +232,14 @@ func _play_random_voice(t: float) -> void:
 	free_player.volume_db = lerpf(MIN_VOLUME_DB, MAX_VOLUME_DB, t) + randf_range(-2.0, 1.0)
 	free_player.pitch_scale = randf_range(0.8, 1.2)
 	free_player.stream = stream
-	free_player.play()
+	var length := stream.get_length()
+	var start := 0.0 if length < SEGMENT_MAX + 1.0 else randf() * (length - SEGMENT_MAX)
+	free_player.play(start)
+	if length > SEGMENT_MAX + 1.0:
+		var player := free_player
+		get_tree().create_timer(randf_range(SEGMENT_MIN, SEGMENT_MAX)).timeout.connect(func() -> void:
+			if is_instance_valid(player) and player.stream == stream and player.playing:
+				player.stop())
 	voices_heard[idx] = int(voices_heard.get(idx, 0)) + 1
 	_log("VOIX", "voix #%d (folie=%.0f, %d simultanées)" % [idx + 1, t * 100.0, _playing_count()])
 

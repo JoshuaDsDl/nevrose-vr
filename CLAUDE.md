@@ -22,9 +22,20 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
     jamais placées derrière la porte verrouillée ni dehors.
   - **Bac à sable** : meubles et objets deviennent des `PropBody` (RigidBody3D, couche 8) ; grip =
     attraper (rayon 3 m) et lancer, A (droite) = sauter, clic du stick droit = changer d'arme.
-    Poings, ou armes de la boutique (marteau, pied-de-biche, batte, masse, `kind: weapon` dans
-    `DecorCatalog`). Tout se casse ; murs et plafonds se percent à coups répétés (`HuntSandbox._wall_hit`).
-    Le joueur reste un CharacterBody (pas de RigidBody pour lui).
+    Poings, ou armes de la boutique, **utilisables seulement en Chasse** (`kind: weapon` dans
+    `DecorCatalog`, vrais assets CC0 de `assets/Gun&Knife` normalisés par `weapon_model.gd`) : couteau
+    (melee), pistolet, revolver, fusil à pompe, fusil d'assaut (la gâchette droite tire, tir auto pour le
+    fusil), grenade (lancée, explose). Tout se casse ; murs et plafonds se percent à coups répétés ou à
+    la balle (`HuntSandbox._wall_hit`). Le joueur reste un CharacterBody (pas de RigidBody pour lui).
+- **Résistance** : le téléphone sort tout de suite et porte un GPS vers la pilule (`NavGrid`) ; la pilule
+  est une fois sur deux rangée dans un placard / le frigo (lueur cyan qui la trahit) ; halo + faisceau +
+  carillon audible de loin. Petits objets attrapables et jetables (`HuntSandbox` en mode `light`).
+- Retours haptiques au contact des meubles, murs et objets (`Main._tick_touch_haptics`).
+- Easter egg (`easter_egg.gd`) : main derrière soi + gâchette 4 s = POP de champagne, œuf surprise ;
+  un 2e appui l'ouvre : diplôme d'ingénieur IMT Nord Europe.
+- Son spatial : Godot n'a pas de HRTF ; `SpatialAudio` renforce le panoramique et assombrit les sons
+  situés derrière/très haut/très bas. Un vrai HRTF demanderait un plugin natif Android (Steam Audio, Meta
+  XR Audio) qu'on n'a pas pu valider sans casque.
 - **Retour au lobby** à tout moment : maintenir 1,2 s le bouton menu (gauche), Y (gauche) ou B (droite)
   (Échap au bureau) ; une barre « RETOUR AU LOBBY » se remplit devant les yeux et deux vibrations
   annoncent le retour (`Main._poll_lobby_exit`).
