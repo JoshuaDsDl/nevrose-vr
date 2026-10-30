@@ -42,8 +42,8 @@ const LOBBY_SCENE := preload("res://scenes/lobby.tscn")
 const LOBBY_MIN := Vector2(-2.25, -2.15)
 const LOBBY_MAX := Vector2(2.25, 2.15)
 const LOBBY_SPAWN := Vector2(1.0, 1.35)
-const APARTMENT_SPAWN := Vector2(-1.0, 0.0) # salon, zone libre
-const RESET_HOLD := 1.0 # secondes de maintien de la combinaison X + A
+const APARTMENT_SPAWN := Vector2(0.0, 0.0) # centre du salon (libre, vérifié par la marche)
+const RESET_HOLD := 0.5 # secondes de maintien de la combinaison A + B (manette droite)
 const JUMP_SPEED := 3.1 # m/s : un saut d'environ 0,5 m
 const GRAVITY := 9.8
 const LOBBY_HOLD := 1.2 # secondes de maintien d'un bouton « retour au lobby » (menu, Y ou B)
@@ -223,7 +223,7 @@ func start_game(p_mode: int = Mode.RESIST) -> void:
 	if music != null:
 		music.pause()
 
-	xr_origin.position = Vector3(0.0, 1.7 if not xr_active else 0.0, 0.0)
+	xr_origin.position = Vector3(APARTMENT_SPAWN.x, 1.7 if not xr_active else 0.0, APARTMENT_SPAWN.y)
 	xr_origin.rotation = Vector3.ZERO
 	_desktop_yaw = 0.0
 	_desktop_pitch = 0.0
@@ -715,12 +715,12 @@ func _poll_trigger(hand: XRController3D, key: StringName) -> void:
 		_trigger_down[key] = false
 
 
-## Combinaison de réinitialisation : maintenir X (gauche) et A (droite) ensemble
+## Combinaison de réinitialisation : maintenir A et B de la manette droite ensemble
 ## pendant RESET_HOLD secondes ramène le joueur au point de départ.
 func _poll_reset(delta: float) -> void:
 	if not xr_active:
 		return
-	var combo := left_hand.is_button_pressed(&"ax_button") and right_hand.is_button_pressed(&"ax_button")
+	var combo := right_hand.is_button_pressed(&"ax_button") and right_hand.is_button_pressed(&"by_button")
 	if not combo:
 		_reset_hold = 0.0
 		return
@@ -737,9 +737,10 @@ func _poll_lobby_exit(delta: float) -> void:
 	if xr_active:
 		# Trois boutons au choix : le bouton menu (manette gauche) n'est pas toujours remonté
 		# par le système du Quest, Y (gauche) et B (droite) le sont toujours.
+		var right_b := right_hand.is_button_pressed(&"by_button") and not right_hand.is_button_pressed(&"ax_button") # B seul sort ; A+B réinitialise
 		pressed = left_hand.is_button_pressed(&"menu_button") \
 			or left_hand.is_button_pressed(&"by_button") \
-			or right_hand.is_button_pressed(&"by_button")
+			or right_b
 	elif InputMap.has_action(&"dbg_lobby"):
 		pressed = Input.is_action_pressed(&"dbg_lobby")
 	_tick_lobby_hold(pressed, delta)
@@ -941,8 +942,11 @@ func _tick_hunt_gps() -> void:
 ## Remet le joueur au point de départ, orienté vers l'avant, sans toucher à la partie.
 func reset_position() -> void:
 	var spawn := LOBBY_SPAWN if not game_started else APARTMENT_SPAWN
-	xr_origin.position = Vector3(spawn.x, xr_origin.position.y, spawn.y)
+	_jump_y = 0.0
+	_jump_vy = 0.0
+	xr_origin.position = Vector3(spawn.x, 0.0 if xr_active else 1.7, spawn.y)
 	xr_origin.rotation = Vector3.ZERO
+	_movement_body.position = Vector3(0.0, -xr_origin.position.y if not xr_active else 0.0, 0.0)
 	_desktop_yaw = 0.0
 	_pulse_haptics(0.3, 0.1)
 	_log("GAME", "réinitialisation de position")

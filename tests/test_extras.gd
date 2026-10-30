@@ -77,6 +77,17 @@ func _initialize() -> void:
 	egg._close_diploma()
 	_assert(egg.state == EasterEgg.State.IDLE, "easter egg : on peut recommencer")
 
+	# --- Apparition et réinitialisation : au centre du salon, jamais dehors ---
+	main.start_game(Main.Mode.RESIST)
+	await process_frame
+	_assert(absf(main.xr_origin.position.x - Main.APARTMENT_SPAWN.x) < 0.01 and absf(main.xr_origin.position.z - Main.APARTMENT_SPAWN.y) < 0.01, "apparition : au centre du salon (%.2f, %.2f)" % [main.xr_origin.position.x, main.xr_origin.position.z])
+	main.xr_origin.position = Vector3(9.0, 0.4, -4.0)
+	main.reset_position()
+	_assert(absf(main.xr_origin.position.x - Main.APARTMENT_SPAWN.x) < 0.01 and absf(main.xr_origin.position.z - Main.APARTMENT_SPAWN.y) < 0.01, "réinitialisation : ramène au centre du salon")
+	_assert(absf(main.xr_origin.position.y - (0.0 if main.xr_active else 1.7)) < 0.001, "réinitialisation : hauteur de sol remise")
+	main.return_to_lobby()
+	await process_frame
+
 	# --- Bêta test et musique du lobby ---
 	var tokens0: int = main.profile.tokens
 	main.lobby._on_beta_pressed()
