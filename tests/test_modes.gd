@@ -65,11 +65,11 @@ func _initialize() -> void:
 	_assert(hunt.candidates.size() + hunt.patches.size() >= hunt.target_count, "chasse : assez de murs candidats (%d)" % (hunt.candidates.size() + hunt.patches.size()))
 	_assert(hunt.current != null and hunt.current.active, "chasse : une plaque cogne")
 	_assert(not main.creepy_voices.enabled, "chasse : pas de voix de folie")
-	_assert(hunt.voice_streams.size() == 15, "chasse : les 15 voix du jeu sont chargées pour les murs")
+	_assert(hunt.voice_streams.size() == load("res://scripts/creepy_voices.gd").VOICE_COUNT, "chasse : toutes les voix du jeu sont chargées pour les murs")
 	var seen_voices := {}
-	for i in 30:
+	for i in 80:
 		seen_voices[hunt._next_voice_index()] = true
-	_assert(seen_voices.size() == 15, "chasse : le sac de voix les fait toutes sortir (%d/15)" % seen_voices.size())
+	_assert(seen_voices.size() == load("res://scripts/creepy_voices.gd").VOICE_COUNT, "chasse : le sac de voix les fait toutes sortir (%d)" % seen_voices.size())
 	hunt._voice_clock = 0.0
 	for i in 3:
 		await physics_frame

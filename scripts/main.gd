@@ -111,6 +111,7 @@ var _lobby_hud: Label3D = null ## indicateur de progression devant les yeux
 var sandbox: HuntSandbox = null ## objets attrapables du mode Résistance (en Chasse : hunt.sandbox)
 var nav: NavGrid = null ## carte d'accessibilité : GPS vers la pilule (mode Résistance)
 var easter: EasterEgg = null
+var music: LobbyMusic = null ## musique du lobby, vit ici pour reprendre où elle s'était arrêtée
 var _pill_gps_on := false
 var _touch_state := {} ## main -> touche-t-elle un objet ? (retours haptiques)
 var _touch_prev := {}
@@ -137,6 +138,9 @@ func _ready() -> void:
 	profile = PlayerProfile.new()
 	profile.name = "Profile"
 	add_child(profile)
+	music = LobbyMusic.new()
+	music.name = "LobbyMusic"
+	add_child(music)
 	_init_openxr()
 	_build_player()
 	_build_lobby()
@@ -192,6 +196,8 @@ func _build_lobby() -> void:
 	add_child(lobby)
 	lobby.setup(profile)
 	lobby.play_requested.connect(start_game)
+	if music != null:
+		music.resume()
 	xr_origin.position = Vector3(1.0, 1.7 if not xr_active else 0.0, 1.35)
 	xr_origin.rotation = Vector3.ZERO
 	_desktop_yaw = 0.0
@@ -214,6 +220,8 @@ func start_game(p_mode: int = Mode.RESIST) -> void:
 	if is_instance_valid(lobby):
 		lobby.queue_free()
 	lobby = null
+	if music != null:
+		music.pause()
 
 	xr_origin.position = Vector3(0.0, 1.7 if not xr_active else 0.0, 0.0)
 	xr_origin.rotation = Vector3.ZERO

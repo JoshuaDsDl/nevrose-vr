@@ -90,6 +90,35 @@ static func expected_duration(script: String) -> float:
 	return maxf(words(script).size() / READ_WORDS_PER_SEC, 4.0)
 
 
+## Plafond de note imposé par la voix (10 = aucun plafond). Sans micro ou sans parole,
+## le réel ne peut pas être un succès : le jury ne peut pas l'ignorer.
+static func voice_cap(voice: Dictionary, script: String) -> float:
+	if not voice.get("mic", false):
+		return 3.0
+	var expected := expected_duration(script)
+	var spoken := float(voice.get("duration", 0.0)) * float(voice.get("speak_ratio", 0.0))
+	if float(voice.get("speak_ratio", 0.0)) < 0.15 or spoken < expected * 0.3:
+		return 2.5
+	if spoken < expected * 0.6:
+		return 5.0
+	return 10.0
+
+
+## Applique le plafond : la note est ramenée au plafond et l'audience baisse avec elle.
+static func apply_voice_cap(result: Dictionary, cap: float, followers: int) -> void:
+	if cap >= 10.0 or float(result.get("score", 0.0)) <= cap:
+		return
+	var factor := pow(cap / maxf(float(result["score"]), 0.1), 2.0)
+	for key in ["views", "likes", "comments", "shares", "followers"]:
+		result[key] = int(float(result.get(key, 0)) * factor)
+	result["score"] = cap
+	if cap <= 3.0:
+		result["verdict"] = "Tu n'as presque rien dit. L'Algorithme a retenu le décor et rien d'autre."
+	else:
+		result["verdict"] = "Trop de silences. Le complot existe peut-être, mais personne ne l'a entendu."
+	sanitize(result, followers)
+
+
 ## Première phrase, pour la carte du tableau.
 static func teaser(script: String) -> String:
 	var end := -1
@@ -143,6 +172,9 @@ static func judge_messages(ctx: Dictionary, jpeg: PackedByteArray) -> Array:
 	else:
 		lines.append("Micro indisponible : juge seulement l'idée, le ton annoncé et l'image.")
 	var system := "Tu es « L'Algorithme », jury sarcastique et imprévisible d'un faux Instagram où l'on poste des réels de théories du complot ABSURDES sur la crypto (pure satire : pas de haine, pas de vraie désinformation). Tu juges l'idée, le ton, la cohérence entre le ton annoncé et la voix mesurée, et la mise en scène visible sur l'image jointe quand il y en a une. Sois sévère et varié : un réel plat fait moins de 500 vues, un bon réel quelques milliers, un grand réel plus de 50 000, un réel viral (rarissime) plus de 1 million. Les likes font 2 à 12 % des vues, les commentaires 1 à 10 % des likes, les partages 1 à 15 % des likes. Réponds UNIQUEMENT par ces lignes, dans cet ordre exact, sans markdown ni rien d'autre :\nVUES: <entier>\nLIKES: <entier>\nCOMMENTAIRES: <entier>\nPARTAGES: <entier>\nABONNES: <abonnés gagnés, entier>\nNOTE: <0 à 10>\nTITRE: <titre du réel, 5 mots max>\nVERDICT: <une phrase mordante, 20 mots max>\nC: <pseudo> | <commentaire drôle, 12 mots max>\n(5 lignes C: en tout : fans, haters et trolls mélangés)"
+	var cap := voice_cap(voice, String(ctx["premise"]["script"]))
+	if cap < 10.0:
+		lines.append("Plafond imposé par la mesure de la voix : NOTE ne peut pas dépasser %.1f." % cap)
 	var text := "\n".join(lines)
 	var user_content: Variant = text
 	if not jpeg.is_empty():

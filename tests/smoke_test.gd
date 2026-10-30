@@ -133,20 +133,20 @@ func _initialize() -> void:
 	main._desktop_yaw = 0.0
 	main._desktop_pitch = 0.0
 
-	# --- B : voix : les 15 fichiers servent, le chevauchement croît avec la folie ---
+	# --- B : voix : les 34 fichiers servent, le chevauchement croît avec la folie ---
 	_assert(main.creepy_voices._is_voice_playing(), "B: le murmure d'introduction est actif")
-	_assert(main.creepy_voices._streams.size() == 15, "B: les 15 voix sont chargées")
+	_assert(main.creepy_voices._streams.size() == load("res://scripts/creepy_voices.gd").VOICE_COUNT, "B: toutes les voix sont chargées")
 	_assert(main.creepy_voices.max_simultaneous(0.1) == 2, "B: deux voix possibles dès le début")
 	_assert(main.creepy_voices.max_simultaneous(1.0) >= 5, "B: plusieurs voix en pleine crise")
 	for player in main.creepy_voices._players:
 		player.stop()
 	main.creepy_voices.voices_heard.clear()
 	main.creepy_voices._bag.clear()
-	for i in 15:
+	for i in 40:
 		main.creepy_voices._play_random_voice(0.5)
 		for player in main.creepy_voices._players:
 			player.stop()
-	_assert(main.creepy_voices.voices_heard.size() == 15, "B: 15 tirages = les 15 voix différentes (%d)" % main.creepy_voices.voices_heard.size())
+	_assert(main.creepy_voices.voices_heard.size() == load("res://scripts/creepy_voices.gd").VOICE_COUNT, "B: tirages = voix différentes (%d)" % main.creepy_voices.voices_heard.size())
 	for player in main.creepy_voices._players:
 		player.stop()
 

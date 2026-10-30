@@ -77,6 +77,26 @@ func _initialize() -> void:
 	egg._close_diploma()
 	_assert(egg.state == EasterEgg.State.IDLE, "easter egg : on peut recommencer")
 
+	# --- Bêta test et musique du lobby ---
+	var tokens0: int = main.profile.tokens
+	main.lobby._on_beta_pressed()
+	_assert(main.profile.tokens == tokens0 + LobbyWorld.BETA_TOKENS, "bêta test : +%d tokens au lobby" % LobbyWorld.BETA_TOKENS)
+	_assert(main.music != null and main.music._player != null and main.music._player.stream != null, "musique : piste de lobby prête")
+	_assert(main.music._player.stream.get_length() > 0.0 or main.music._player.stream is AudioStreamWAV, "musique : boucle valide")
+
+	# --- Réels : la voix plafonne la note (sans parole, pas de succès) ---
+	var script := String(ReelData.SCRIPTS[0]["script"])
+	var long_talk := {"mic": true, "duration": ReelData.expected_duration(script) + 2.0, "speak_ratio": 0.8, "variation": 6.0, "avg_db": -20.0}
+	_assert(ReelData.voice_cap(long_talk, script) == 10.0, "réels : une vraie lecture n'est pas plafonnée")
+	var mute := {"mic": false, "duration": 10.0, "speak_ratio": 0.0}
+	_assert(ReelData.voice_cap(mute, script) == 3.0, "réels : sans micro, plafond à 3")
+	var silent := {"mic": true, "duration": 10.0, "speak_ratio": 0.02}
+	_assert(ReelData.voice_cap(silent, script) == 2.5, "réels : micro muet ou silence, plafond à 2,5")
+	var hit := {"score": 9.0, "views": 200000, "likes": 20000, "comments": 500, "shares": 800, "followers": 900}
+	ReelData.apply_voice_cap(hit, 2.5, 100)
+	_assert(is_equal_approx(float(hit["score"]), 2.5) and int(hit["views"]) < 20000, "réels : un réel silencieux perd ses vues (%d)" % int(hit["views"]))
+	_assert(int(hit["likes"]) <= int(hit["views"]) * 0.35, "réels : likes toujours cohérents après plafond")
+
 	# --- Mode Résistance : pilules, GPS, objets jetables ---
 	main.start_game(Main.Mode.RESIST)
 	var waited := 0
@@ -139,11 +159,11 @@ func _initialize() -> void:
 
 	# --- Voix de la Résistance : toutes jouées, par extraits ---
 	var voices: Node = main.creepy_voices
-	_assert(voices._streams.size() == 15, "voix : les 15 fichiers sont chargés")
+	_assert(voices._streams.size() == load("res://scripts/creepy_voices.gd").VOICE_COUNT, "voix : les %d fichiers sont chargés" % load("res://scripts/creepy_voices.gd").VOICE_COUNT)
 	var seen := {}
-	for i in 30: # le sac a déjà servi : deux tirages complets garantissent de tout voir
+	for i in 80: # le sac a déjà servi : deux tirages complets garantissent de tout voir
 		seen[voices._next_voice_index()] = true
-	_assert(seen.size() == 15, "voix : le sac fait sortir les 15 voix")
+	_assert(seen.size() == load("res://scripts/creepy_voices.gd").VOICE_COUNT, "voix : le sac fait sortir toutes les voix")
 	_assert(voices.max_simultaneous(0.1) >= 2, "voix : deux voix possibles dès le début")
 
 	# --- Grenade en Chasse ---

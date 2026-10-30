@@ -9,6 +9,7 @@ signal play_requested(mode: int)
 const MODE_RESIST := 1 # = Main.Mode.RESIST
 const MODE_HUNT := 2 # = Main.Mode.HUNT
 const MODE_REEL := 3 # = Main.Mode.REEL
+const BETA_TOKENS := 5000 # crédit du bouton « bêta test » du lobby
 
 @onready var computer: LobbyComputer = $Computer
 
@@ -96,6 +97,18 @@ Plus tu buzzes, plus tu gagnes de tokens.",
 		post.position = Vector3((card as Node3D).position.x, pm.height * 0.5, (card as Node3D).position.z - 0.02)
 		holder.add_child(post)
 
+	# Bêta test : bouton de test à gauche des cartes, il donne de quoi tout acheter.
+	var beta := LobbyButton.new()
+	beta.name = "BetaTest"
+	holder.add_child(beta)
+	beta.setup(Vector2(0.5, 0.3), "BÊTA TEST", "", Color(0.6, 0.85, 1.0), 0.0021, 0.0013)
+	beta.title_label.font_size = 34
+	beta.set_state("+%d TOKENS" % BETA_TOKENS, Color(0.6, 0.85, 1.0), true)
+	beta.position = Vector3(-1.45, 1.2, -0.1)
+	beta.rotation.y = deg_to_rad(22.0)
+	beta.pressed.connect(_on_beta_pressed)
+	interactables.append(beta)
+
 	tokens_label = Label3D.new()
 	tokens_label.name = "Tokens"
 	tokens_label.font = LobbyButton.bold_font()
@@ -170,6 +183,12 @@ func _build_shop() -> void:
 		card.pressed.connect(_on_shop_pressed.bind(String(item["id"])))
 		shop_cards[item["id"]] = card
 		interactables.append(card)
+
+
+## Bêta test : crédite BETA_TOKENS tokens (pour tester toute la boutique). Sans limite.
+func _on_beta_pressed() -> void:
+	if profile != null:
+		profile.add_tokens(BETA_TOKENS)
 
 
 func _on_shop_pressed(id: String) -> void:

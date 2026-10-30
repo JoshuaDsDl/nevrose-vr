@@ -10,7 +10,7 @@ extends Node
 ## natif sur casque VR (Quest 2, Vive Pro via SteamVR).
 
 const VOICE_DIR := "res://assets/voices/"
-const VOICE_COUNT := 15
+const VOICE_COUNT := 34
 
 ## Emplacements spatiaux : murs (4), plafond (2), sol (2), coin (2).
 ## Valeurs par défaut = map 1 (studio 6x4.5). configure_room() les recale

@@ -1050,6 +1050,10 @@ func _on_judge_line(line: String) -> void:
 	var key := ReelData.parse_line(_judging["result"], line)
 	if key != "":
 		_judging["judge"] = String(_judge_client.provider_name).get_slice(" · ", 1) if _judge_client.provider_name.contains(" · ") else _judge_client.provider_name
+		# Si la voix plafonne la note, les chiffres attendent la fin : ils seront corrigés.
+		var capped := ReelData.voice_cap(_judging["voice"], String(_judging["premise"]["script"])) < 10.0
+		if capped and key != "comment":
+			return
 		_enqueue_reveal(_judging, key)
 		_reveal_key(_judging, key)
 
@@ -1136,6 +1140,8 @@ func _complete(entry: Dictionary) -> void:
 	var ctx := _judge_context(entry)
 	var had_all: bool = entry["result"].has("views") and entry["result"].has("verdict")
 	ReelData.fill_missing(entry["result"], ctx, _rng)
+	# La voix a le dernier mot : sans parole, pas de succès.
+	ReelData.apply_voice_cap(entry["result"], ReelData.voice_cap(entry["voice"], String(entry["premise"]["script"])), int(entry["followers_at_post"]))
 	if entry["judge"] == "":
 		entry["judge"] = "juge local"
 	entry["state"] = "done"

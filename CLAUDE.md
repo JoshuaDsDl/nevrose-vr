@@ -8,12 +8,12 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
 
 ## Modes de jeu
 
-- **Résistance** : on démarre déjà fou (12 %), les voix (les 15 `assets/voices/v*.wav`,
+- **Résistance** : on démarre déjà fou (12 %), les voix (les 34 `assets/voices/v*.wav`,
   sac mélangé, de plus en plus nombreuses) montent avec la folie. Pilules visibles
   avec un faisceau cyan + vibration + indice sur le téléphone, toujours à ≥ 5 m du joueur.
   Plus de clés ni de verrous. Tokens à l'assimilation : 0,12/s tenue + 5/pilule.
 - **Chasse** (`hunt_mode.gd`, `knock_patch.gd`, `monster.gd`, `hunt_sandbox.gd`, `prop_body.gd`) :
-  « toc toc toc » dans les murs/plafond, et une voix au hasard (sac mélangé des 15 `v*.wav`)
+  « toc toc toc » dans les murs/plafond, et une voix au hasard (sac mélangé des 34 `v*.wav`)
   sort du même point toutes les 4,5 à 7,5 s ; on casse la plaque ; au dernier mur le monstre
   (`assets/monster/entity.glb`, mannequin Xbot de three.js, animé) apparaît puis se dissout.
   Tokens : 8 + 5 par mur + 1 tous les 3 objets cassés.
