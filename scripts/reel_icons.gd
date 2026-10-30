@@ -2,7 +2,7 @@ class_name ReelIcons
 extends RefCounted
 ## Icônes de l'interface « réels » dessinées au démarrage (aucune image importée) :
 ## cœur, bulle de commentaire, avion en papier. Polygones rastérisés en 64×64 avec
-## un petit anticrénelage, mis en cache.
+## un petit anticrénelage (2×2 échantillons : léger pour le casque), mis en cache.
 
 const SIZE := 64
 
@@ -46,15 +46,15 @@ static func _icon(key: String, color: Color, polys: Array) -> Texture2D:
 	for y in SIZE:
 		for x in SIZE:
 			var covered := 0
-			for sy in 3:
-				for sx in 3:
-					var p := Vector2(x + (sx + 0.5) / 3.0, y + (sy + 0.5) / 3.0)
+			for sy in 2:
+				for sx in 2:
+					var p := Vector2(x + (sx + 0.5) / 2.0, y + (sy + 0.5) / 2.0)
 					for poly in polys:
 						if Geometry2D.is_point_in_polygon(p, poly):
 							covered += 1
 							break
 			if covered > 0:
-				img.set_pixel(x, y, Color(color.r, color.g, color.b, covered / 9.0))
+				img.set_pixel(x, y, Color(color.r, color.g, color.b, covered / 4.0))
 	var tex := ImageTexture.create_from_image(img)
 	_cache[id] = tex
 	return tex

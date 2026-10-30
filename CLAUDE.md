@@ -13,7 +13,8 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
   avec un faisceau cyan + vibration + indice sur le téléphone, toujours à ≥ 5 m du joueur.
   Plus de clés ni de verrous. Tokens à l'assimilation : 0,12/s tenue + 5/pilule.
 - **Chasse** (`hunt_mode.gd`, `knock_patch.gd`, `monster.gd`) : « toc toc toc » dans
-  les murs/plafond, on casse la plaque (gâchette ou coup de poing, 4 coups) ; au
+  les murs/plafond, et une voix au hasard (sac mélangé des 15 `v*.wav`) sort du même point
+  toutes les 4,5 à 7,5 s ; on casse la plaque (gâchette ou coup de poing, 4 coups) ; au
   dernier mur le monstre (`assets/monster/entity.glb`, mannequin Xbot de three.js,
   animé) apparaît puis se dissout. Tokens : 8 + 5 par mur.
 - **Lobby** : deux cartes géantes (viser + gâchette) pour choisir le mode ; boutique
@@ -96,10 +97,12 @@ Tokens selon vues/likes (`ReelData.compute_tokens`).
 
 - Les GLB Kenney ont leur pivot dans un coin : dans le studio, toujours les poser avec
   `StudioMap._place_centered` (emprise centrée), jamais avec `position` brute.
-- LLM : OpenRouter si une clé est présente (`OPENROUTER_API_KEY`, ou `key=` dans
-  `llm.local.cfg` à la racine, **ignoré par git**, inclus dans l'APK par `include_filter`),
-  modèle `google/gemini-2.5-flash-lite`. Sinon serveur llama.cpp (`user://llm.cfg` ou
-  `NEVROSE_LLM_URL`, défaut Tailscale `http://100.113.199.15:8081`).
+- LLM (jury seulement) : OpenRouter si une clé est présente (`OPENROUTER_API_KEY`, ou `key=`
+  dans `llm.local.cfg` à la racine, **ignoré par git**), modèle `google/gemini-2.5-flash-lite`.
+  La clé n'est **jamais** dans l'APK : sur le casque, la pousser avec
+  `adb push llm.local.cfg /sdcard/Android/data/com.noirlab.nevrose/files/llm.cfg`
+  (lue comme `user://llm.cfg`). Sans clé ni réseau : juge local. Sinon serveur llama.cpp
+  (`url=` dans ce même fichier, ou `NEVROSE_LLM_URL`).
 - Android : permissions `internet` et `record_audio` dans `export_presets.cfg`.
 - Le LLM ne sert plus qu à juger le réel (vues, likes, verdict, commentaires).
 - UI : `LobbyButton` (shader à coins arrondis, halo, pilule) et `LobbyButton.make_panel` ; un fond doit avoir un `render_priority` plus bas que les cartes posées dessus.

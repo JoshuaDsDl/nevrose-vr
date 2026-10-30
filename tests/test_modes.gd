@@ -65,6 +65,17 @@ func _initialize() -> void:
 	_assert(hunt.candidates.size() + hunt.patches.size() >= hunt.target_count, "chasse : assez de murs candidats (%d)" % (hunt.candidates.size() + hunt.patches.size()))
 	_assert(hunt.current != null and hunt.current.active, "chasse : une plaque cogne")
 	_assert(not main.creepy_voices.enabled, "chasse : pas de voix de folie")
+	_assert(hunt.voice_streams.size() == 15, "chasse : les 15 voix du jeu sont chargées pour les murs")
+	var seen_voices := {}
+	for i in 30:
+		seen_voices[hunt._next_voice_index()] = true
+	_assert(seen_voices.size() == 15, "chasse : le sac de voix les fait toutes sortir (%d/15)" % seen_voices.size())
+	hunt._voice_clock = 0.0
+	for i in 3:
+		await physics_frame
+	_assert(hunt.voices_played >= 1 and hunt.current.voices_played >= 1, "chasse : une voix sort du mur qui cogne")
+	var voice_node := hunt.current.get_node_or_null("Voix") as AudioStreamPlayer3D
+	_assert(voice_node != null and voice_node.playing and voice_node.stream != null, "chasse : la voix est jouée depuis la plaque")
 	var s0: float = main.sanity
 	for i in 20:
 		await physics_frame

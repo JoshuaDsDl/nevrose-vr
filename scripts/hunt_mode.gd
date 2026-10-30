@@ -19,6 +19,11 @@ const HINT_PERIOD := 22.0
 const PUNCH_SPEED := 2.0 ## m/s : un vrai geste, pas un frôlement
 const PUNCH_REACH := 0.5
 const PUNCH_COOLDOWN := 0.4
+const VOICE_DIR := "res://assets/voices/"
+const VOICE_COUNT := 15 ## v01.wav … v15.wav : toutes les voix du jeu
+const VOICE_FIRST_DELAY := 1.4 ## la première voix sort peu après le premier « toc toc »
+const VOICE_GAP_MIN := 4.5
+const VOICE_GAP_MAX := 7.5
 
 var apartment: MapBase = null
 var camera: Node3D = null
@@ -33,6 +38,11 @@ var monster: Monster = null
 var candidates: Array[Dictionary] = []
 var patches: Array[KnockPatch] = []
 
+var voice_streams: Array[AudioStream] = []
+var voices_played := 0
+var _voice_bag: Array[int] = []
+var _last_voice := -1
+var _voice_clock := 0.0
 var _hint_clock := 0.0
 var _hand_prev := {}
 var _punch_cd := {}
@@ -46,6 +56,7 @@ func setup(p_apartment: MapBase, p_camera: Node3D, p_hands: Array[Node3D]) -> vo
 
 ## Coroutine : attend une frame physique pour que les collisions des meubles existent.
 func start() -> void:
+	_load_voices()
 	target_count = randi_range(WALLS_MIN, WALLS_MAX)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -169,6 +180,7 @@ func _activate_next() -> void:
 	current = patch
 	patch.activate()
 	_hint_clock = 0.0
+	_voice_clock = VOICE_FIRST_DELAY
 
 
 func _on_patch_broken(patch: KnockPatch) -> void:
@@ -232,11 +244,51 @@ static func compute_tokens(walls: int) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Voix dans le mur : une voix au hasard parmi toutes celles du jeu, depuis la plaque
+# qui cogne (même point que les coups : c'est là qu'il faut aller).
+# ---------------------------------------------------------------------------
+func _load_voices() -> void:
+	voice_streams.clear()
+	for i in range(1, VOICE_COUNT + 1):
+		var stream := load("%sv%02d.wav" % [VOICE_DIR, i]) as AudioStream
+		if stream != null:
+			voice_streams.append(stream)
+
+
+## Sac mélangé : toutes les voix sortent avant qu'une revienne, jamais deux fois de suite.
+func _next_voice_index() -> int:
+	if voice_streams.is_empty():
+		return -1
+	if _voice_bag.is_empty():
+		for i in voice_streams.size():
+			_voice_bag.append(i)
+		_voice_bag.shuffle()
+		if _voice_bag.size() > 1 and _voice_bag[_voice_bag.size() - 1] == _last_voice:
+			_voice_bag.reverse()
+	_last_voice = _voice_bag.pop_back()
+	return _last_voice
+
+
+func _play_wall_voice() -> void:
+	if current == null or not current.active or current.is_broken:
+		return
+	var idx := _next_voice_index()
+	if idx < 0:
+		return
+	current.play_voice(voice_streams[idx])
+	voices_played += 1
+
+
+# ---------------------------------------------------------------------------
 # Indices et coups de poing
 # ---------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
 	if not started or finished or current == null or not current.active:
 		return
+	_voice_clock -= delta
+	if _voice_clock <= 0.0:
+		_voice_clock = randf_range(VOICE_GAP_MIN, VOICE_GAP_MAX)
+		_play_wall_voice()
 	_hint_clock += delta
 	if _hint_clock >= HINT_PERIOD:
 		_hint_clock = 0.0

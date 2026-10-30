@@ -163,7 +163,7 @@ func show_recording(elapsed: float, limit: float, level: float, viewers: int, cu
 		_cue_box.visible = false # le texte est lu sur le prompteur au-dessus de l'objectif
 		_meter_box.visible = true
 	_rec_label.text = "REC %02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
-	_live_label.text = "● LIVE  %s" % ReelData.format_count(viewers)
+	_live_label.text = "LIVE  %s" % ReelData.format_count(viewers)
 	if _cue_label.text != cue:
 		_cue_label.text = cue
 	_status.text = "" if mic_ok else "Micro indisponible"

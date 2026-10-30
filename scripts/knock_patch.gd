@@ -24,6 +24,8 @@ var _plaster: MeshInstance3D
 var _plaster_mat: StandardMaterial3D
 var _cracks: Array[MeshInstance3D] = []
 var _audio: AudioStreamPlayer3D
+var _voice: AudioStreamPlayer3D
+var voices_played := 0 ## voix sorties de ce mur (diagnostic / tests)
 var _dust: CPUParticles3D
 var _clock := 0.0
 var _knock_index := 0
@@ -101,6 +103,16 @@ func _build() -> void:
 	_audio.position.z = -0.05
 	add_child(_audio)
 
+	# Voix qui sort du mur, au même endroit que les coups.
+	_voice = AudioStreamPlayer3D.new()
+	_voice.name = "Voix"
+	_voice.unit_size = 5.0
+	_voice.max_distance = 40.0
+	_voice.volume_db = 4.0
+	_voice.attenuation_filter_cutoff_hz = 7000.0 # étouffée par la distance, comme à travers une cloison
+	_voice.position.z = -0.08
+	add_child(_voice)
+
 	_dust = CPUParticles3D.new()
 	_dust.name = "Poussiere"
 	_dust.one_shot = true
@@ -138,6 +150,20 @@ func activate() -> void:
 	_set_area_enabled(true)
 	if not _cracks.is_empty():
 		_cracks[0].visible = true
+
+
+## Une voix sort du mur (flux choisi par HuntMode). Sans effet une fois la plaque brisée.
+func play_voice(stream: AudioStream) -> void:
+	if is_broken or stream == null or _voice == null:
+		return
+	_voice.stream = stream
+	_voice.play()
+	voices_played += 1
+
+
+func stop_voice() -> void:
+	if _voice != null:
+		_voice.stop()
 
 
 func deactivate() -> void:
@@ -216,6 +242,7 @@ func hit() -> void:
 func _break_open() -> void:
 	is_broken = true
 	active = false
+	stop_voice()
 	_set_area_enabled(false)
 	var crash := AudioStreamPlayer3D.new()
 	crash.stream = Sfx.crash()

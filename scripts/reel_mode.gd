@@ -436,7 +436,14 @@ func _show_monitor() -> void:
 	_selected = -1
 	_monitor_quad.visible = true
 	_post_quad.visible = false
+	_set_screens_active(true)
 	_refresh_tabs()
+
+
+## Quest 2 : une sous-fenêtre qu'on ne voit pas ne doit pas être redessinée.
+func _set_screens_active(monitor_on: bool) -> void:
+	monitor.render_target_update_mode = SubViewport.UPDATE_ALWAYS if monitor_on else SubViewport.UPDATE_DISABLED
+	post.render_target_update_mode = SubViewport.UPDATE_DISABLED if monitor_on else SubViewport.UPDATE_ALWAYS
 
 
 func _show_entry(index: int) -> void:
@@ -446,6 +453,7 @@ func _show_entry(index: int) -> void:
 	_selected = index
 	_monitor_quad.visible = false
 	_post_quad.visible = true
+	_set_screens_active(false)
 	var entry := reels[index]
 	post.reset("nevrose.officiel", profile.followers)
 	post.set_frame(entry["image"])
@@ -626,10 +634,10 @@ func _refresh_board() -> void:
 		card.title_label.text = String(p["title"])
 		card.body_label.text = String(p["hook"])
 		var chosen := i == premise_index
-		card.set_state("✔ CHOISIE" if chosen else "", AMBER if chosen else RED, state == State.CHOOSING, chosen)
+		card.set_state("CHOISIE" if chosen else "", AMBER if chosen else RED, state == State.CHOOSING, chosen)
 	for i in _tone_cards.size():
 		var chosen := i == tone_index
-		_tone_cards[i].set_state("✔ CHOISI" if chosen else "", AMBER if chosen else STEEL, state == State.CHOOSING, chosen)
+		_tone_cards[i].set_state("CHOISI" if chosen else "", AMBER if chosen else STEEL, state == State.CHOOSING, chosen)
 	_reroll_button.set_state("", STEEL, state == State.CHOOSING)
 	_end_button.set_state("", RED, state == State.CHOOSING)
 	_refresh_rec_button()

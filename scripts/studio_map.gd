@@ -34,6 +34,7 @@ const DECOR := {
 }
 
 var _shell: Node3D
+var _plaster_tex: ImageTexture = null
 var _leds: Array[Dictionary] = [] # {mat, light, phase}
 var _clock := 0.0
 
@@ -87,9 +88,11 @@ func _solid(node_name: String, size: Vector3, pos: Vector3, mat: Material) -> St
 
 
 func _plaster_mat(color: Color, uv := 3.0) -> StandardMaterial3D:
+	if _plaster_tex == null:
+		_plaster_tex = ProceduralTextures.plaster(Color.WHITE) # générée une seule fois (CPU du casque)
 	var m := StandardMaterial3D.new()
 	m.albedo_color = color
-	m.albedo_texture = ProceduralTextures.plaster(Color.WHITE)
+	m.albedo_texture = _plaster_tex
 	m.uv1_scale = Vector3(uv, uv, 1.0)
 	m.roughness = 0.95
 	return m
@@ -199,13 +202,18 @@ func _bounds(n: Node3D, acc: Transform3D) -> AABB:
 # Lumière : plafonnier froid, bandes LED, ambiance du mur du fond
 # ---------------------------------------------------------------------------
 func _build_lighting() -> void:
+	var lit := 0
 	for pos in [Vector3(-1.5, HEIGHT - 0.15, -0.5), Vector3(1.5, HEIGHT - 0.15, -0.5), Vector3(-1.5, HEIGHT - 0.15, 2.0), Vector3(1.5, HEIGHT - 0.15, 2.0)]:
-		var l := OmniLight3D.new()
-		l.light_color = Color(1.0, 0.35, 0.3)
-		l.light_energy = 0.45
-		l.omni_range = 5.5
-		l.position = pos
-		_shell.add_child(l)
+		# Mode Compatibilité (Quest 2) : chaque lumière coûte une passe de rendu par objet.
+		# Deux vraies lumières suffisent ; les deux autres dalles sont seulement émissives.
+		if lit < 2:
+			var l := OmniLight3D.new()
+			l.light_color = Color(1.0, 0.35, 0.3)
+			l.light_energy = 0.55
+			l.omni_range = 6.0
+			l.position = pos
+			_shell.add_child(l)
+			lit += 1
 		var panel := MeshInstance3D.new()
 		var bm := BoxMesh.new()
 		bm.size = Vector3(0.6, 0.03, 0.6)
@@ -235,13 +243,7 @@ func _build_lighting() -> void:
 		mi.material_override = m
 		mi.position = spec[1]
 		_shell.add_child(mi)
-		var light := OmniLight3D.new()
-		light.light_color = Color(1.0, 0.12, 0.12)
-		light.light_energy = 0.4
-		light.omni_range = 3.5
-		light.position = (spec[1] as Vector3) + Vector3(0, 0, 0.2) if absf((spec[0] as Vector3).x) > 1.0 else (spec[1] as Vector3) + Vector3(0.2 * signf(-(spec[1] as Vector3).x), 0, 0)
-		_shell.add_child(light)
-		_leds.append({"mat": m, "light": light, "phase": spec[2]})
+		_leds.append({"mat": m, "light": null, "phase": spec[2]})
 
 
 ## Enseigne néon au-dessus du décor.

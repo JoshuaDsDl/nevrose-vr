@@ -69,8 +69,14 @@ func start() -> void:
 
 
 func _on_permission_result(permission: String, granted: bool) -> void:
-	if permission.ends_with("RECORD_AUDIO") and not granted:
-		permission_denied = true
+	if not permission.ends_with("RECORD_AUDIO"):
+		return
+	permission_denied = not granted
+	# Accordée en cours de route : le flux micro lancé trop tôt est muet, on le relance.
+	if granted and _player != null:
+		_frames_seen = 0
+		_player.stop()
+		_player.play()
 
 
 func stop() -> void:

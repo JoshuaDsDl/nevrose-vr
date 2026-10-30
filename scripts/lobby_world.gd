@@ -54,7 +54,7 @@ func _build_mode_cards() -> void:
 		Color(0.3, 0.95, 0.85), 0.0027, 0.0015)
 	card_resist.position = Vector3(-0.6, 1.45, -0.2)
 	card_resist.rotation.y = deg_to_rad(16.0)
-	card_resist.set_state("◆ MODE RÉSISTANCE", Color(0.3, 0.95, 0.85), true)
+	card_resist.set_state("MODE RÉSISTANCE", Color(0.3, 0.95, 0.85), true)
 	card_resist.pressed.connect(func() -> void: _choose(MODE_RESIST))
 
 	card_hunt = LobbyButton.new()
@@ -65,7 +65,7 @@ func _build_mode_cards() -> void:
 		Color(1.0, 0.3, 0.25), 0.0027, 0.0015)
 	card_hunt.position = Vector3(0.55, 1.45, -0.2)
 	card_hunt.rotation.y = deg_to_rad(3.0)
-	card_hunt.set_state("◆ MODE CHASSE", Color(1.0, 0.3, 0.25), true)
+	card_hunt.set_state("MODE CHASSE", Color(1.0, 0.3, 0.25), true)
 	card_hunt.pressed.connect(func() -> void: _choose(MODE_HUNT))
 
 	card_reel = LobbyButton.new()
@@ -78,7 +78,7 @@ Plus tu buzzes, plus tu gagnes de tokens.",
 		Color(1.0, 0.4, 0.75), 0.0027, 0.0015)
 	card_reel.position = Vector3(1.7, 1.45, -0.2)
 	card_reel.rotation.y = deg_to_rad(-14.0)
-	card_reel.set_state("◆ MODE RÉELS", Color(1.0, 0.4, 0.75), true)
+	card_reel.set_state("MODE RÉELS", Color(1.0, 0.4, 0.75), true)
 	card_reel.pressed.connect(func() -> void: _choose(MODE_REEL))
 
 	# Petits pieds lumineux au sol pour ancrer les cartes.
@@ -170,7 +170,7 @@ func _on_shop_pressed(id: String) -> void:
 func _refresh_tokens() -> void:
 	if profile == null:
 		return
-	var txt := "◆ %d tokens  ·  %s abonnés" % [profile.tokens, ReelData.format_count(profile.followers)]
+	var txt := "%d tokens  ·  %s abonnés" % [profile.tokens, ReelData.format_count(profile.followers)]
 	if tokens_label != null:
 		tokens_label.text = txt
 	computer.play_prompt.text = "Ton solde de tokens"
@@ -182,8 +182,8 @@ func _refresh_tokens() -> void:
 		var item := DecorCatalog.get_item(id)
 		var price := int(item["price"])
 		if profile.owns(id):
-			card.set_state("✔ POSSÉDÉ", Color(0.3, 0.95, 0.85), false)
+			card.set_state("POSSÉDÉ", Color(0.3, 0.95, 0.85), false)
 		elif profile.tokens >= price:
-			card.set_state("ACHETER %d ◆" % price, Color(0.5, 1.0, 0.4), true)
+			card.set_state("ACHETER %d" % price, Color(0.5, 1.0, 0.4), true)
 		else:
-			card.set_state("%d ◆" % price, Color(0.85, 0.3, 0.25), false)
+			card.set_state("%d TOKENS" % price, Color(0.85, 0.3, 0.25), false)
