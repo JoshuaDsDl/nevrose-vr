@@ -11,6 +11,7 @@ enum State { IDLE, EGG, OPEN }
 const HOLD_SECONDS := 4.0
 const TRIGGER_ON := 0.7
 const DIPLOMA_SECONDS := 10.0
+const ZONE_GRACE := 0.6 ## s : la main peut sortir brièvement de la zone (suivi perdu dans le dos)
 
 var state: State = State.IDLE
 var left: Node3D = null
@@ -20,6 +21,8 @@ var camera: Node3D = null
 var _hold := {} ## id de la main -> secondes de maintien
 var _ticks := {}
 var _prev_pressed := {}
+var _miss := {} ## id -> secondes hors zone pendant le maintien
+var _last_zone := {} ## id -> dernière réponse fiable de at_butt (suivi perdu = on la garde)
 var _released_since_pop := false
 var _egg: Node3D = null
 var _diploma: Node3D = null
@@ -35,9 +38,17 @@ func _physics_process(delta: float) -> void:
 	if camera == null:
 		return
 	for hand in [left, right]:
-		if hand is XRController3D and is_instance_valid(hand) and (hand as XRController3D).get_is_active():
-			var trigger := (hand as XRController3D).get_float(&"trigger")
-			tick_hand(hand, at_butt(hand), trigger > TRIGGER_ON, delta)
+		if not (hand is XRController3D and is_instance_valid(hand)):
+			continue
+		var ctrl := hand as XRController3D
+		var id := ctrl.get_instance_id()
+		# Dans le dos, les caméras du Quest ne voient plus la manette : sa position se fige.
+		# On garde alors la dernière réponse obtenue quand elle était suivie.
+		var zone: bool = _last_zone.get(id, false)
+		if ctrl.get_has_tracking_data():
+			zone = at_butt(ctrl)
+			_last_zone[id] = zone
+		tick_hand(ctrl, zone, ctrl.get_float(&"trigger") > TRIGGER_ON, delta)
 
 
 ## La main est-elle derrière le joueur, à hauteur de fesses ? Les proportions suivent sa taille.
@@ -49,7 +60,8 @@ func at_butt(hand: Node3D) -> bool:
 	var local := yaw.inverse() * (hand.global_position - camera.global_position)
 	var drop := -local.y
 	var flat := Vector2(local.x, local.z).length()
-	return local.z > 0.08 and absf(local.x) < 0.5 and flat < 0.65 and drop > 0.3 * height and drop < 0.66 * height
+	# Pas devant soi, près du corps, entre le bas du dos et le haut des cuisses.
+	return local.z > -0.05 and absf(local.x) < 0.55 and flat < 0.7 and drop > 0.28 * height and drop < 0.75 * height
 
 
 ## Un pas de temps pour une main. Séparé de la lecture des manettes pour être testable.
@@ -59,7 +71,13 @@ func tick_hand(hand: Node3D, butt: bool, pressed: bool, delta: float) -> void:
 	_prev_pressed[id] = pressed
 	match state:
 		State.IDLE:
+			if pressed and not butt and float(_hold.get(id, 0.0)) > 0.0:
+				# Sortie brève de la zone : on garde le compteur un instant.
+				_miss[id] = float(_miss.get(id, 0.0)) + delta
+				if float(_miss[id]) <= ZONE_GRACE:
+					return
 			if butt and pressed:
+				_miss[id] = 0.0
 				_hold[id] = float(_hold.get(id, 0.0)) + delta
 				# Le contrôleur vibre de plus en plus fort : « il se passe quelque chose ».
 				var ticks := int(float(_hold[id]))
@@ -71,6 +89,7 @@ func tick_hand(hand: Node3D, butt: bool, pressed: bool, delta: float) -> void:
 			else:
 				_hold[id] = 0.0
 				_ticks[id] = 0
+				_miss[id] = 0.0
 		State.EGG:
 			if not pressed:
 				_released_since_pop = true

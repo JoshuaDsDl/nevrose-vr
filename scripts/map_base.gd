@@ -269,6 +269,8 @@ func spawn_dose(avoid := Vector3(1e9, 0.0, 1e9), min_dist := 5.0) -> void:
 		_dose.monitorable = false
 		_dose_marker = _make_dose_marker(spot["pos"])
 		add_child(_dose_marker)
+		if c.is_open:
+			c._reveal_dose() # rangement laissé ouvert : la pilule s'y voit tout de suite
 	else:
 		add_child(_dose)
 		_dose.position = spot["pos"]
@@ -301,6 +303,16 @@ func _make_dose_marker(pos: Vector3) -> Node3D:
 	beam.position.y = 1.1
 	marker.add_child(beam)
 	return marker
+
+
+## La pilule vient d'être prise en main : plus aucun rangement ne la cache, plus de lueur.
+func on_dose_picked() -> void:
+	for c in containers:
+		if c.dose == _dose:
+			c.dose = null
+	if is_instance_valid(_dose_marker):
+		_dose_marker.queue_free()
+	_dose_marker = null
 
 
 func clear_dose() -> void:

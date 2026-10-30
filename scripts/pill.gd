@@ -3,10 +3,8 @@ extends Area3D
 ## La pilule (cœur du jeu — GDD §5.1). Spawne dans un conteneur aléatoire.
 ## Capsule émissive cyan : visible de loin, coût graphique nul.
 ##
-## Mécanique (2026-10) : GRAB à la main → PORTER À LA BOUCHE → MANGER.
-## La pilule suit la main droite une fois saisie. Quand la main entre dans
-## la zone "bouche" (rayon 0.25 m du point bas de la caméra), un indicateur
-## s'allume et la gâchette = avaler.
+## Mécanique : gâchette près de la pilule (ou en la visant) → elle passe dans cette main →
+## la porter à la bouche (rayon 0,28 m sous la caméra) l'avale tout de suite (main.gd).
 
 const PILL_COLOR := Color(0.35, 1.0, 0.85)
 const AURA_LOOP_SECONDS := 12.0
@@ -14,11 +12,17 @@ const AURA_MIX_RATE := 22050
 const AURA_VOLUME_DB := -9.0 # audible à travers l'appartement : on la suit à l'oreille
 const AURA_MAX_DISTANCE_M := 14.0
 const BEAM_HEIGHT := 2.6 ## faisceau de repérage : la pilule se voit de loin
+const BEAM_GAP := 0.3 ## le faisceau commence 30 cm au-dessus de la gélule
 const AURA_UNIT_SIZE_M := 2.5
+
+const HALO_FADE_NEAR := 1.8 ## m : en dessous (debout au-dessus d'elle), le halo disparaît
+const HALO_FADE_FAR := 3.5 ## m : au-delà, halo à pleine intensité
 
 var _spin := true
 var _beam: MeshInstance3D = null
 var _glow: OmniLight3D = null
+var _halo: MeshInstance3D = null
+var _halo_mat: StandardMaterial3D = null
 var _aura_audio: AudioStreamPlayer3D = null
 var _aura_consumed := false
 var is_held := false
@@ -45,19 +49,34 @@ func can_eat() -> bool:
 
 
 func _ready() -> void:
+	# Gélule lisible dans le casque : 11 cm, cyan lumineux avec une bague blanche au milieu.
 	var body := MeshInstance3D.new()
+	body.name = "Gelule"
 	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.028
-	capsule.height = 0.08
+	capsule.radius = 0.032
+	capsule.height = 0.11
 	body.mesh = capsule
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = PILL_COLOR
+	mat.albedo_color = Color(0.15, 0.85, 0.75)
 	mat.emission_enabled = true
 	mat.emission = PILL_COLOR
-	mat.emission_energy_multiplier = 2.2
+	mat.emission_energy_multiplier = 0.55 # assez pour briller, pas au point de virer au blanc
 	mat.roughness = 0.35
 	body.material_override = mat
+	body.rotation.z = PI / 2.0 # couchée : vue d'en haut on voit toute sa longueur
 	add_child(body)
+	var ring := MeshInstance3D.new()
+	ring.name = "Bague"
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.031
+	torus.outer_radius = 0.037
+	ring.mesh = torus
+	var ring_mat := StandardMaterial3D.new()
+	ring_mat.albedo_color = Color(0.97, 0.97, 1.0)
+	ring_mat.roughness = 0.3
+	ring.material_override = ring_mat
+	ring.rotation.z = PI / 2.0 # bague autour de l'axe de la gélule couchée
+	add_child(ring)
 
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
@@ -65,8 +84,8 @@ func _ready() -> void:
 	shape.shape = sphere
 	add_child(shape)
 
-	body_offset_y = 0.05
 	_create_beam()
+	body_offset_y = 0.05 # après la création de tous les maillages : gélule, bague et halo ensemble
 	_create_aura()
 
 
@@ -74,10 +93,12 @@ func _ready() -> void:
 func _create_beam() -> void:
 	_beam = MeshInstance3D.new()
 	_beam.name = "Faisceau"
+	# Le faisceau part au-dessus de la gélule (sinon sa base l'englobe et on ne voit qu'une
+	# colonne blanche), fin et discret : il indique l'endroit, la gélule reste à voir.
 	var cyl := CylinderMesh.new()
-	cyl.top_radius = 0.05
-	cyl.bottom_radius = 0.1
-	cyl.height = BEAM_HEIGHT
+	cyl.top_radius = 0.02
+	cyl.bottom_radius = 0.035
+	cyl.height = BEAM_HEIGHT - BEAM_GAP
 	cyl.radial_segments = 8
 	cyl.rings = 1
 	_beam.mesh = cyl
@@ -85,10 +106,10 @@ func _create_beam() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(0.25, 0.95, 0.85, 0.55)
+	mat.albedo_color = Color(0.25, 0.95, 0.85, 0.22)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_beam.material_override = mat
-	_beam.position.y = BEAM_HEIGHT * 0.5
+	_beam.position.y = BEAM_GAP + (BEAM_HEIGHT - BEAM_GAP) * 0.5
 	add_child(_beam)
 	var glow := OmniLight3D.new()
 	glow.name = "Lueur"
@@ -98,12 +119,13 @@ func _create_beam() -> void:
 	glow.position.y = 0.15
 	add_child(glow)
 	_glow = glow
-	# Halo : un grand disque qui fait toujours face au joueur, visible de très loin même
-	# derrière un angle de mur (le faisceau fin se perd dans la résolution du casque).
+	# Halo : un anneau qui fait toujours face au joueur, visible de loin (le faisceau fin se
+	# perd dans la résolution du casque). Centre transparent : la gélule reste visible
+	# dedans, et il s'efface quand on s'approche (voir _process).
 	var halo := MeshInstance3D.new()
 	halo.name = "Halo"
 	var quad := QuadMesh.new()
-	quad.size = Vector2(0.9, 0.9)
+	quad.size = Vector2(0.5, 0.5)
 	halo.mesh = quad
 	var hmat := StandardMaterial3D.new()
 	hmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -113,22 +135,23 @@ func _create_beam() -> void:
 	hmat.albedo_texture = _halo_texture()
 	hmat.no_depth_test = false
 	halo.material_override = hmat
-	halo.position.y = 0.12
 	add_child(halo)
+	_halo = halo
+	_halo_mat = hmat
 
 
 static var _halo_tex: ImageTexture = null
 
 
-## Disque lumineux dégradé (rayon de 64 px), généré une seule fois.
+## Anneau lumineux (64 px) : creux au centre pour ne pas noyer la gélule, généré une fois.
 static func _halo_texture() -> ImageTexture:
 	if _halo_tex == null:
 		var img := Image.create(64, 64, false, Image.FORMAT_RGBA8)
 		for y in 64:
 			for x in 64:
 				var d := Vector2(x - 31.5, y - 31.5).length() / 32.0
-				var a := clampf(1.0 - d, 0.0, 1.0)
-				a = a * a * 0.9
+				var a := clampf(1.0 - absf(d - 0.62) / 0.38, 0.0, 1.0)
+				a = a * a * 0.85
 				img.set_pixel(x, y, Color(0.35, 1.0, 0.9, a))
 		_halo_tex = ImageTexture.create_from_image(img)
 	return _halo_tex
@@ -235,18 +258,32 @@ var body_offset_y := 0.0:
 
 func _process(delta: float) -> void:
 	if is_held:
-		if _beam != null and _beam.visible:
-			_beam.visible = false
-			if _glow != null:
-				_glow.visible = false
-		# Suivre la main — position offset fix par main.gd
+		# En main : ni faisceau, ni lueur, ni halo devant les yeux (main.gd tient la position).
+		for n in [_beam, _glow, _halo]:
+			if n != null and (n as Node3D).visible:
+				(n as Node3D).visible = false
 		return
-	if not _spin or not visible:
+	if not visible:
+		return
+	_fade_halo()
+	if not _spin:
 		return
 	rotate_y(delta * 1.6)
 	for c in get_children():
 		if c is MeshInstance3D and c != _beam:
 			c.position.y = body_offset_y + sin(Time.get_ticks_msec() / 1000.0 * 2.4) * 0.012
+
+
+## Le halo sert à repérer la pilule de loin ; de près il s'efface pour laisser voir la gélule.
+func _fade_halo() -> void:
+	if _halo_mat == null:
+		return
+	var cam := get_viewport().get_camera_3d() if get_viewport() != null else null
+	var t := 1.0
+	if cam != null:
+		t = clampf((cam.global_position.distance_to(global_position) - HALO_FADE_NEAR) / (HALO_FADE_FAR - HALO_FADE_NEAR), 0.0, 1.0)
+	_halo_mat.albedo_color = Color(1.0, 1.0, 1.0, t)
+	_halo.visible = t > 0.01
 
 
 func on_pointed() -> void:
@@ -260,18 +297,26 @@ func on_unpointed() -> void:
 ## Gâchette quand la pilule est dans la main :
 # - Si pas encore dans la bouche → rien (le joueur doit la rapprocher).
 # - Si dans la bouche → avaler.
-func interact() -> void:
+## `_key` : signature commune aux interactables (main.gd passe la clé tenue).
+func interact(_key: Node3D = null) -> void:
 	if not visible:
 		return
 	if is_held:
 		if can_eat():
 			_consume()
 		return
-	# Pas encore tenue : on la ramasse (main.gd gère le reparent)
-	_spin = false
+	# Pas encore tenue : on la ramasse (main.gd gère le reparent et coupe la rotation).
 	var main := get_tree().get_first_node_in_group("main")
 	if main and main.has_method(&"pickup_pill"):
 		main.pickup_pill(self)
+
+
+## Saisie par une main : plus de rotation, plus de repères lumineux.
+func on_picked(p_camera: Node3D) -> void:
+	is_held = true
+	_spin = false
+	camera = p_camera
+	rotation = Vector3.ZERO
 
 
 ## Appelé quand la pilule est avalée.

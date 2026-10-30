@@ -30,9 +30,15 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
 - **Résistance** : le téléphone sort tout de suite et porte un GPS vers la pilule (`NavGrid`) ; la pilule
   est une fois sur deux rangée dans un placard / le frigo (lueur cyan qui la trahit) ; halo + faisceau +
   carillon audible de loin. Petits objets attrapables et jetables (`HuntSandbox` en mode `light`).
+- **Pilules** (`pill.gd`, `MapBase.spawn_dose`) : gélule couchée, faisceau qui commence 30 cm au-dessus
+  (sinon il cache la gélule), anneau-halo visible de loin et effacé de près. Gâchette près d'elle (ou en la
+  visant) = elle passe dans CETTE main ; une pilule rangée ne se prend pas à travers une porte fermée ; dès
+  qu'elle est prise, le rangement la lâche (`MapBase.on_dose_picked`). Portée à la bouche = avalée, sans
+  gâchette. Tout emplacement doit passer `tests/test_pills.gd` (à portée d'une case, rien au-dessus).
 - Retours haptiques au contact des meubles, murs et objets (`Main._tick_touch_haptics`).
 - Easter egg (`easter_egg.gd`) : main derrière soi + gâchette 4 s = POP de champagne, œuf surprise ;
-  un 2e appui l'ouvre : diplôme d'ingénieur IMT Nord Europe.
+  un 2e appui l'ouvre : diplôme d'ingénieur IMT Nord Europe. Marche partout (lobby compris). Dans le dos
+  le Quest perd la manette : on garde sa dernière zone connue et on tolère 0,6 s de sortie de zone.
 - Son spatial : Godot n'a pas de HRTF ; `SpatialAudio` renforce le panoramique et assombrit les sons
   situés derrière/très haut/très bas. Un vrai HRTF demanderait un plugin natif Android (Steam Audio, Meta
   XR Audio) qu'on n'a pas pu valider sans casque.

@@ -44,9 +44,10 @@ const SURFACES := [
 	"Shell/sideTableDrawers",
 ]
 
-# Points au sol libres (hors meubles)
+# Points au sol libres (hors meubles, rien au-dessus : vérifié par tests/test_pills.gd).
+# Le centre du salon n'en fait plus partie : il tombe sous la table.
 const FLOOR_SPOTS := [
-	Vector3.ZERO, Vector3(-2.2, 0.0, -0.8), Vector3(2.4, 0.0, 0.4),
+	Vector3(-2.2, 0.0, -0.8), Vector3(2.4, 0.0, 0.4),
 	Vector3(8.0, 0.0, 2.2), Vector3(7.7, 0.0, 6.2), Vector3(6.3, 0.0, -0.6),
 ]
 

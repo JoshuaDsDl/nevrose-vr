@@ -108,6 +108,9 @@ var _laser: MeshInstance3D = null ## rayon de visée de la main droite (VR)
 var _pointed: Node = null ## conteneur, clé ou pilule actuellement visé
 var _held_key: KeyObject = null
 var _held_pill: Dose = null
+var _pill_hand: XRController3D = null ## main qui tient la pilule
+var _toast_label: Label3D = null ## message devant les yeux quand il n'y a pas de téléphone
+var _toast_serial := 0
 var _pill_ready := false ## la pilule tenue est dans la bouche
 var _reset_hold := 0.0 ## temps de maintien de la combinaison de réinitialisation
 var _lobby_hold := 0.0 ## temps de maintien du bouton « retour au lobby »
@@ -596,7 +599,9 @@ func _tick_interaction_ray() -> void:
 	if hit and hit.collider is Area3D:
 		var area := hit.collider as Area3D
 		var owner_node: Node = area.get_parent()
-		if area is Dose or area.has_method(&"on_pointed"):
+		if area is Dose and not area.is_visible_in_tree():
+			new_pointed = null # pilule rangée derrière une porte fermée
+		elif area is Dose or area.has_method(&"on_pointed"):
 			new_pointed = area
 		elif owner_node and owner_node.has_method(&"on_pointed"):
 			new_pointed = owner_node
@@ -633,22 +638,25 @@ func interact(source_hand: XRController3D = null) -> void:
 	if mode == Mode.HUNT and sb != null and sb.uses_trigger() and source_hand != left_hand:
 		sb.trigger_pressed(source_hand if source_hand != null else xr_camera)
 		return
-	# Pilule tenue : gâchette = avaler si elle est dans la bouche.
-	if _held_pill and is_instance_valid(_held_pill):
+	# Pilule tenue à la bouche : gâchette = avaler (secours, elle s'avale déjà seule).
+	# Sinon la gâchette reste libre : on peut refermer un tiroir pilule en main.
+	if _held_pill and is_instance_valid(_held_pill) and _held_pill.can_eat():
 		_held_pill.interact()
 		return
 	if _pointed is KeyObject:
 		_pickup_key(_pointed as KeyObject)
 		return
 	if _pointed is Dose:
-		pickup_pill(_pointed as Dose)
+		pickup_pill(_pointed as Dose, source_hand)
 		return
 	if _pointed != null and _pointed.has_method(&"interact"):
 		_run_interaction(_pointed, source_hand)
 		return
 	# Au contact, sans viser : le conteneur ou la pilule la plus proche.
-	var near := _nearest_interactable()
-	if near != null:
+	var near := _nearest_interactable(source_hand)
+	if near is Dose:
+		pickup_pill(near as Dose, source_hand)
+	elif near != null:
 		_run_interaction(near, source_hand)
 
 
@@ -661,7 +669,7 @@ func _run_interaction(target: Node, source_hand: XRController3D) -> void:
 
 
 ## L'interactable le plus proche d'une main, dans PROXIMITY_RADIUS.
-func _nearest_interactable() -> Node:
+func _nearest_interactable(source_hand: XRController3D = null) -> Node:
 	if not game_started:
 		if lobby == null:
 			return null
@@ -684,23 +692,23 @@ func _nearest_interactable() -> Node:
 				if hand.global_transform.origin.distance_to(hunt.current.global_transform.origin) < 0.6:
 					return hunt.current
 		return null
+	var hands: Array = [source_hand] if source_hand != null else [right_hand, left_hand]
+	# La pilule passe avant le rangement qui la contient : tiroir ouvert + gâchette = on la prend.
+	# Rangée derrière une porte fermée (invisible), elle ne se prend pas.
+	var dose := apartment.get_dose()
+	if dose != null and is_instance_valid(dose) and dose.is_visible_in_tree() and not dose.is_held:
+		for hand in hands:
+			if (hand as Node3D).global_position.distance_to(dose.global_position) < DOSE_REACH:
+				return dose
 	var best: Node = null
 	var best_d := PROXIMITY_RADIUS
-	for hand in [right_hand, left_hand]:
-		var origin: Vector3 = hand.global_transform.origin
+	for hand in hands:
+		var origin: Vector3 = (hand as Node3D).global_position
 		for c in apartment.containers:
-			if not c.has_method(&"interact"):
-				continue
 			var d: float = origin.distance_to(c.global_transform.origin)
 			if d < best_d:
 				best_d = d
 				best = c
-		var dose: Node = apartment.get_dose()
-		if dose != null and is_instance_valid(dose) and dose.has_method(&"interact"):
-			var dd: float = origin.distance_to(dose.global_transform.origin)
-			if dd < DOSE_REACH and (best == null or dd < best_d):
-				best_d = dd
-				best = dose
 	return best
 
 
@@ -1023,22 +1031,25 @@ func _pickup_key(key: KeyObject) -> void:
 	_pulse_haptics(0.35, 0.10, right_hand)
 
 
-func pickup_pill(pill: Dose) -> void:
-	if not is_instance_valid(pill):
+func pickup_pill(pill: Dose, hand: XRController3D = null) -> void:
+	if not is_instance_valid(pill) or not pill.visible:
 		return
 	if _held_pill and is_instance_valid(_held_pill):
 		_say("Tu tiens déjà une pilule.")
 		return
+	_pill_hand = hand if hand != null else right_hand
 	_held_pill = pill
-	pill.is_held = true
-	pill.camera = xr_camera
+	# Le rangement la lâche : refermer le tiroir ne doit plus la cacher, la lueur s'éteint.
+	if apartment != null:
+		apartment.on_dose_picked()
+	pill.on_picked(xr_camera)
 	pill.name = "HeldPill"
-	pill.reparent(right_hand)
-	pill.position = Vector3(0.0, -0.06, 0.10)
+	pill.reparent(_pill_hand)
+	pill.position = Vector3(0.0, -0.03, -0.06)
 	pill.rotation = Vector3(PI / 2, 0, 0)
-	_log("GAME", "pilule saisie")
-	_say("Tu l'as. Porte-la à ta bouche. Gâchette = avaler.")
-	_pulse_haptics(0.40, 0.10, right_hand)
+	_log("GAME", "pilule saisie (%s)" % ("gauche" if _pill_hand == left_hand else "droite"))
+	_say("Tu l'as. Porte-la à ta bouche pour l'avaler.")
+	_pulse_haptics(0.40, 0.10, _pill_hand)
 
 
 ## Vibration quand la pilule entre dans la zone de la bouche (pas de point à l'écran).
@@ -1049,7 +1060,7 @@ func _tick_pill_feedback() -> void:
 	var ready := _held_pill.can_eat()
 	if ready and not _pill_ready:
 		# Pilule à la bouche : on l'avale tout de suite, sans appuyer sur la gâchette.
-		_pulse_haptics(0.3, 0.06, right_hand)
+		_pulse_haptics(0.3, 0.06, _pill_hand)
 		_held_pill.interact()
 		ready = false
 	_pill_ready = ready
@@ -1190,6 +1201,33 @@ func _say(text: String, is_alert := false, force := false) -> void:
 		return
 	if phone:
 		phone.receive_message(text, is_alert)
+	else:
+		_toast(text) # lobby : pas de téléphone, le message s'affiche devant les yeux
+
+
+## Message court devant les yeux (lobby, ou tout moment sans téléphone), effacé après 4 s.
+func _toast(text: String) -> void:
+	if _toast_label == null or not is_instance_valid(_toast_label):
+		_toast_label = Label3D.new()
+		_toast_label.name = "Toast"
+		_toast_label.font = LobbyButton.bold_font()
+		_toast_label.pixel_size = 0.0012
+		_toast_label.font_size = 40
+		_toast_label.outline_size = 8
+		_toast_label.outline_modulate = Color(0, 0, 0, 0.8)
+		_toast_label.width = 900.0
+		_toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_toast_label.no_depth_test = true
+		_toast_label.render_priority = 10
+		_toast_label.position = Vector3(0.0, -0.12, -0.7)
+		xr_camera.add_child(_toast_label)
+	_toast_label.text = text
+	_toast_label.visible = true
+	_toast_serial += 1
+	var serial := _toast_serial
+	get_tree().create_timer(4.0).timeout.connect(func() -> void:
+		if serial == _toast_serial and is_instance_valid(_toast_label):
+			_toast_label.visible = false)
 
 
 ## Chaque seconde : compte à rebours sur l'écran du téléphone.
