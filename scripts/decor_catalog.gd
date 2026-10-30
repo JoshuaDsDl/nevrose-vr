@@ -6,6 +6,8 @@ extends RefCounted
 ## kind "node"  : nœud déjà présent dans la scène, masqué par défaut.
 ## kind "frame" : cadre procédural accroché au mur.
 ## kind "glb"   : objet Kenney posé au sol ou sur une surface (`on` = nœud support).
+## kind "weapon": arme du mode Chasse (`damage` = puissance d'un coup, `reach` = portée au-delà
+##                de la main, en mètres, `swing` = vitesse minimale du geste pour frapper).
 
 const KENNEY := "res://assets/kenney/furniture/"
 
@@ -31,7 +33,20 @@ const ITEMS: Array[Dictionary] = [
 		"glb": "radio.glb", "on": "kitchenCabinetDrawer", "offset": Vector3.ZERO, "scale": 2.5},
 	{"id": "nounours", "name": "Nounours", "price": 15, "kind": "glb",
 		"glb": "bear.glb", "on": "ExtensionEst/Chambre/LitDouble", "offset": Vector3.ZERO, "scale": 2.5},
+	{"id": "arme_marteau", "name": "Marteau", "price": 20, "kind": "weapon", "damage": 2.0, "reach": 0.45, "swing": 1.8},
+	{"id": "arme_pied", "name": "Pied-de-biche", "price": 24, "kind": "weapon", "damage": 2.4, "reach": 0.6, "swing": 1.8},
+	{"id": "arme_batte", "name": "Batte", "price": 28, "kind": "weapon", "damage": 2.8, "reach": 0.8, "swing": 2.0},
+	{"id": "arme_masse", "name": "Masse", "price": 45, "kind": "weapon", "damage": 4.5, "reach": 0.9, "swing": 2.4},
 ]
+
+
+## Armes de la boutique (mode Chasse), de la moins chère à la plus chère.
+static func weapons() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for item in ITEMS:
+		if item["kind"] == "weapon":
+			out.append(item)
+	return out
 
 
 static func get_item(id: String) -> Dictionary:

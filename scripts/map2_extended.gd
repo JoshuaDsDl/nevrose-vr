@@ -83,6 +83,16 @@ func _register_ambience() -> void:
 		var mat := wall.material_override as StandardMaterial3D
 		_reg_breather(mat, mat.albedo_color, Color(0.42, 0.34, 0.33))
 	_register_lights(get_node("Shell"))
+	_strip_shadows(get_node("Shell"))
+
+
+## Quest 2 (mode Compatibilité) : une lumière à ombres redessine toute la scène ; trois ombres
+## suffisaient à faire chuter les images par seconde. L'ambiance reste, les ombres portées partent.
+func _strip_shadows(node: Node) -> void:
+	if node is Light3D:
+		(node as Light3D).shadow_enabled = false
+	for child in node.get_children():
+		_strip_shadows(child)
 
 
 func _register_lights(node: Node) -> void:

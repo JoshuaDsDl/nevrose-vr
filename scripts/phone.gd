@@ -62,6 +62,14 @@ var _timer_badge_label: Label = null
 var _battery_label: Label = null
 var _clock_label: Label = null
 var _messages_container: VBoxContainer = null
+var _chat_scroll: ScrollContainer = null
+# GPS du mode Chasse : une flèche qui indique où ça cogne
+var _gps_panel: Panel = null
+var _gps_arrow: Control = null
+var _gps_distance: Label = null
+var _gps_hint: Label = null
+var _gps_angle := 0.0
+var _gps_near := false
 var _input_label: Label = null
 
 # Historique : 3 messages conservés, mais seulement les 2 derniers affichés.
@@ -284,7 +292,7 @@ func _build_2d_messenger_ui() -> void:
 
 	_timer_badge_label = Label.new()
 	_timer_badge_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_timer_badge_label.text = "⏱️ --:--"
+	_timer_badge_label.text = "--:--"
 	_timer_badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_timer_badge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_timer_badge_label.add_theme_font_size_override("font_size", 13)
@@ -293,6 +301,7 @@ func _build_2d_messenger_ui() -> void:
 
 	# 3. Zone de conversation Messenger (bulles)
 	var chat_scroll := ScrollContainer.new()
+	_chat_scroll = chat_scroll
 	chat_scroll.position = Vector2(12, 108)
 	chat_scroll.size = Vector2(VIEWPORT_WIDTH - 24, 468)
 	chat_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -303,6 +312,7 @@ func _build_2d_messenger_ui() -> void:
 	_messages_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_messages_container.add_theme_constant_override("separation", 10)
 	chat_scroll.add_child(_messages_container)
+	_build_gps_panel()
 
 	# 4. Pied de page Messenger (fausse barre de saisie)
 	var footer := Panel.new()
@@ -350,7 +360,7 @@ func _build_2d_messenger_ui() -> void:
 	var mic_lbl := Label.new()
 	mic_lbl.position = Vector2(VIEWPORT_WIDTH - 80, 10)
 	mic_lbl.size = Vector2(30, 36)
-	mic_lbl.text = "🎙️"
+	mic_lbl.text = "mic"
 	mic_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	mic_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	mic_lbl.add_theme_font_size_override("font_size", 15)
@@ -360,7 +370,7 @@ func _build_2d_messenger_ui() -> void:
 	var thumb_lbl := Label.new()
 	thumb_lbl.position = Vector2(VIEWPORT_WIDTH - 44, 10)
 	thumb_lbl.size = Vector2(34, 36)
-	thumb_lbl.text = "👍"
+	thumb_lbl.text = "ok"
 	thumb_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	thumb_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	thumb_lbl.add_theme_font_size_override("font_size", 16)
@@ -369,6 +379,86 @@ func _build_2d_messenger_ui() -> void:
 
 	# Message initial de bienvenue du subconscient
 	receive_message("Ne reste pas là. Trouve la dose.", false)
+
+
+# ---------------------------------------------------------------------------
+# GPS (mode Chasse) : flèche vers le mur qui cogne
+# ---------------------------------------------------------------------------
+func _build_gps_panel() -> void:
+	_gps_panel = Panel.new()
+	_gps_panel.name = "GPS"
+	_gps_panel.position = Vector2(12, 106)
+	_gps_panel.size = Vector2(VIEWPORT_WIDTH - 24, 232)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.06, 0.09)
+	style.border_color = Color(0.35, 1.0, 0.55)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(16)
+	_gps_panel.add_theme_stylebox_override("panel", style)
+	_gps_panel.visible = false
+	_ui_root.add_child(_gps_panel)
+
+	var title := Label.new()
+	title.text = "GPS  -  ÇA COGNE"
+	title.position = Vector2(0, 8)
+	title.size = Vector2(_gps_panel.size.x, 22)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_color_override("font_color", Color(0.6, 0.9, 0.7))
+	_gps_panel.add_child(title)
+
+	_gps_arrow = Control.new()
+	_gps_arrow.position = Vector2(_gps_panel.size.x * 0.5, 112)
+	_gps_arrow.draw.connect(_draw_gps_arrow)
+	_gps_panel.add_child(_gps_arrow)
+
+	_gps_distance = Label.new()
+	_gps_distance.position = Vector2(0, 176)
+	_gps_distance.size = Vector2(_gps_panel.size.x, 34)
+	_gps_distance.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gps_distance.add_theme_font_size_override("font_size", 28)
+	_gps_distance.add_theme_color_override("font_color", Color.WHITE)
+	_gps_panel.add_child(_gps_distance)
+
+	_gps_hint = Label.new()
+	_gps_hint.position = Vector2(0, 208)
+	_gps_hint.size = Vector2(_gps_panel.size.x, 20)
+	_gps_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gps_hint.add_theme_font_size_override("font_size", 13)
+	_gps_hint.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	_gps_panel.add_child(_gps_hint)
+
+
+func _draw_gps_arrow() -> void:
+	var color := Color(1.0, 0.8, 0.25) if _gps_near else Color(0.35, 1.0, 0.55)
+	_gps_arrow.draw_arc(Vector2.ZERO, 72.0, 0.0, TAU, 48, Color(1, 1, 1, 0.1), 3.0, true)
+	_gps_arrow.draw_set_transform(Vector2.ZERO, _gps_angle, Vector2.ONE)
+	var pts := PackedVector2Array([Vector2(0, -62), Vector2(40, 34), Vector2(0, 14), Vector2(-40, 34)])
+	_gps_arrow.draw_colored_polygon(pts, color)
+	_gps_arrow.draw_polyline(PackedVector2Array([pts[0], pts[1], pts[2], pts[3], pts[0]]), Color(0, 0, 0, 0.5), 2.0, true)
+
+
+## Active ou coupe le GPS ; le chat descend pour lui laisser la place.
+func set_gps(active: bool) -> void:
+	if _gps_panel == null:
+		return
+	_gps_panel.visible = active
+	if _chat_scroll != null:
+		_chat_scroll.position.y = 346.0 if active else 108.0
+		_chat_scroll.size.y = 230.0 if active else 468.0
+	if active:
+		_gps_arrow.queue_redraw()
+
+
+## `angle` : 0 = droit devant, positif = vers la droite (radians). `vertical` : 1 plafond.
+func update_gps(angle: float, distance: float, vertical: int) -> void:
+	if _gps_panel == null or not _gps_panel.visible:
+		return
+	_gps_angle = angle
+	_gps_near = distance < 2.5
+	_gps_distance.text = "TOUT PRÈS" if distance < 1.6 else "%d m" % int(round(distance))
+	_gps_hint.text = "au plafond" if vertical > 0 else ""
+	_gps_arrow.queue_redraw()
 
 
 # ---------------------------------------------------------------------------
@@ -558,7 +648,7 @@ func _flash_header(is_alert: bool) -> void:
 # ---------------------------------------------------------------------------
 func update_timer(time_str: String, sanity: float) -> void:
 	if _timer_badge_label:
-		_timer_badge_label.text = "⏱️ " + time_str
+		_timer_badge_label.text = time_str
 
 	# Adaptation visuelle selon la folie
 	if _contact_status_label:

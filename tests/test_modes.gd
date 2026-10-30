@@ -57,9 +57,9 @@ func _initialize() -> void:
 		await physics_frame
 	_assert(main.mode == Main.Mode.HUNT, "chasse : mode Chasse actif")
 	var apt: MapBase = main.apartment
-	_assert(not apt.get_node("Shell/mayozedong_framed").visible, "décor : tableau non acheté invisible")
-	_assert(apt.get_node_or_null("Shell/Deco_radio") != null, "décor : la radio achetée est présente")
-	_assert(apt.get_node_or_null("Shell/Deco_nounours") != null, "décor : le nounours acheté est présent")
+	_assert(apt.find_child("mayozedong_framed", true, false) == null or not (apt.find_child("mayozedong_framed", true, false) as Node3D).visible, "décor : tableau non acheté invisible")
+	_assert(main.find_child("Deco_radio", true, false) != null, "décor : la radio achetée est présente")
+	_assert(main.find_child("Deco_nounours", true, false) != null, "décor : le nounours acheté est présent")
 	var hunt: HuntMode = main.hunt
 	_assert(hunt != null and hunt.started, "chasse : HuntMode démarré")
 	_assert(hunt.candidates.size() + hunt.patches.size() >= hunt.target_count, "chasse : assez de murs candidats (%d)" % (hunt.candidates.size() + hunt.patches.size()))

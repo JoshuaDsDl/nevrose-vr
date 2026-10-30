@@ -44,6 +44,8 @@ const LOBBY_MAX := Vector2(2.25, 2.15)
 const LOBBY_SPAWN := Vector2(1.0, 1.35)
 const APARTMENT_SPAWN := Vector2(-1.0, 0.0) # salon, zone libre
 const RESET_HOLD := 1.0 # secondes de maintien de la combinaison X + A
+const JUMP_SPEED := 3.1 # m/s : un saut d'environ 0,5 m
+const GRAVITY := 9.8
 const LOBBY_HOLD := 1.2 # secondes de maintien d'un bouton « retour au lobby » (menu, Y ou B)
 
 const HAND_SCENE_R := preload("res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn")
@@ -106,6 +108,9 @@ var _reset_hold := 0.0 ## temps de maintien de la combinaison de réinitialisati
 var _lobby_hold := 0.0 ## temps de maintien du bouton « retour au lobby »
 var _lobby_ticks := 0 ## vibrations déjà données pendant le maintien
 var _lobby_hud: Label3D = null ## indicateur de progression devant les yeux
+var _jump_y := 0.0 ## hauteur du saut en cours (mode Chasse)
+var _jump_vy := 0.0
+var _fps_clock := 0.0
 var _snap_cooldown := 0.0
 var _trigger_down := {} ## état « gâchette enfoncée » par main
 var _desktop_yaw := 0.0
@@ -129,8 +134,10 @@ func _ready() -> void:
 	_build_player()
 	_build_lobby()
 	_register_debug_inputs()
-	left_hand.button_pressed.connect(_on_button_pressed)
-	right_hand.button_pressed.connect(_on_button_pressed)
+	left_hand.button_pressed.connect(_on_button_pressed.bind(left_hand))
+	right_hand.button_pressed.connect(_on_button_pressed.bind(right_hand))
+	left_hand.button_released.connect(_on_button_released.bind(left_hand))
+	right_hand.button_released.connect(_on_button_released.bind(right_hand))
 
 
 ## Écrit une ligne dans le journal (GameLog), repli sur print().
@@ -232,7 +239,7 @@ func _build_world() -> void:
 	env.fog_light_color = Color(0.12, 0.1, 0.14)
 	env.fog_density = 0.035
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.glow_enabled = true
+	env.glow_enabled = not xr_active # le halo plein écran coûte trop cher sur Quest 2
 	env.glow_intensity = 0.35
 	env.glow_strength = 0.8
 	env.glow_bloom = 0.08
@@ -288,6 +295,7 @@ func _build_player() -> void:
 		_body.name = "PlayerBody"
 		xr_origin.add_child(_body)
 		_body.setup(xr_camera)
+		_body.visible = false # le corps n'est montré que pour filmer (mode Réels)
 		_build_laser()
 
 	# Capsule de déplacement partagée VR et bureau : une capsule, pas de RigidBody.
@@ -345,6 +353,9 @@ func _register_debug_inputs() -> void:
 	_add_key_action(&"dbg_interact", [KEY_F])
 	_add_key_action(&"dbg_reset", [KEY_R])
 	_add_key_action(&"dbg_lobby", [KEY_ESCAPE])
+	_add_key_action(&"dbg_jump", [KEY_SPACE])
+	_add_key_action(&"dbg_grab", [KEY_G])
+	_add_key_action(&"dbg_weapon", [KEY_V])
 	_add_key_action(&"dbg_phone", [KEY_TAB, KEY_T, KEY_P])
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
@@ -398,6 +409,9 @@ func _physics_process(delta: float) -> void:
 		return
 	_tick_movement(delta)
 	_tick_interaction_ray()
+	_tick_jump(delta)
+	if mode == Mode.HUNT:
+		_tick_hunt_gps()
 	if mode == Mode.HUNT or mode == Mode.REEL:
 		return # ni folie ni voix : les coups dans les murs, ou le studio de réels
 	run_time += delta
@@ -411,11 +425,24 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	# Une ligne de performance toutes les 10 s dans nevrose.log : sert à diagnostiquer le casque.
+	_fps_clock += delta
+	if _fps_clock >= 10.0:
+		_fps_clock = 0.0
+		_log("PERF", "%d fps, %d objets, %d draw calls" % [Engine.get_frames_per_second(),
+			int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+			int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))])
 	if not xr_active:
 		if Input.is_action_just_pressed(&"dbg_interact"):
 			interact()
 		if Input.is_action_just_pressed(&"dbg_snap_right"):
 			snap_turn(1.0)
+		if Input.is_action_just_pressed(&"dbg_jump"):
+			jump()
+		if Input.is_action_just_pressed(&"dbg_grab") and mode == Mode.HUNT:
+			_toggle_grab(xr_camera)
+		if Input.is_action_just_pressed(&"dbg_weapon") and mode == Mode.HUNT:
+			_cycle_weapon()
 		if Input.is_action_just_pressed(&"dbg_reset"):
 			reset_position()
 	if Input.is_action_just_pressed(&"dbg_phone") and phone:
@@ -739,6 +766,59 @@ func _show_lobby_hud(on: bool) -> void:
 	_lobby_hud.visible = true
 
 
+func _on_button_released(action_name: String, hand: XRController3D) -> void:
+	if action_name == &"grip_click" and mode == Mode.HUNT and hunt != null and hunt.sandbox != null:
+		hunt.sandbox.release(hand)
+
+
+## Grip : attrape l'objet visé ou touché ; relâché, l'objet part avec l'élan de la main.
+## Au bureau (touche G) la même touche attrape puis lâche.
+func _toggle_grab(hand: Node3D, force_grab := false) -> void:
+	if hunt == null or hunt.sandbox == null:
+		return
+	if hunt.sandbox.is_holding(hand) and not force_grab:
+		hunt.sandbox.release(hand)
+	else:
+		hunt.sandbox.grab(hand)
+
+
+func _cycle_weapon() -> void:
+	if hunt == null or hunt.sandbox == null:
+		return
+	hunt.sandbox.cycle_weapon()
+	_say("Arme : %s" % hunt.sandbox.weapon_name())
+
+
+## Saut (mode Chasse) : un petit bond, pas de plafond de verre — la capsule suit.
+func jump() -> void:
+	if mode != Mode.HUNT or not game_started or game_over or _jump_y > 0.0:
+		return
+	_jump_vy = JUMP_SPEED
+	_jump_y = 0.001
+
+
+func _tick_jump(delta: float) -> void:
+	if _jump_y <= 0.0:
+		return
+	_jump_vy -= GRAVITY * delta
+	_jump_y += _jump_vy * delta
+	var base_y := 1.7 if not xr_active else 0.0
+	if _jump_y <= 0.0:
+		_jump_y = 0.0
+		_jump_vy = 0.0
+	xr_origin.position.y = base_y + _jump_y
+
+
+## Mise à jour de la flèche du téléphone : elle montre le chemin vers le mur qui cogne.
+func _tick_hunt_gps() -> void:
+	if hunt == null or phone == null:
+		return
+	var info := hunt.gps_info()
+	if info.is_empty():
+		return
+	phone.update_gps(float(info["angle"]), float(info["distance"]), int(info["vertical"]))
+
+
 ## Remet le joueur au point de départ, orienté vers l'avant, sans toucher à la partie.
 func reset_position() -> void:
 	var spawn := LOBBY_SPAWN if not game_started else APARTMENT_SPAWN
@@ -750,7 +830,18 @@ func reset_position() -> void:
 
 
 ## Boutons X/Y et grip : sortir ou ranger le téléphone. Menu : relancer après game over.
-func _on_button_pressed(action_name: String) -> void:
+func _on_button_pressed(action_name: String, hand: XRController3D) -> void:
+	# Mode Chasse : grip = attraper/lancer, A = sauter, clic du stick droit = changer d'arme.
+	if mode == Mode.HUNT and game_started and not game_over:
+		if action_name == &"grip_click":
+			_toggle_grab(hand, true)
+			return
+		if action_name == &"ax_button" and hand == right_hand:
+			jump()
+			return
+		if action_name == &"primary_click" and hand == right_hand:
+			_cycle_weapon()
+			return
 	if action_name in [&"ax_button", &"by_button", &"grip_click", &"primary_click"]:
 		if phone:
 			phone.toggle_pocket()
@@ -1042,8 +1133,21 @@ func _start_hunt() -> void:
 	add_child(hunt)
 	var hands: Array[Node3D] = [left_hand, right_hand]
 	hunt.setup(apartment, xr_camera, hands)
+	hunt.owned_items = profile.owned
 	hunt.message.connect(_on_hunt_message)
 	hunt.hunt_finished.connect(_on_hunt_finished)
+	# Les objets deviennent physiques : le joueur est bloqué par eux (couche 8) mais pas par ses propres armes.
+	_movement_body.collision_mask = 1 | PropBody.LAYER
+	# Plus rien à faire des mimics ici : on libère le processeur du casque pour la physique.
+	for mimic in apartment.mimics:
+		if is_instance_valid(mimic):
+			mimic.set_physics_process(false)
+			mimic.set_process(false)
+	# Le téléphone sort tout de suite : c'est le GPS.
+	if phone != null:
+		phone.set_gps(true)
+		if not phone.is_in_hand:
+			phone.toggle_pocket()
 	hunt.start()
 
 
@@ -1056,6 +1160,8 @@ func _start_reel() -> void:
 	reel.message.connect(_on_hunt_message)
 	reel.session_finished.connect(_on_reel_finished)
 	reel.start()
+	if is_instance_valid(_body):
+		_body.visible = true # le corps n'existe que pour filmer
 	var spawn := reel.player_start()
 	xr_origin.position = Vector3(spawn.x, xr_origin.position.y, spawn.z)
 	xr_origin.rotation = Vector3(0.0, ReelMode.PLAYER_YAW, 0.0) # face au trépied
@@ -1090,8 +1196,11 @@ func _on_hunt_finished(walls: int, tokens: int) -> void:
 	last_tokens = tokens
 	profile.add_tokens(tokens)
 	_log("GAME", "chasse terminée : %d murs cassés, +%d tokens" % [walls, tokens])
-	_say("%d murs défoncés pour rien : +%d tokens.
-Gâchette : retour au lobby." % [walls, tokens], true, true)
+	var broken := hunt.sandbox.destroyed_count if hunt != null and hunt.sandbox != null else 0
+	_say("%d murs défoncés pour rien, %d objets cassés : +%d tokens.
+Gâchette : retour au lobby." % [walls, broken, tokens], true, true)
+	if phone:
+		phone.set_gps(false)
 	if phone and not phone.is_in_hand:
 		phone.toggle_pocket()
 	_set_laser_target(false)
@@ -1100,6 +1209,11 @@ Gâchette : retour au lobby." % [walls, tokens], true, true)
 ## Démonte la partie et revient au lobby (les tokens sont déjà crédités).
 func return_to_lobby() -> void:
 	_log("GAME", "retour au lobby")
+	if is_instance_valid(_body):
+		_body.visible = false
+	_movement_body.collision_mask = 1
+	_jump_y = 0.0
+	_jump_vy = 0.0
 	if is_instance_valid(_pointed) and _pointed.has_method(&"on_unpointed"):
 		_pointed.on_unpointed()
 	_pointed = null

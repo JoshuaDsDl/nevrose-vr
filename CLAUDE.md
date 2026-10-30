@@ -12,14 +12,23 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
   sac mélangé, de plus en plus nombreuses) montent avec la folie. Pilules visibles
   avec un faisceau cyan + vibration + indice sur le téléphone, toujours à ≥ 5 m du joueur.
   Plus de clés ni de verrous. Tokens à l'assimilation : 0,12/s tenue + 5/pilule.
-- **Chasse** (`hunt_mode.gd`, `knock_patch.gd`, `monster.gd`) : « toc toc toc » dans
-  les murs/plafond, et une voix au hasard (sac mélangé des 15 `v*.wav`) sort du même point
-  toutes les 4,5 à 7,5 s ; on casse la plaque (gâchette ou coup de poing, 4 coups) ; au
-  dernier mur le monstre (`assets/monster/entity.glb`, mannequin Xbot de three.js,
-  animé) apparaît puis se dissout. Tokens : 8 + 5 par mur.
+- **Chasse** (`hunt_mode.gd`, `knock_patch.gd`, `monster.gd`, `hunt_sandbox.gd`, `prop_body.gd`) :
+  « toc toc toc » dans les murs/plafond, et une voix au hasard (sac mélangé des 15 `v*.wav`)
+  sort du même point toutes les 4,5 à 7,5 s ; on casse la plaque ; au dernier mur le monstre
+  (`assets/monster/entity.glb`, mannequin Xbot de three.js, animé) apparaît puis se dissout.
+  Tokens : 8 + 5 par mur + 1 tous les 3 objets cassés.
+  - **GPS** sur le téléphone (`Phone.set_gps/update_gps`) : la flèche suit le plus court chemin à pied
+    (carte d'accessibilité en cases de 0,3 m, `HuntMode._compute_reachable`). Les plaques ne sont
+    jamais placées derrière la porte verrouillée ni dehors.
+  - **Bac à sable** : meubles et objets deviennent des `PropBody` (RigidBody3D, couche 8) ; grip =
+    attraper (rayon 3 m) et lancer, A (droite) = sauter, clic du stick droit = changer d'arme.
+    Poings, ou armes de la boutique (marteau, pied-de-biche, batte, masse, `kind: weapon` dans
+    `DecorCatalog`). Tout se casse ; murs et plafonds se percent à coups répétés (`HuntSandbox._wall_hit`).
+    Le joueur reste un CharacterBody (pas de RigidBody pour lui).
 - **Retour au lobby** à tout moment : maintenir 1,2 s le bouton menu (gauche), Y (gauche) ou B (droite)
   (Échap au bureau) ; une barre « RETOUR AU LOBBY » se remplit devant les yeux et deux vibrations
   annoncent le retour (`Main._poll_lobby_exit`).
+- Le corps du joueur (`VRBody`) n'est visible que dans le mode Réels (pour filmer).
 - **Lobby** : trois cartes géantes (viser + gâchette) pour choisir le mode ; boutique
   de décorations au mur sud (`decor_catalog.gd`), profil sauvegardé (`player_profile.gd`).
 - Tests : `tests/smoke_test.gd` et `tests/test_modes.gd`.
@@ -109,4 +118,7 @@ Tokens selon vues/likes (`ReelData.compute_tokens`).
 - Android : permissions `internet` et `record_audio` dans `export_presets.cfg`.
 - Le LLM ne sert plus qu à juger le réel (vues, likes, verdict, commentaires).
 - UI : `LobbyButton` (shader à coins arrondis, halo, pilule) et `LobbyButton.make_panel` ; un fond doit avoir un `render_priority` plus bas que les cartes posées dessus.
-- Tests : `tests/test_reels.gd` (hors ligne) ; `tests/live_llm.gd` essai manuel réseau.
+- Performances Quest 2 : ombres des lumières coupées dans l'appartement, pas de glow en VR, mimics
+  désactivés en Chasse ; une ligne `PERF` (fps, nœuds, draw calls) est écrite toutes les 10 s dans
+  `nevrose.log`.
+- Tests : `tests/test_sandbox.gd` (Chasse : objets, armes, GPS, saut), `tests/test_reels.gd` (hors ligne) ; `tests/live_llm.gd` essai manuel réseau.

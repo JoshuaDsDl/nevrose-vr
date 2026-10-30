@@ -217,10 +217,11 @@ func interact(_holding: Node3D = null) -> void:
 	hit()
 
 
-func hit() -> void:
+## Un coup ; une arme lourde compte pour plusieurs (`power`).
+func hit(power: int = 1) -> void:
 	if not active or is_broken:
 		return
-	hits += 1
+	hits += maxi(power, 1)
 	var player := AudioStreamPlayer3D.new()
 	player.stream = Sfx.hit()
 	player.volume_db = 6.0
@@ -237,6 +238,15 @@ func hit() -> void:
 	tw.tween_property(_plaster, "scale", Vector3.ONE, 0.15)
 	if hits >= HITS_TO_BREAK:
 		_break_open()
+
+
+## Défonce la plaque d'un coup (trou fait par le joueur, hors objectif de la chasse).
+func break_now() -> void:
+	if is_broken:
+		return
+	active = true
+	hits = HITS_TO_BREAK
+	_break_open()
 
 
 func _break_open() -> void:

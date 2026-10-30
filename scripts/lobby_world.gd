@@ -150,7 +150,9 @@ func _build_shop() -> void:
 		var card := LobbyButton.new()
 		card.name = "Achat_%s" % item["id"]
 		board.add_child(card)
-		card.setup(Vector2(0.62, 0.46), String(item["name"]), "", Color(0.9, 0.75, 0.3), 0.0021, 0.0015)
+		var is_weapon: bool = item["kind"] == "weapon"
+		card.setup(Vector2(0.62, 0.46), String(item["name"]), "mode Chasse" if is_weapon else "",
+			Color(1.0, 0.4, 0.35) if is_weapon else Color(0.9, 0.75, 0.3), 0.0021, 0.0013)
 		card.title_label.position.y = 0.08
 		card.title_label.font_size = 38
 		card.tag_label.font_size = 30
