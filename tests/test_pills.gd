@@ -56,11 +56,14 @@ func _initialize() -> void:
 		if sp["container"] != null:
 			continue
 		var base: Vector3 = sp["pos"]
-		var q := PhysicsRayQueryParameters3D.create(base + Vector3(0, 0.15, 0), base + Vector3(0, 1.3, 0))
-		q.collision_mask = 1
-		var hit := space.intersect_ray(q)
-		if not hit.is_empty():
-			covered.append("%s sous %s" % [str(base), (hit["collider"] as Node).name])
+		# Le point exact et les coins du petit décalage aléatoire des pilules au sol (±15 cm).
+		for off in [Vector3.ZERO, Vector3(0.15, 0, 0.15), Vector3(-0.15, 0, 0.15), Vector3(0.15, 0, -0.15), Vector3(-0.15, 0, -0.15)]:
+			var q := PhysicsRayQueryParameters3D.create(base + off + Vector3(0, 0.15, 0), base + off + Vector3(0, 1.3, 0))
+			q.collision_mask = 1
+			var hit := space.intersect_ray(q)
+			if not hit.is_empty():
+				covered.append("%s sous %s" % [str(base + off), (hit["collider"] as Node).name])
+				break
 	for cv in covered:
 		printerr("  [ECHEC] pilule cachée : ", cv)
 	_assert(covered.is_empty(), "aucune pilule n'est cachée sous un meuble")
@@ -131,6 +134,15 @@ func _initialize() -> void:
 		egg.tick_hand(rh, true, true, 0.1)
 	_assert(egg.state == EasterEgg.State.EGG, "easter egg : un court décrochage du suivi ne remet pas le compteur à zéro")
 	egg._close_diploma()
+
+	# Rythme : chaque pilule laisse moins de temps que la précédente.
+	var windows: Array[float] = []
+	for n in range(1, 7):
+		windows.append(Main.dose_window(n))
+	var shrinking := true
+	for i in range(1, windows.size()):
+		shrinking = shrinking and windows[i] < windows[i - 1]
+	_assert(shrinking and windows[0] > 40.0 and windows[5] < 15.0, "rythme : répit de plus en plus court (%.0f s → %.0f s)" % [windows[0], windows[5]])
 
 	# Achats : on peut mettre de côté un article acheté, et le reprendre.
 	var prof: PlayerProfile = main.profile

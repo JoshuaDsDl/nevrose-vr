@@ -30,7 +30,9 @@ const TOKENS_PER_DOSE := 5
 const SANITY_RATE := 1.4 # points/seconde sans dose (GDD §5.2)
 const SANITY_DOSE_RELIEF := 55.0
 const SANITY_RATE_AFTER_DOSE := 0.7
-const SANITY_RATE_ESCALATION := 0.3 # +0.3 par dose avalée
+const SANITY_RATE_ESCALATION := 0.4 # +0.4 point/s par dose avalée
+const SANITY_RELIEF_DECAY := 4.0 # chaque dose soulage un peu moins (jusqu'à SANITY_RELIEF_MIN)
+const SANITY_RELIEF_MIN := 30.0
 const FOLIE_CRITIQUE := 88.0 # au-delà : messages d'alerte
 const FOLIE_LEGERE := 35.0 # au-delà : messages inquiets
 const MESSAGE_INTERVAL := 4 # un message du téléphone toutes les 4 secondes
@@ -1165,9 +1167,20 @@ func spawn_mobile_mimic() -> void:
 
 
 ## Appelé par la pilule avalée.
+## Soulagement de la n-ième dose : de moins en moins fort.
+static func dose_relief(n: int) -> float:
+	return maxf(SANITY_DOSE_RELIEF - SANITY_RELIEF_DECAY * float(n - 1), SANITY_RELIEF_MIN)
+
+
+## Secondes de répit après la n-ième dose (folie à 0 → 100 % si on était au plus bas) : de plus
+## en plus court, chaque pilule laisse moins de temps pour trouver la suivante.
+static func dose_window(n: int) -> float:
+	return dose_relief(n) / (SANITY_RATE_AFTER_DOSE + SANITY_RATE_ESCALATION * float(n))
+
+
 func on_dose_taken() -> void:
 	dose_count += 1
-	sanity = maxf(0.0, sanity - SANITY_DOSE_RELIEF)
+	sanity = maxf(0.0, sanity - dose_relief(dose_count))
 	sanity_rate = SANITY_RATE_AFTER_DOSE
 	_consume_pill()
 	_log("GAME", "dose avalée n°%d (folie=%.0f)" % [dose_count, sanity])

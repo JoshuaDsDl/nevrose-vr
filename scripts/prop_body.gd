@@ -5,6 +5,7 @@ extends RigidBody3D
 ## les petits objets volent. Les tableaux restent accrochés jusqu'au premier coup.
 
 signal destroyed(prop: PropBody)
+signal woke(prop: PropBody) ## sort de son immobilité de départ : ce qui est posé dessus doit tomber
 
 const LAYER := 8 ## couche « objets » : ni le sol ni les murs (couche 1), ni le joueur (couche 2)
 const IMPACT_SPEED := 4.5 ## m/s : en dessous, un choc ne casse rien
@@ -61,11 +62,15 @@ func _physics_process(_delta: float) -> void:
 
 ## Réveille l'objet (décroche un tableau, sort du sommeil).
 func wake() -> void:
+	var was_frozen := freeze
 	if freeze:
 		_grace = 0.6
 	freeze = false
 	hanging = false
 	sleeping = false
+	if was_frozen:
+		woke.emit(self)
+
 
 func _on_body_entered(_other: Node) -> void:
 	if is_dead or not breakable or _grace > 0.0:

@@ -23,6 +23,7 @@ var _ticks := {}
 var _prev_pressed := {}
 var _miss := {} ## id -> secondes hors zone pendant le maintien
 var _last_zone := {} ## id -> dernière réponse fiable de at_butt (suivi perdu = on la garde)
+var _diag := {} ## id -> secondes avant la prochaine ligne de diagnostic (gâchette tenue)
 var _released_since_pop := false
 var _egg: Node3D = null
 var _diploma: Node3D = null
@@ -45,10 +46,34 @@ func _physics_process(delta: float) -> void:
 		# Dans le dos, les caméras du Quest ne voient plus la manette : sa position se fige.
 		# On garde alors la dernière réponse obtenue quand elle était suivie.
 		var zone: bool = _last_zone.get(id, false)
-		if ctrl.get_has_tracking_data():
+		var tracked := ctrl.get_has_tracking_data()
+		if tracked:
 			zone = at_butt(ctrl)
 			_last_zone[id] = zone
-		tick_hand(ctrl, zone, ctrl.get_float(&"trigger") > TRIGGER_ON, delta)
+		var pressed := ctrl.get_float(&"trigger") > TRIGGER_ON
+		_log_diag(ctrl, pressed, zone, tracked, delta)
+		tick_hand(ctrl, zone, pressed, delta)
+
+
+## Diagnostic dans nevrose.log : gâchette tenue, une ligne par seconde avec la position de la
+## main par rapport à la tête. Sert à régler la zone si le geste ne se déclenche pas au casque.
+func _log_diag(ctrl: XRController3D, pressed: bool, zone: bool, tracked: bool, delta: float) -> void:
+	var id := ctrl.get_instance_id()
+	if not pressed:
+		_diag[id] = 0.0
+		return
+	_diag[id] = float(_diag.get(id, 0.0)) - delta
+	if float(_diag[id]) > 0.0:
+		return
+	_diag[id] = 1.0
+	var yaw := Basis(Vector3.UP, camera.global_rotation.y)
+	var local := yaw.inverse() * (ctrl.global_position - camera.global_position)
+	var logger := get_node_or_null(^"/root/GameLog")
+	if logger == null:
+		return
+	logger.log_line("EGG", "%s gâchette : zone=%s suivi=%s tête=%.2f main x=%.2f y=%.2f z=%.2f tenue=%.1fs" % [
+		"gauche" if ctrl == left else "droite", str(zone), str(tracked), camera.global_position.y,
+		local.x, local.y, local.z, float(_hold.get(id, 0.0))])
 
 
 ## La main est-elle derrière le joueur, à hauteur de fesses ? Les proportions suivent sa taille.
@@ -60,8 +85,14 @@ func at_butt(hand: Node3D) -> bool:
 	var local := yaw.inverse() * (hand.global_position - camera.global_position)
 	var drop := -local.y
 	var flat := Vector2(local.x, local.z).length()
-	# Pas devant soi, près du corps, entre le bas du dos et le haut des cuisses.
-	return local.z > -0.05 and absf(local.x) < 0.55 and flat < 0.7 and drop > 0.28 * height and drop < 0.75 * height
+	# Pas devant soi, près du corps, entre le bas du dos et le haut des cuisses. Large exprès :
+	# dans le dos, la manette n'est plus vue par le casque et sa position est approximative.
+	if not (local.z > -0.25 and absf(local.x) < 0.6 and flat < 0.75 and drop > 0.25 * height and drop < 0.8 * height):
+		return false
+	# Une manette tenue à la hanche qui vise devant (arme) n'est pas dans le dos.
+	var aim := yaw.inverse() * -hand.global_transform.basis.z
+	var aim_flat := Vector2(aim.x, aim.z)
+	return not (aim_flat.length() > 0.6 and aim.z < -0.5)
 
 
 ## Un pas de temps pour une main. Séparé de la lecture des manettes pour être testable.
@@ -78,6 +109,8 @@ func tick_hand(hand: Node3D, butt: bool, pressed: bool, delta: float) -> void:
 					return
 			if butt and pressed:
 				_miss[id] = 0.0
+				if float(_hold.get(id, 0.0)) == 0.0:
+					_haptic(hand, 0.2, 0.08) # « détecté » : le compte à rebours commence
 				_hold[id] = float(_hold.get(id, 0.0)) + delta
 				# Le contrôleur vibre de plus en plus fort : « il se passe quelque chose ».
 				var ticks := int(float(_hold[id]))

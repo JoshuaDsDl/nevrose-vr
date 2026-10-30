@@ -35,10 +35,14 @@ Fragment 1 (studio) jouable. GDD verrouillé dans `ASSIMILE_GDD.md`.
   visant) = elle passe dans CETTE main ; une pilule rangée ne se prend pas à travers une porte fermée ; dès
   qu'elle est prise, le rangement la lâche (`MapBase.on_dose_picked`). Portée à la bouche = avalée, sans
   gâchette. Tout emplacement doit passer `tests/test_pills.gd` (à portée d'une case, rien au-dessus).
+  Rythme : chaque dose soulage moins et la folie monte plus vite (`Main.dose_window` : ~50 s → ~11 s).
 - Retours haptiques au contact des meubles, murs et objets (`Main._tick_touch_haptics`).
 - Easter egg (`easter_egg.gd`) : main derrière soi + gâchette 4 s = POP de champagne, œuf surprise ;
   un 2e appui l'ouvre : diplôme d'ingénieur IMT Nord Europe. Marche partout (lobby compris). Dans le dos
   le Quest perd la manette : on garde sa dernière zone connue et on tolère 0,6 s de sortie de zone.
+  Gâchette tenue : une ligne `EGG` par seconde dans `nevrose.log` (position de la main) pour régler la zone.
+- Chasse : les meubles restent figés jusqu'au premier contact ; ce qui est posé dessus tombe dès qu'ils
+  bougent ou cassent (`HuntSandbox._wake_above`). Le monstre crie (`Sfx.shriek`).
 - Son spatial : Godot n'a pas de HRTF ; `SpatialAudio` renforce le panoramique et assombrit les sons
   situés derrière/très haut/très bas. Un vrai HRTF demanderait un plugin natif Android (Steam Audio, Meta
   XR Audio) qu'on n'a pas pu valider sans casque.
@@ -135,7 +139,8 @@ Tokens selon vues/likes (`ReelData.compute_tokens`).
 - Android : permissions `internet` et `record_audio` dans `export_presets.cfg`.
 - Le LLM ne sert plus qu à juger le réel (vues, likes, verdict, commentaires).
 - UI : `LobbyButton` (shader à coins arrondis, halo, pilule) et `LobbyButton.make_panel` ; un fond doit avoir un `render_priority` plus bas que les cartes posées dessus.
-- Performances Quest 2 : ombres des lumières coupées dans l'appartement, pas de glow en VR, mimics
+- Performances Quest 2 : écran du téléphone redessiné à 12 im/s (`Phone.SCREEN_FPS`), petits objets
+  (< 45 cm) plus dessinés au-delà de 7 m, fovéation 3 dynamique ; ombres des lumières coupées dans l'appartement, pas de glow en VR, mimics
   désactivés en Chasse ; une ligne `PERF` (fps, nœuds, draw calls) est écrite toutes les 10 s dans
   `nevrose.log`.
 - Tests : `tests/test_sandbox.gd` (Chasse : objets, armes, GPS, saut), `tests/test_reels.gd` (hors ligne) ; `tests/live_llm.gd` essai manuel réseau.

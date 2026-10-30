@@ -18,6 +18,7 @@ const SCREEN_HEIGHT := 0.300
 # Résolution interne de l'écran Messenger (ratio 9:15)
 const VIEWPORT_WIDTH := 384
 const VIEWPORT_HEIGHT := 640
+const SCREEN_FPS := 12.0 ## l'écran est redessiné 12 fois/s, pas à chaque image (coût Quest)
 
 # Couleurs de la charte Messenger & Dark Mode VR
 const COLOR_MESSENGER_BLUE := Color(0.0, 0.518, 1.0) # #0084FF
@@ -156,11 +157,25 @@ func _build_3d_phone() -> void:
 # ---------------------------------------------------------------------------
 # Construction de l'interface 2D Messenger dans le SubViewport
 # ---------------------------------------------------------------------------
+var _screen_clock := 0.0
+
+
+## Redessine l'écran à SCREEN_FPS, et seulement quand le téléphone est visible.
+func _process(delta: float) -> void:
+	if _sub_viewport == null:
+		return
+	_screen_clock -= delta
+	if _screen_clock > 0.0 or not is_visible_in_tree():
+		return
+	_screen_clock = 1.0 / SCREEN_FPS
+	_sub_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
 func _build_2d_messenger_ui() -> void:
 	_sub_viewport = SubViewport.new()
 	_sub_viewport.name = "ScreenViewport"
 	_sub_viewport.size = Vector2i(VIEWPORT_WIDTH, VIEWPORT_HEIGHT)
-	_sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_sub_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE # puis à SCREEN_FPS, voir _process
 	_sub_viewport.transparent_bg = false
 	add_child(_sub_viewport)
 

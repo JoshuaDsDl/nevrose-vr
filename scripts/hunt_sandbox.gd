@@ -145,14 +145,32 @@ func _make_prop(node: Node3D) -> void:
 	body.configure(bounds.size, _tint_of(node), hanging)
 	body.breakable = not light
 	body.destroyed.connect(_on_prop_destroyed)
+	body.woke.connect(_wake_above)
 	props.append(body)
 	if fixed_body != null:
 		fixed_body.queue_free()
 
 
+## Ce qui reposait sur `support` (assiettes sur la table…) n'est plus figé : il tombe quand le
+## meuble bouge ou casse. En chaîne : une pile se défait d'un coup.
+func _wake_above(support: PropBody) -> void:
+	if not is_instance_valid(support):
+		return
+	var half := support.size * 0.5
+	var top := support.global_position.y + half.y
+	for any_prop in props.duplicate():
+		var p := any_prop as PropBody
+		if p == null or not is_instance_valid(p) or p == support or not p.freeze or p.hanging:
+			continue
+		var d := p.global_position - support.global_position
+		if absf(d.x) < half.x + 0.05 and absf(d.z) < half.z + 0.05 				and p.global_position.y > top - 0.15 and p.global_position.y < top + 0.6:
+			p.wake()
+
+
 func _on_prop_destroyed(prop: PropBody) -> void:
 	destroyed_count += 1
 	props.erase(prop)
+	_wake_above(prop)
 	for id in held.keys():
 		if held[id]["prop"] == prop:
 			held.erase(id)

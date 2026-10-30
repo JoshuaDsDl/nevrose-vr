@@ -46,9 +46,21 @@ const SURFACES := [
 
 # Points au sol libres (hors meubles, rien au-dessus : vérifié par tests/test_pills.gd).
 # Le centre du salon n'en fait plus partie : il tombe sous la table.
+const SMALL_MESH_SIZE := 0.45 ## m : en dessous, un maillage est un « petit objet »
+const SMALL_MESH_RANGE := 7.0 ## m : distance au-delà de laquelle il n'est plus dessiné
+
 const FLOOR_SPOTS := [
-	Vector3(-2.2, 0.0, -0.8), Vector3(2.4, 0.0, 0.4),
-	Vector3(8.0, 0.0, 2.2), Vector3(7.7, 0.0, 6.2), Vector3(6.3, 0.0, -0.6),
+	# Salon / cuisine
+	Vector3(-2.2, 0.0, -0.8), Vector3(2.4, 0.0, 0.4), Vector3(-3.2, 0.0, 1.8), Vector3(1.2, 0.0, -2.3),
+	Vector3(-1.4, 0.0, 2.4), Vector3(3.3, 0.0, 2.0),
+	# Couloir
+	Vector3(8.0, 0.0, 2.2), Vector3(5.4, 0.0, 2.1), Vector3(10.0, 0.0, 2.3),
+	# Chambre, dressing, salle de bain, WC
+	Vector3(6.3, 0.0, -0.6), Vector3(5.2, 0.0, -2.8), Vector3(8.6, 0.0, -1.6), Vector3(10.6, 0.0, -3.1),
+	Vector3(10.4, 0.0, -0.2), Vector3(12.4, 0.0, -3.0),
+	# Garage et garage à voiture
+	Vector3(7.7, 0.0, 6.2), Vector3(5.4, 0.0, 4.4), Vector3(8.6, 0.0, 4.0), Vector3(10.4, 0.0, 4.2),
+	Vector3(13.8, 0.0, 6.9),
 ]
 
 
@@ -76,6 +88,7 @@ func build() -> void:
 	_place_mimics()
 	_register_ambience()
 	_hide_decorations()
+	_limit_small_meshes()
 
 
 ## Les murs respirent et les lumières grésillent avec la folie (GDD §5.2).
@@ -282,6 +295,24 @@ func _build_extension() -> void:
 		InteractiveContainer.Mode.ROTATE, InteractiveContainer.LockType.NONE, 0.0, -105.0)
 
 
+## Petits objets (couverts, canettes, nourriture…) : plus dessinés au-delà de 7 m. L'appartement
+## n'a pas d'occlusion, sans ça chaque fourchette des autres pièces coûte un appel de rendu.
+func _limit_small_meshes() -> void:
+	var stack: Array[Node] = [self]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Dose:
+			continue # la pilule doit se voir de loin
+		if n is MeshInstance3D and (n as MeshInstance3D).mesh != null:
+			var mi := n as MeshInstance3D
+			var box: AABB = Transform3D(mi.global_transform.basis, Vector3.ZERO) * mi.mesh.get_aabb()
+			if maxf(box.size.x, maxf(box.size.y, box.size.z)) < SMALL_MESH_SIZE:
+				mi.visibility_range_end = SMALL_MESH_RANGE
+				mi.visibility_range_end_margin = 0.6
+		for ch in n.get_children():
+			stack.append(ch)
+
+
 ## Sol continu sous tout l'appartement : les seuils entre deux pièces n'en avaient pas,
 ## le joueur avait l'impression de marcher dans le vide. Posé sous les sols existants.
 func _add_threshold_floor() -> void:
@@ -363,7 +394,11 @@ func _register_spawn_spots() -> void:
 		_spawn_spots.append({"pos": pos, "container": null, "floor": true})
 	# Et dans les rangements : tiroir de cuisine, frigo, commode du salon (lueur à travers la porte).
 	# Associés par nom : l'ordre de création des conteneurs ne correspond pas à cette liste.
-	var holders := {"KitchenDrawerKey": "Shell/kitchenCabinetDrawer", "FridgeDoor": "Shell/kitchenFridge", "ClosetDoor": "Shell/sideTableDrawers"}
+	var holders := {
+		"KitchenDrawerKey": "Shell/kitchenCabinetDrawer", "FridgeDoor": "Shell/kitchenFridge",
+		"ClosetDoor": "Shell/sideTableDrawers", "NightstandDrawer": "Shell/ExtensionEst/Chambre/TableNuit",
+		"GarageDrawer": "Shell/ExtensionEst/Garage/Etabli", "BookcaseDoor": "Shell/ExtensionEst/Chambre/EtagereChambre",
+	} # pas le meuble de la SDB ni l'armoire du dressing : trop loin d'où l'on peut se tenir
 	for cname in holders:
 		var c := _container_named(cname)
 		var holder := get_node_or_null(holders[cname]) as Node3D

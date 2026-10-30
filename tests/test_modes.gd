@@ -137,7 +137,9 @@ func _initialize() -> void:
 	await process_frame
 	_assert(absf(main.sanity - Main.START_SANITY) < 2.0, "résistance : on démarre déjà fou (%.1f)" % main.sanity)
 	var dose: Dose = main.apartment.get_dose()
-	_assert(dose != null and dose.visible and dose.get_node_or_null("Faisceau") != null, "résistance : pilule visible avec son faisceau")
+	# À l'air libre (visible) ou rangée (cachée, mais une lueur trahit son rangement).
+	var shown: bool = dose != null and (dose.visible or is_instance_valid(main.apartment._dose_marker))
+	_assert(shown and dose.get_node_or_null("Faisceau") != null, "résistance : pilule visible ou rangement signalé, avec son faisceau")
 	var d := Vector2(dose.global_position.x - main.xr_camera.global_position.x, dose.global_position.z - main.xr_camera.global_position.z).length()
 	_assert(d >= 4.9, "résistance : pilule à %.1f m du départ" % d)
 	_assert(main.apartment.containers.all(func(c): return not c.is_locked), "résistance : plus aucun verrou")

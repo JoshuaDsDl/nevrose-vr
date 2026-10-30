@@ -271,6 +271,16 @@ func _reveal_monster(patch: KnockPatch) -> void:
 	sting.unit_size = 8.0
 	monster.add_child(sting)
 	sting.play()
+	# Le cri : très fort et strident, presque pas atténué par la distance.
+	var scream := AudioStreamPlayer3D.new()
+	scream.name = "Cri"
+	scream.stream = Sfx.shriek()
+	scream.volume_db = 14.0
+	scream.max_db = 14.0
+	scream.unit_size = 30.0
+	scream.position.y = 1.6
+	monster.add_child(scream)
+	scream.play()
 	var flash := OmniLight3D.new()
 	flash.light_color = Color(1.0, 0.1, 0.05)
 	flash.light_energy = 3.0

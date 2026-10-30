@@ -46,6 +46,17 @@ static func sting() -> AudioStreamWAV:
 	return _cache["sting"]
 
 
+## Cri du monstre : hurlement suraigu et saturé (2,6 à 3,9 kHz qui trillent), 1,8 s.
+static func shriek() -> AudioStreamWAV:
+	if not _cache.has("shriek"):
+		_cache["shriek"] = _synth(1.8, func(t: float, n: float) -> float:
+			var env := smoothstep(0.0, 0.03, t) * (1.0 - smoothstep(1.3, 1.8, t))
+			var f := 2900.0 + 700.0 * sin(t * 6.0) + 300.0 * sin(t * 47.0)
+			var s := signf(sin(TAU * f * t)) * 0.5 + sin(TAU * f * 1.5 * t) * 0.35 + sin(TAU * f * 2.01 * t) * 0.25
+			return clampf((s + n * 0.45) * env * 1.4, -1.0, 1.0))
+	return _cache["shriek"]
+
+
 ## Bip de compte à rebours ; `go` = bip final, plus aigu et plus long.
 static func beep(go: bool = false) -> AudioStreamWAV:
 	var key := "beep_go" if go else "beep"

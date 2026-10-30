@@ -51,7 +51,13 @@ func _initialize() -> void:
 	var cam: Node3D = main.xr_camera
 	var hand: Node3D = main.right_hand
 	hand.global_position = cam.global_position + Basis(Vector3.UP, cam.global_rotation.y) * Vector3(0.1, -0.85, 0.25)
+	hand.global_rotation = Vector3(-1.2, cam.global_rotation.y, 0.0) # manette vers le bas, comme dans le dos
 	_assert(egg.at_butt(hand), "easter egg : main derrière, à hauteur de fesses = détecté")
+	hand.global_position = cam.global_position + Basis(Vector3.UP, cam.global_rotation.y) * Vector3(0.0, -0.75, 0.05)
+	_assert(egg.at_butt(hand), "easter egg : main au ras du dos (suivi approximatif) = détecté")
+	hand.global_position = cam.global_position + Basis(Vector3.UP, cam.global_rotation.y) * Vector3(0.3, -0.7, -0.1)
+	hand.global_rotation = Vector3(0.0, cam.global_rotation.y, 0.0)
+	_assert(not egg.at_butt(hand), "easter egg : arme tenue à la hanche qui vise devant = non détecté")
 	hand.global_position = cam.global_position + Basis(Vector3.UP, cam.global_rotation.y) * Vector3(0.1, -0.3, -0.4)
 	_assert(not egg.at_butt(hand), "easter egg : main devant soi = non détecté")
 	for i in 3:
@@ -206,6 +212,37 @@ func _initialize() -> void:
 	_assert(not box.throw_grenade(main.right_hand), "grenade : une seule à la fois")
 	var thrown := box.get_node_or_null("Grenade")
 	_assert(thrown != null and thrown is RigidBody3D, "grenade : le projectile existe, avec le vrai modèle")
+	# Objets posés : quand le meuble casse, ce qui était dessus tombe (plus rien ne flotte).
+	var support: PropBody = null
+	var on_top: PropBody = null
+	for sp_any in box.props:
+		var sp := sp_any as PropBody
+		if sp == null or not is_instance_valid(sp) or not sp.freeze or sp.hanging or sp.size.y < 0.3:
+			continue
+		var top := sp.global_position.y + sp.size.y * 0.5
+		for q_any in box.props:
+			var q := q_any as PropBody
+			if q == null or q == sp or not is_instance_valid(q) or not q.freeze or q.hanging:
+				continue
+			var dd := q.global_position - sp.global_position
+			if absf(dd.x) < sp.size.x * 0.5 and absf(dd.z) < sp.size.z * 0.5 and q.global_position.y > top - 0.15 and q.global_position.y < top + 0.6:
+				# Il faut que ce meuble soit vraiment ce qui le porte (premier obstacle en dessous).
+				var dq := PhysicsRayQueryParameters3D.create(q.global_position, q.global_position + Vector3.DOWN * 2.0)
+				dq.exclude = [q.get_rid()]
+				var below: Dictionary = q.get_world_3d().direct_space_state.intersect_ray(dq)
+				if not below.is_empty() and below["collider"] == sp:
+					support = sp
+					on_top = q
+					break
+		if support != null:
+			break
+	_assert(support != null, "objets posés : un objet repose sur un meuble au départ")
+	if support != null:
+		var y_before := on_top.global_position.y
+		support.damage(10000.0)
+		for i in 40:
+			await physics_frame
+		_assert(is_instance_valid(on_top) and not on_top.freeze and on_top.global_position.y < y_before - 0.1, "objets posés : le meuble cassé, l'objet tombe (%.2f m plus bas)" % (y_before - on_top.global_position.y if is_instance_valid(on_top) else 0.0))
 	# La gâchette droite tire ou lance via Main.interact, la gauche reste normale.
 	main.interact(main.right_hand)
 
